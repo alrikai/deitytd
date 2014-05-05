@@ -28,6 +28,9 @@ private:
     Ogre::Rectangle2D* background_rect;
 
     Ogre::Rectangle2D* map_rect;
+
+    Ogre::SceneNode* map_node;
+    Ogre::SceneNode* background_node;
 };
 
 #endif

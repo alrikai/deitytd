@@ -53,33 +53,82 @@ void InputListener::window_resized(Ogre::RenderTarget* ogre_window)
 
 bool InputListener::keyPressed (const OIS::KeyEvent& key_arg)
 {
-	std::cout << "key pressed" << std::endl;
-    if (key_arg.key == OIS::KC_ESCAPE)
-        std::cout << "ESCAPE key" << std::endl;
-    return true;
+    current_key = key_arg.key;
+	return true;
 }
 
 bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
 {
-	std::cout << "key released" << std::endl;
+    ControllerUtil::INPUT_TYPE evt;
+    bool valid_key = true;
+    auto key_type = key_arg.key;
+
+//    if(key_type == current_key)
+//    {
+        if (key_type == OIS::KC_ESCAPE)
+            evt = ControllerUtil::INPUT_TYPE::Esc;	
+        else if(key_arg.key == OIS::KC_UP)
+            evt = ControllerUtil::INPUT_TYPE::UpArrow;
+        else if(key_arg.key == OIS::KC_DOWN)
+            evt = ControllerUtil::INPUT_TYPE::DArrow;
+         else if(key_arg.key == OIS::KC_RIGHT)
+            evt = ControllerUtil::INPUT_TYPE::RArrow;
+         else if(key_arg.key == OIS::KC_LEFT)
+            evt = ControllerUtil::INPUT_TYPE::LArrow;
+         else if(key_arg.key == OIS::KC_A)
+            evt = ControllerUtil::INPUT_TYPE::A;    
+        else if(key_arg.key == OIS::KC_S)
+            evt = ControllerUtil::INPUT_TYPE::S;    
+        else if(key_arg.key == OIS::KC_W)
+            evt = ControllerUtil::INPUT_TYPE::W;    
+        else if(key_arg.key == OIS::KC_D)
+            evt = ControllerUtil::INPUT_TYPE::D;
+        else
+            valid_key = false;
+//    }
+//    else
+//    {
+//        valid_key = false;
+//    }
+
+	if(valid_key)
+  	    for (auto& m_listeners : input_listeners)
+		    m_listeners.second->push(evt);
+
 	return true;
 }
 
 bool InputListener::mouseMoved (const OIS::MouseEvent& mouse_arg)
 {
-	std::cout << "mouse moved" << std::endl;
 	return true;
 }
 
 bool InputListener::mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id)
 {
-	std::cout << "mouse pressed" << std::endl;
 	return true;
 }
 
 bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id)
 {
-	std::cout << "mouse released" << std::endl;
+
+    ControllerUtil::INPUT_TYPE evt;
+    bool valid_input = true;
+
+    if(mouse_id == OIS::MouseButtonID::MB_Left)
+        evt = ControllerUtil::INPUT_TYPE::LClick;
+    else if(mouse_id == OIS::MouseButtonID::MB_Right)
+        evt = ControllerUtil::INPUT_TYPE::RClick;
+    else
+        valid_input = false;
+   
+    if(valid_input)
+    	for (auto& m_listeners : input_listeners)
+		    m_listeners.second->push(evt);      
 	return true;
+}
+
+bool InputListener::add_input_listener(std::string id, ControllerUtil::ControllerBufferType* buffer)
+{
+    return input_listeners.insert(std::make_pair(id, buffer)).second;;
 }
 

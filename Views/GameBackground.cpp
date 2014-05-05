@@ -6,7 +6,7 @@ const std::string GameBackground::minimal_obj_material{"BackgroundMap"};
 GameBackground::GameBackground(Ogre::SceneManager* scene)
     : scene_mgmt(scene), root_node(scene_mgmt->getRootSceneNode())
 {
-    make_background();
+//    make_background();
 }
 
 //set up the background
@@ -20,20 +20,19 @@ void GameBackground::make_background()
     background_rect = new Ogre::Rectangle2D(true);
     background_rect->setCorners(-1.0, 1.0, 1.0, -1.0);
     background_rect->setMaterial(minimal_obj_material);
-
     background_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
     
     inf_box.setInfinite();
     background_rect->setBoundingBox(inf_box);
-
-    auto background_node = root_node->createChildSceneNode("Background");
+    background_node = root_node->createChildSceneNode("Background");
     background_node->attachObject(background_rect);
 
     map_rect = new Ogre::Rectangle2D(true);
     map_rect->setCorners(-0.7, 0.7, 0.7, -0.7);
     map_rect->setMaterial(map_material);
+    map_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
 
-    auto map_node = root_node->createChildSceneNode("GameMap");
+    map_node = root_node->createChildSceneNode("GameMap");
     map_node->attachObject(map_rect);
 }
 
@@ -83,6 +82,7 @@ void GameBackground::draw_background(Ogre::Viewport* view_port)
             map_grid_rowlines.at(row)->position(-1*row_idx_end, col_idx_start, depth_idx_end);
         }
         map_grid_rowlines.at(row)->end();
+        map_grid_rowlines.at(row)->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
     }
 
     row_idx_start = row_offset;
@@ -103,6 +103,7 @@ void GameBackground::draw_background(Ogre::Viewport* view_port)
             map_grid_collines.at(col)->position(row_idx_start, -1*col_idx_end, depth_idx_end);
         }
         map_grid_collines.at(col)->end();
+        map_grid_collines.at(col)->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
     }
 
     std::vector<Ogre::SceneNode*> row_line_nodes (num_row_tiles-1);

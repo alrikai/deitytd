@@ -10,12 +10,15 @@
 #include <OGRE/Ogre.h>
 
 #include "GameBackground.hpp"
+#include "ControllerUtil.hpp"
+#include "Controller.hpp"
 
 class OgreDisplay
 {
 public:
     OgreDisplay()
-        : root (new Ogre::Root(plugins_cfg_filename)), background(nullptr) 
+        : root (new Ogre::Root(plugins_cfg_filename)), cam_rotate(0.13f), cam_move(50.0f),
+        background(nullptr) 
     {
         ogre_setup();
         setup_camera(); 
@@ -29,9 +32,27 @@ public:
         light->setPosition(20.0f, 80.0f, 50.0f); 
 
         background.reset(new GameBackground(scene_mgmt));
+
+        input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
     }
 
 	void start_display();
+    
+    /*
+     *  note: need to figure out how to go about adding manual objects to the scene in a meaningful manner.
+     *  we have the possibility of having this be quite difficult, as we also have to figure out what to do
+     *  with the whole scene/scene manager. 
+     *  IN SFML, we just had a double-buffer scheme, where we would draw whatever we wanted to the 2nd buffer
+     *  then swap the buffers. Here, we have scene nodes and a tree-like hierarchy of scene nodes and their
+     *  contents. 
+     *  --> maybe we have to break the problem down a bit more; i.e. we could have a draw_tower method, which
+     *  would generate the manual object and have all the tower manual objects attached to the same tower_root
+     *  scene node
+     */ 
+    void draw_tower(const std::vector<std::vector<uint32_t>>& polygon_mesh, const std::vector<std::vector<float>>& polygon_points, 
+                    std::string tower_material, std::string&& tower_name = "");
+
+    void register_input_controller(Controller* controller);
 
     Ogre::Root* get_root() const
     { return root.get(); }
@@ -45,6 +66,7 @@ private:
     void setup_camera(); 
 
     void setup_background();
+    void handle_user_input();
 
     const static std::string resource_cfg_filename; 
     const static std::string plugins_cfg_filename;
@@ -55,11 +77,17 @@ private:
 	Ogre::SceneManager* scene_mgmt;
     Ogre::SceneNode* root_node;
 
+    //the coefficients for camera movement (there will be more as we add more functionality)
+    const float cam_rotate;
+    const float cam_move;
+
 	Ogre::Camera* camera;
     Ogre::Viewport* view_port;
     Ogre::Light* light;
 
     std::unique_ptr<GameBackground> background;
+    std::unique_ptr<ControllerUtil::ControllerBufferType> input_events;
+
 };
 
 
@@ -177,7 +205,7 @@ void make_mesh(Ogre::ManualObject* obj, const std::string& mesh_name, std::vecto
         minimal_obj->triangle(7,3,2);
 
         // face left / right
-        minimal_obj->triangle(0,7,4);
+        minimal_obj->triangle(0,7,4);>
         minimal_obj->triangle(7,0,3);
         minimal_obj->triangle(1,5,6);
         minimal_obj->triangle(6,2,1); 

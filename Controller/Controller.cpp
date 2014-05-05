@@ -53,3 +53,9 @@ void Controller::start()
     //what to do here? Do we need to spawn a new thread for listening on input?
 
 }
+
+bool Controller::register_input_listener(std::string id, ControllerBufferType* buffer)
+{
+    return listener->add_input_listener(id, buffer);
+}
+

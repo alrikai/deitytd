@@ -1,5 +1,5 @@
-#ifndef TD_CONTROLLER_UTIL_HPP__
-#define TD_CONTROLLER_UTIL_HPP__
+#ifndef TD_CONTROLLER_UTIL_HPP
+#define TD_CONTROLLER_UTIL_HPP
 
 #include </home/alrik/boost_1_55_0/boost/lockfree/spsc_queue.hpp>
 
@@ -7,9 +7,26 @@
 
 namespace ControllerUtil
 {
-    enum class INPUT_TYPE {A, S, W, D, LArrow, RArrow, UpArrow, DArrow, Esc, LClick, RClick};
-    typedef boost::lockfree::spsc_queue<INPUT_TYPE, boost::lockfree::capacity<1024>> ControllerBufferType;
+    enum class INPUT_TYPE {NONE, A, S, W, D, LArrow, RArrow, UpArrow, DArrow, Esc, PUp, PDown,  
+                           LClick, RClick, MDrag};
+    struct InputEvent
+    {
+        explicit InputEvent()
+            : event_type(INPUT_TYPE::NONE), x_pos(-1), y_pos(-1)
+        {}
+        explicit InputEvent(INPUT_TYPE type)
+            : event_type(type), x_pos(-1), y_pos(-1)
+        {}
+        InputEvent(INPUT_TYPE type, const int x, const int y)
+            : event_type(type), x_pos(x), y_pos(y)
+        {}
 
+        INPUT_TYPE event_type;
+        int x_pos;
+        int y_pos;
+    };
+
+    typedef boost::lockfree::spsc_queue<InputEvent, boost::lockfree::capacity<1024>> ControllerBufferType;
 
     inline void print_input_type(INPUT_TYPE input)
     {
@@ -26,6 +43,12 @@ namespace ControllerUtil
             break;
             case INPUT_TYPE::DArrow:
                 std::cout << "Key Down-Arrow" << std::endl;
+            break;
+            case INPUT_TYPE::PUp:
+                std::cout << "Key Page-Up" << std::endl;
+            break;
+            case INPUT_TYPE::PDown:
+                std::cout << "Key Page-Down" << std::endl;
             break;
             case INPUT_TYPE::A:
                 std::cout << "Key A" << std::endl;
@@ -48,7 +71,9 @@ namespace ControllerUtil
             case INPUT_TYPE::RClick:
                 std::cout << "Mouse Rclick" << std::endl;
             break;
-            default:
+            case INPUT_TYPE::MDrag:
+                std::cout << "Mouse drag" << std::endl;
+            break;            default:
                 std::cout << "Unknown Type" << std::endl;
         };
     }

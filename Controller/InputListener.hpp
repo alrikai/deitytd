@@ -19,6 +19,9 @@ public:
           current_key(OIS::KeyCode::KC_UNASSIGNED), current_mouse(OIS::MouseButtonID::MB_Button7)
     {
         std::cout << "Made the Input Listener..." << std::endl;
+        mouse_dragging = false;
+        drag_pos_y = 0;
+        drag_pos_x = 0;
     }
 
     //frame listeners 
@@ -50,6 +53,11 @@ private:
     OIS::Mouse* mouse;
     OIS::Keyboard* keyboard;
     int frame_count;
+
+    bool mouse_dragging;
+    int drag_pos_x;
+    int drag_pos_y;
+
 
     //eventually we might want to support having multiple keys pressed (e.g. alt + tab or something)
 //    std::vector<OIS::KeyEvent> current_keys;

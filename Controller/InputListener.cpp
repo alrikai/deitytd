@@ -63,54 +63,67 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
     bool valid_key = true;
     auto key_type = key_arg.key;
 
-//    if(key_type == current_key)
-//    {
-        if (key_type == OIS::KC_ESCAPE)
-            evt = ControllerUtil::INPUT_TYPE::Esc;	
-        else if(key_arg.key == OIS::KC_UP)
-            evt = ControllerUtil::INPUT_TYPE::UpArrow;
-        else if(key_arg.key == OIS::KC_DOWN)
-            evt = ControllerUtil::INPUT_TYPE::DArrow;
-         else if(key_arg.key == OIS::KC_RIGHT)
-            evt = ControllerUtil::INPUT_TYPE::RArrow;
-         else if(key_arg.key == OIS::KC_LEFT)
-            evt = ControllerUtil::INPUT_TYPE::LArrow;
-         else if(key_arg.key == OIS::KC_A)
-            evt = ControllerUtil::INPUT_TYPE::A;    
-        else if(key_arg.key == OIS::KC_S)
-            evt = ControllerUtil::INPUT_TYPE::S;    
-        else if(key_arg.key == OIS::KC_W)
-            evt = ControllerUtil::INPUT_TYPE::W;    
-        else if(key_arg.key == OIS::KC_D)
-            evt = ControllerUtil::INPUT_TYPE::D;
-        else
-            valid_key = false;
-//    }
-//    else
-//    {
-//        valid_key = false;
-//    }
+    if (key_type == OIS::KC_ESCAPE)
+        evt = ControllerUtil::INPUT_TYPE::Esc;	
+    else if(key_arg.key == OIS::KC_UP)
+        evt = ControllerUtil::INPUT_TYPE::UpArrow;
+    else if(key_arg.key == OIS::KC_DOWN)
+        evt = ControllerUtil::INPUT_TYPE::DArrow;
+     else if(key_arg.key == OIS::KC_RIGHT)
+        evt = ControllerUtil::INPUT_TYPE::RArrow;
+     else if(key_arg.key == OIS::KC_LEFT)
+        evt = ControllerUtil::INPUT_TYPE::LArrow;
+     else if(key_arg.key == OIS::KC_A)
+        evt = ControllerUtil::INPUT_TYPE::A;    
+    else if(key_arg.key == OIS::KC_S)
+        evt = ControllerUtil::INPUT_TYPE::S;    
+    else if(key_arg.key == OIS::KC_W)
+        evt = ControllerUtil::INPUT_TYPE::W;    
+    else if(key_arg.key == OIS::KC_D)
+        evt = ControllerUtil::INPUT_TYPE::D;
+    else if(key_arg.key == OIS::KC_PGUP)
+        evt = ControllerUtil::INPUT_TYPE::PUp;
+    else if(key_arg.key == OIS::KC_PGDOWN)
+        evt = ControllerUtil::INPUT_TYPE::PDown;
+    else
+        valid_key = false;
 
 	if(valid_key)
   	    for (auto& m_listeners : input_listeners)
-		    m_listeners.second->push(evt);
+		    m_listeners.second->push(ControllerUtil::InputEvent(evt));
 
 	return true;
 }
 
 bool InputListener::mouseMoved (const OIS::MouseEvent& mouse_arg)
 {
+    //track where the mouse is being dragged to
+    if(mouse_dragging)
+    {
+        const OIS::MouseState &ms = mouse->getMouseState();
+        ControllerUtil::INPUT_TYPE evt = ControllerUtil::INPUT_TYPE::MDrag;
+    	for (auto& m_listeners : input_listeners)
+		    m_listeners.second->push(ControllerUtil::InputEvent(evt, ms.X.abs - drag_pos_x, ms.Y.abs - drag_pos_y));          
+
+        //update the last mouse position
+        drag_pos_x = ms.X.abs;
+        drag_pos_y = ms.Y.abs;
+    }
+
 	return true;
 }
 
 bool InputListener::mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id)
 {
-	return true;
+    mouse_dragging = true;
+    const OIS::MouseState &ms = mouse->getMouseState();
+    drag_pos_y = ms.Y.abs;
+    drag_pos_x = ms.X.abs;
+    return true;
 }
 
 bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id)
 {
-
     ControllerUtil::INPUT_TYPE evt;
     bool valid_input = true;
 
@@ -122,8 +135,12 @@ bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseB
         valid_input = false;
    
     if(valid_input)
+    {
+        const OIS::MouseState &ms = mouse->getMouseState();
     	for (auto& m_listeners : input_listeners)
-		    m_listeners.second->push(evt);      
+		    m_listeners.second->push(ControllerUtil::InputEvent(evt, ms.X.abs, ms.Y.abs));      
+    }
+    mouse_dragging = false;
 	return true;
 }
 

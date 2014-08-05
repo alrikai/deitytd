@@ -1,25 +1,38 @@
-#ifndef TD_MAP_TILE_HPP__
-#define TD_MAP_TILE_HPP__
+#ifndef TD_MAP_TILE_HPP
+#define TD_MAP_TILE_HPP
 
+#include <tuple>
+
+template <typename T>
 struct Coordinate
 {
     Coordinate()
-        : row(0), col(0)
+        : col(0), row(0)
     {}
 
-    Coordinate (const int row_, const int col_)
-        : row(row_), col(col_)    
+    Coordinate (const T col_, const T row_)
+        : col(col_), row(row_)    
     {}
 
-    int row;
-    int col;
+    T col;
+    T row;
 };
 
 struct MapTile
 {
-    Coordinate loc;
-    int width;
-    int height;
+    MapTile()
+        : idx_location(), tile_coord(), width(0), height(0), 
+          tile_center(), occupied(false)
+    {}
+
+    //store the tile ROI via upper left coordinate and width, height
+    Coordinate<int> idx_location;
+    Coordinate<double> tile_coord;
+    double width;
+    double height;
+
+    Coordinate<double> tile_center;
+    bool occupied;
 };
 
 #endif

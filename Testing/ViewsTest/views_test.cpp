@@ -1,5 +1,5 @@
 #include "Controller/Controller.hpp"
-#include "views_util.hpp"
+#include "fractal_util.hpp"
 
 /*
  * how do we test the view without the model?

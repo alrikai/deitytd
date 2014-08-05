@@ -20,6 +20,9 @@
 
 int main()
 {
+
+
+    
     OgreDisplay display;
     Controller controller (display.get_root(), display.get_render_window());
 
@@ -27,7 +30,7 @@ int main()
     std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(&display));
 
     display.register_input_controller(&controller);   
-    display.register_model(td.get());
+//    display.register_model(td.get());
 
     using PixelType = uint8_t;
     std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};

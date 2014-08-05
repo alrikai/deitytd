@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TD_UTIL_RANDOM_UTIL_HPP
+#define TD_UTIL_RANDOM_UTIL_HPP
 
 #include <vector>
 #include <random>
@@ -49,3 +50,5 @@ namespace Randomize
     };
 
 }
+
+#endif

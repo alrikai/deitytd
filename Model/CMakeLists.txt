@@ -1,4 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SET(SRCS main.cpp)
-ADD_EXECUTABLE(Model ${SRCS})
+set(make_include_current_dir on)
+include_directories(Towers)
+add_subdirectory(Towers)
+
+set (LogicSrc TowerLogic.cpp)
+add_library(TowersBackend SHARED ${LogicSrc})
+target_link_libraries(TowersBackend TDTowers)

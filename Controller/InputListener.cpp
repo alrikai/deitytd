@@ -81,6 +81,26 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
         evt = ControllerUtil::INPUT_TYPE::W;    
     else if(key_arg.key == OIS::KC_D)
         evt = ControllerUtil::INPUT_TYPE::D;
+    else if(key_arg.key == OIS::KC_0)
+        evt = ControllerUtil::INPUT_TYPE::ZERO;
+    else if(key_arg.key == OIS::KC_1)
+        evt = ControllerUtil::INPUT_TYPE::ONE;    
+    else if(key_arg.key == OIS::KC_2)
+        evt = ControllerUtil::INPUT_TYPE::TWO;    
+    else if(key_arg.key == OIS::KC_3)
+        evt = ControllerUtil::INPUT_TYPE::THREE;    
+    else if(key_arg.key == OIS::KC_4)
+        evt = ControllerUtil::INPUT_TYPE::FOUR;    
+    else if(key_arg.key == OIS::KC_5)
+        evt = ControllerUtil::INPUT_TYPE::FIVE;    
+    else if(key_arg.key == OIS::KC_6)
+        evt = ControllerUtil::INPUT_TYPE::SIX;    
+    else if(key_arg.key == OIS::KC_7)
+        evt = ControllerUtil::INPUT_TYPE::SEVEN;    
+    else if(key_arg.key == OIS::KC_8)
+        evt = ControllerUtil::INPUT_TYPE::EIGHT;    
+    else if(key_arg.key == OIS::KC_9)
+        evt = ControllerUtil::INPUT_TYPE::NINE;    
     else if(key_arg.key == OIS::KC_PGUP)
         evt = ControllerUtil::INPUT_TYPE::PUp;
     else if(key_arg.key == OIS::KC_PGDOWN)

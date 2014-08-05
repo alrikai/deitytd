@@ -1,38 +1,70 @@
-#ifndef TD_GAME_MAP_HPP__
-#define TD_GAME_MAP_HPP__
+#ifndef TD_GAME_MAP_HPP
+#define TD_GAME_MAP_HPP
 
 #include <array>
+#include <cmath>
 
 #include "MapTile.hpp"
 
-
-
 /*
- *  This is enforcing that the map has 600 x 800 tiles. The #pixels per tile
- *  is configurable at the point of construction
+ * will have 2 seperate space metrics; space in pixels, and space in tiles. 
+ * when taking cooridnates from the Views, they'll be normalized coordinate, specifically
+ * real #'s between [0 ~ 1]. The Game Map will then map these normalized coordinates to
+ * the correct tiles
  */
 class GameMap
 {
 public:
+    using IndexCoordinate = Coordinate<int>;
+    using PointCoordinate = Coordinate<float>;
+    //number of tiles to have in the map -- 3:4 ratio of height:width
+    const static int MAP_HEIGHT = 15;
+    const static int MAP_WIDTH = 20;
 
-    GameMap(const int mapsize_pxheight, const int mapsize_pxwidth) 
-        : map_pxheight(mapsize_pxheight), map_pxwidth(mapsize_pxwidth), 
-          tile_pxheight(mapsize_pxheight / MAP_HEIGHT), tile_pxwidth(mapsize_pxwidth / MAP_WIDTH)
+    //indexed as [row][column]
+    using MapElements = std::array<std::array<MapTile, MAP_WIDTH>, MAP_HEIGHT>;
+
+    GameMap() 
+        : tile_height(1.0/MAP_HEIGHT), tile_width(1.0/MAP_WIDTH)
     {
         setmap_dims();
     }
 
-
-    //return the index of the tile containing the point (note: the point is in terms of pixels)
-    Coordinate get_bounding_tile(Coordinate location)
+    //assume these are normalized coordinates 
+    IndexCoordinate get_bounding_tile(const float col_location, const float row_location) const 
     {
         //check boundary
-        if(location.row > map_pxheight || location.col > map_pxwidth)
-            return Coordinate(-1, -1);
+        if(row_location > 1.0f || col_location > 1.0f || row_location < 0.0f || col_location < 0.0f)
+            return IndexCoordinate(-1, -1);
 
-        int tile_row = map_pxheight / location.row;
-        int tile_col = map_pxwidth / location.col;
-        return Coordinate (tile_row, tile_col);
+        //we want to get incides row e [0, MAP_HEIGHT), col e [0, MAP_WIDTH) from the normalized input row | col vals
+        const int tile_row = std::floor(row_location/tile_height);
+        const int tile_col = std::floor(col_location/tile_width);
+        return IndexCoordinate (tile_col, tile_row);
+    }
+
+    //return the index of the tile containing the point (note: the point is in terms of pixels)
+    IndexCoordinate get_bounding_tile(PointCoordinate location) const 
+    {
+        return get_bounding_tile(location.col, location.row);
+    }
+
+    bool is_obstructed(const float col_location, const float row_location) const 
+    {
+        auto map_coord = get_bounding_tile(col_location, row_location);
+        return map[map_coord.row][map_coord.col].occupied;
+    }
+
+    void set_obstructed(const float col_location, const float row_location, bool obstruct_flag)
+    {
+        auto map_coord = get_bounding_tile(col_location, row_location);
+        map[map_coord.row][map_coord.col].occupied = obstruct_flag;
+    }
+
+    Coordinate<double> get_tile_center(const float col_location, const float row_location) const
+    {
+        auto map_coord = get_bounding_tile(col_location, row_location);
+        return map[map_coord.row][map_coord.col].tile_center;
     }
 
     //would likely have other helper functions -- 
@@ -47,24 +79,24 @@ private:
         {
             for (int tile_col = 0; tile_col < MAP_WIDTH; ++tile_col)
             {
-                map[tile_row][tile_col].loc.row = tile_row;
-                map[tile_row][tile_col].loc.col = tile_col;
-                map[tile_row][tile_col].width = tile_pxwidth;
-                map[tile_row][tile_col].height = tile_pxheight;
+                map[tile_row][tile_col].idx_location.row = tile_row;
+                map[tile_row][tile_col].idx_location.col = tile_col;
+
+                //set the tile ROI
+                map[tile_row][tile_col].width = tile_width;
+                map[tile_row][tile_col].height = tile_height;
+                map[tile_row][tile_col].tile_coord.row = tile_height * tile_row;
+                map[tile_row][tile_col].tile_coord.col = tile_width * tile_col;
+            
+                //set the tile center
+                map[tile_row][tile_col].tile_center.col = tile_width * (tile_col + 0.5); 
+                map[tile_row][tile_col].tile_center.row = tile_height * (tile_row + 0.5); 
             }
         }
     }
 
-    //number of tiles to have in the map
-    const static int MAP_HEIGHT = 600;
-    const static int MAP_WIDTH = 800;
-    using MapElements = std::array<std::array<MapTile, MAP_HEIGHT>, MAP_WIDTH>;
-
-
-    const int map_pxheight;
-    const int map_pxwidth;
-    const int tile_pxheight;
-    const int tile_pxwidth;
+    const double tile_height;
+    const double tile_width;
 
     MapElements map;
 };

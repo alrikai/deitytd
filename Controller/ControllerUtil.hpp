@@ -7,7 +7,8 @@
 
 namespace ControllerUtil
 {
-    enum class INPUT_TYPE {NONE, A, S, W, D, LArrow, RArrow, UpArrow, DArrow, Esc, PUp, PDown,  
+    enum class INPUT_TYPE {NONE, A, S, W, D, LArrow, RArrow, UpArrow, DArrow, Esc, PUp, PDown, 
+                           ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,
                            LClick, RClick, MDrag};
     struct InputEvent
     {
@@ -61,6 +62,36 @@ namespace ControllerUtil
             break;
             case INPUT_TYPE::D:
                 std::cout << "Key D" << std::endl;
+            break;
+            case INPUT_TYPE::ZERO:
+                std::cout << "Key 0" << std::endl;
+            break;
+            case INPUT_TYPE::ONE:
+                std::cout << "Key 1" << std::endl;
+            break;
+            case INPUT_TYPE::TWO:
+                std::cout << "Key 2" << std::endl;
+            break;
+            case INPUT_TYPE::THREE:
+                std::cout << "Key 3" << std::endl;
+            break;
+            case INPUT_TYPE::FOUR:
+                std::cout << "Key 4" << std::endl;
+            break;
+            case INPUT_TYPE::FIVE:
+                std::cout << "Key 5" << std::endl;
+            break;
+            case INPUT_TYPE::SIX:
+                std::cout << "Key 6" << std::endl;
+            break;
+            case INPUT_TYPE::SEVEN:
+                std::cout << "Key 7" << std::endl;
+            break;
+            case INPUT_TYPE::EIGHT:
+                std::cout << "Key 8" << std::endl;
+            break;
+            case INPUT_TYPE::NINE:
+                std::cout << "Key 9" << std::endl;
             break;
             case INPUT_TYPE::Esc:
                 std::cout << "Key Escape" << std::endl;

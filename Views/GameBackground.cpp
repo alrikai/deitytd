@@ -1,123 +1,136 @@
 #include "GameBackground.hpp"
 
-const std::string GameBackground::map_material {"GameMap"};
-const std::string GameBackground::minimal_obj_material{"BackgroundMap"};
+const std::string GameBackground::map_material {"Examples/GrassFloor"};
+const std::string GameBackground::skybox_material {"TD/StarSky"};     //{"Examples/CloudySky"};  //SpaceSkyBox"};
+const std::string GameBackground::map_name {"GameBGMap"};
 
-GameBackground::GameBackground(Ogre::SceneManager* scene)
-    : scene_mgmt(scene), root_node(scene_mgmt->getRootSceneNode())
+GameBackground::GameBackground(Ogre::SceneManager* scene, Ogre::Viewport* vport)
+    : scene_mgmt(scene), root_node(scene_mgmt->getRootSceneNode()), view_port(vport)
 {
-//    make_background();
+    make_background();
 }
 
 //set up the background
 void GameBackground::make_background()
 {
-    /*
-     *  First part: render a (plain) 2D rectangle
-     *              draw a loaded texture to the rectange
-     *              draw a smaller, semi-transparent rectangle ontop of the background rectangle
-     */
-    background_rect = new Ogre::Rectangle2D(true);
-    background_rect->setCorners(-1.0, 1.0, 1.0, -1.0);
-    background_rect->setMaterial(minimal_obj_material);
-    background_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
-    
-    inf_box.setInfinite();
-    background_rect->setBoundingBox(inf_box);
-    background_node = root_node->createChildSceneNode("Background");
-    background_node->attachObject(background_rect);
+    auto cam = view_port->getCamera();
+    std::vector<Ogre::Vector2> map_extents {{0.1f, 0.1f}, {0.9f, 0.9f}};
+    std::vector<Ogre::Vector3> world_extents (map_extents.size());
 
-    map_rect = new Ogre::Rectangle2D(true);
-    map_rect->setCorners(-0.7, 0.7, 0.7, -0.7);
-    map_rect->setMaterial(map_material);
-    map_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
+    Ogre::AxisAlignedBox ray_aab (Ogre::AxisAlignedBox::Extent::EXTENT_INFINITE);
+    for (size_t pt_idx = 0; pt_idx < map_extents.size(); ++pt_idx)
+    {
+        Ogre::Ray ray = cam->getCameraToViewportRay(map_extents.at(pt_idx)[0], map_extents.at(pt_idx)[1]);
+        auto world_coord = ray.intersects(ray_aab);
 
-    map_node = root_node->createChildSceneNode("GameMap");
-    map_node->attachObject(map_rect);
+        if(world_coord.first)
+            std::cout << "@ " << pt_idx << " --> " << ray.getPoint(world_coord.second) << std::endl;
+        else
+            std::cout << "NOTE: DIDNT INTERSECT " << std::endl;
+        world_extents[pt_idx] = ray.getPoint(world_coord.second);
+    }
+
+    float map_height = world_extents[1][1] - world_extents[0][1]; 
+    float map_width = world_extents[1][0] - world_extents[0][0]; 
+
+    std::cout << "map (@world coords) [" << map_height << ", " << map_width << "]" << std::endl;
+
+    //the above doesn't really work too well, so just discard it and use the extents below...
+
+    map_height = 150;
+    map_width = 200;
+
+    std::string map_planename = map_name+"_plane";
+    Ogre::Plane plane(Ogre::Vector3::UNIT_Z, 0);
+    Ogre::MeshManager::getSingleton().createPlane(map_planename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+            plane, map_width, map_height);
+    auto map_plane = scene_mgmt->createEntity(map_name, map_planename);
+
+    map_plane->setMaterialName(map_material);
+    map_plane->setRenderQueueGroup(Ogre::RENDER_QUEUE_WORLD_GEOMETRY_1);
+    map_node = scene_mgmt->getRootSceneNode()->createChildSceneNode(map_name);
+    map_node->attachObject(map_plane);
+
+    map_aab = map_plane->getBoundingBox();
 }
 
-void GameBackground::draw_background(Ogre::Viewport* view_port)
+void GameBackground::draw_background()
 {
+    //create the background 
+    scene_mgmt->setSkyDome(true, skybox_material, 1.0f, 1.0f, 5000.0f);
+    view_port->setSkiesEnabled(true);
+
     std::cout << "height: " << view_port->getActualHeight() << std::endl;
     std::cout << "width: " << view_port->getActualWidth() << std::endl;
+}
 
-    //
-    //mock up the lines for the map grid
-    //
+//
+//mock up the lines for the map grid. Assume uniform spacing
+//
+void GameBackground::draw_tiles(const int num_cols, const int num_rows)
+{
+    //NOTE: assume this has the world gamemap plane
+    auto aab_size = map_aab.getMaximum() - map_aab.getMinimum();
+    const float ytile_space = aab_size.y * (1.0f / num_rows);
+    const float xtile_space = aab_size.x * (1.0f / num_cols);
 
-    const int map_height = 0.7*view_port->getActualHeight();
-    const int map_width = 0.7*view_port->getActualWidth();
-
-    const float tile_pxheight = 2.f;
-    const float tile_pxwidth = 2.f;
-    const int num_row_tiles = map_height / tile_pxheight;
-    const int num_col_tiles = map_width / tile_pxwidth;
-
-    //need to have (#tiles - 1) #lines
-    std::vector<Ogre::ManualObject*> map_grid_rowlines (num_row_tiles - 1);
-    std::vector<Ogre::ManualObject*> map_grid_collines (num_col_tiles - 1);
-
+    //need to have (#tiles + 1) #lines (for the borders)
+    std::vector<Ogre::ManualObject*> map_grid_rowlines (num_rows + 1);
+    std::vector<Ogre::ManualObject*> map_grid_collines (num_cols + 1);
 
     //TODO: we need to offset the lines to be drawn to the semi-transparent middle rectangle
-    float row_offset = -num_row_tiles/10;
-    float col_offset = -num_col_tiles/10;
+    float row_offset = -map_aab.getHalfSize().y;
+    float col_offset = -map_aab.getHalfSize().x; 
     float depth_offset = 1;
     //the current indices to draw the lines at. Need to update for each line
-    float row_idx_start = row_offset;
-    float col_idx_start = col_offset;
-    float depth_idx_start = depth_offset;
-    float row_idx_end = row_offset;
-    float col_idx_end = col_offset;
-    float depth_idx_end = depth_offset;    
-    
-    for (int row = 0; row < num_row_tiles-1; ++row)
+    float row_idx = row_offset;
+    float col_idx = col_offset;
+   
+    const std::string mapgrid_material {"BaseWhiteNoLighting"};
+    for (size_t row = 0; row < map_grid_rowlines.size(); ++row)
     {
         const std::string line_name = "mapline_row_" + std::to_string(row);
         map_grid_rowlines.at(row) = scene_mgmt->createManualObject(line_name);
-        map_grid_rowlines.at(row)->begin("Ogre/Compositor/GlassPass", Ogre::RenderOperation::OT_LINE_LIST);
+        map_grid_rowlines.at(row)->begin(mapgrid_material, Ogre::RenderOperation::OT_LINE_LIST);
         {
             //make the start and end points for the row lines
-            col_idx_start += tile_pxwidth;
-            map_grid_rowlines.at(row)->position(row_idx_start, col_idx_start, depth_idx_start);
-            map_grid_rowlines.at(row)->position(-1*row_idx_end, col_idx_start, depth_idx_end);
+            map_grid_rowlines.at(row)->position(col_idx, row_idx, depth_offset);
+            map_grid_rowlines.at(row)->position(-1*col_idx, row_idx, depth_offset);
+            row_idx += ytile_space;
         }
         map_grid_rowlines.at(row)->end();
-        map_grid_rowlines.at(row)->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
+        map_grid_rowlines.at(row)->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY);
     }
 
-    row_idx_start = row_offset;
-    col_idx_start = col_offset;
-    depth_idx_start = depth_offset;
-    row_idx_end = row_offset;
-    col_idx_end = col_offset;
-    depth_idx_start = depth_offset;    
-    for (int col = 0; col < num_col_tiles-1; ++col)
+    row_idx = row_offset;
+    col_idx = col_offset;
+    for (size_t col = 0; col < map_grid_collines.size(); ++col)
     {
         const std::string line_name = "mapline_col_" + std::to_string(col);
         map_grid_collines.at(col) = scene_mgmt->createManualObject(line_name);
-        map_grid_collines.at(col)->begin("Ogre/Compositor/GlassPass", Ogre::RenderOperation::OT_LINE_LIST);
+        map_grid_collines.at(col)->begin(mapgrid_material, Ogre::RenderOperation::OT_LINE_LIST);
         {
             //make the start and end points for the column lines
-            row_idx_start += tile_pxheight;
-            map_grid_collines.at(col)->position(row_idx_start, col_idx_start, depth_idx_start);
-            map_grid_collines.at(col)->position(row_idx_start, -1*col_idx_end, depth_idx_end);
+            map_grid_collines.at(col)->position(col_idx, row_idx, depth_offset);
+            map_grid_collines.at(col)->position(col_idx, -1*row_idx, depth_offset);
+            col_idx += xtile_space;
         }
         map_grid_collines.at(col)->end();
-        map_grid_collines.at(col)->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);
+        map_grid_collines.at(col)->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY);
     }
 
-    std::vector<Ogre::SceneNode*> row_line_nodes (num_row_tiles-1);
-    std::vector<Ogre::SceneNode*> col_line_nodes (num_col_tiles-1);
+    std::vector<Ogre::SceneNode*> row_line_nodes (num_rows+1);
+    std::vector<Ogre::SceneNode*> col_line_nodes (num_cols+1);
 
-    for (int row = 0; row < num_row_tiles-1; ++row)
+    for (size_t row = 0; row < map_grid_rowlines.size(); ++row)
     {
-        row_line_nodes.at(row) = root_node->createChildSceneNode();
+        row_line_nodes.at(row) = map_node->createChildSceneNode();
         row_line_nodes.at(row)->attachObject(map_grid_rowlines.at(row));
     }
 
-    for (int col = 0; col < num_col_tiles-1; ++col)
+    for (size_t col = 0; col < map_grid_collines.size(); ++col)
     {
-        col_line_nodes.at(col) = root_node->createChildSceneNode();
+        col_line_nodes.at(col) = map_node->createChildSceneNode();
         col_line_nodes.at(col)->attachObject(map_grid_collines.at(col));
     }
 

@@ -20,26 +20,18 @@
  */
 
 //mock-up of the frontend
+template <typename BackendType>
 struct FrontStub
 {
     using ModifierType = essence;
-    using EssenceModEvt = UserTowerEvents::modify_tower_event<ModifierType>;
-    using ModEvtQueueType = typename UserTowerEvents::EventQueueType<EssenceModEvt>::QType;      
+    using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>*>::QType;
 
     void draw_maptiles(const int width, const int height) {}
-    void register_tower_build_queue(std::shared_ptr<UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType> build_queue)
+    void register_tower_eventqueue(std::shared_ptr<TowerEventQueueType> tevt_queue)
     {
-        tbuild_queue = build_queue; 
+        td_event_queue = tevt_queue;
     }
-
-    void register_tower_mod_queue(std::shared_ptr<ModEvtQueueType> modify_queue)
-    {
-        tmod_queue = modify_queue; 
-    }
-
-    std::shared_ptr<UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType> tbuild_queue;
-    std::shared_ptr<ModEvtQueueType> tmod_queue;
-
+    std::shared_ptr<TowerEventQueueType> td_event_queue;
 };
 
 template <typename TDType>
@@ -58,10 +50,12 @@ void add_testtower(TDType& td)
 }
 
 int main()
-{ 
-    using TDType = TowerDefense<FrontStub>;
-    FrontStub* view = new FrontStub();
+{
+    using TDBackendType = TowerLogic;
+    using TDType = TowerDefense<FrontStub, TDBackendType>;
+    FrontStub<TDBackendType>* view = new FrontStub<TDBackendType>();
     TDType td(view);
+
     //add a tower (assume this to be the fundamental tower)
     td.init_game();
     add_testtower(td);
@@ -92,6 +86,17 @@ int main()
                 continue_running = false;
                 break;
             }
+            else if (input_tokens.at(token_cnt) == "p")
+            {
+                token_cnt += 1;
+                assert(input_tokens.size() > 2);
+                float t_row = std::stof(input_tokens.at(token_cnt++));
+                float t_col = std::stof(input_tokens.at(token_cnt++));
+
+                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::print_tower_event<TDBackendType>(t_row, t_col);
+                view->td_event_queue->push(td_evt);
+                std::cout << "Building a Tower..." << std::endl;
+            }
             else if(input_tokens.at(token_cnt) == "bt")
             {
                 token_cnt += 1;
@@ -100,8 +105,8 @@ int main()
                 float t_row = std::stof(input_tokens.at(token_cnt++));
                 float t_col = std::stof(input_tokens.at(token_cnt++));
 
-                UserTowerEvents::build_tower_event t_evt(tier, t_row, t_col);
-                view->tbuild_queue->push(t_evt);
+                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::build_tower_event<TDBackendType> (tier, t_row, t_col);
+                view->td_event_queue->push(td_evt);
                 std::cout << "Building a Tower..." << std::endl;
             }
             else if(input_tokens.at(token_cnt) == "mt")
@@ -112,7 +117,7 @@ int main()
                 std::string essence_name = input_tokens.at(token_cnt++);
  
                 //based on the index, make the appropriate essence type
-                FrontStub::ModifierType* e_type = nullptr;
+                FrontStub<TDBackendType>::ModifierType* e_type = nullptr;
                 if(essence_name == "aph")
                     e_type = new aphrodite();
                 else if(essence_name == "apo")
@@ -152,8 +157,8 @@ int main()
                 float t_col = std::stof(input_tokens.at(token_cnt++));
 
                 std::cout << "Modifying a Tower..." << std::endl;
-                UserTowerEvents::modify_tower_event<FrontStub::ModifierType> t_evt(e_type, t_row, t_col);
-                view->tmod_queue->push(t_evt);
+                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::modify_tower_event<FrontStub<TDBackendType>::ModifierType, TDBackendType> (e_type, t_row, t_col);
+                view->td_event_queue->push(td_evt);
             }
         }
 

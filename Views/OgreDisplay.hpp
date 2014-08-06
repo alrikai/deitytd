@@ -52,8 +52,6 @@ public:
 
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
-
-        tower_build_evtqueue = nullptr;
     }
 
 	void start_display();
@@ -68,12 +66,11 @@ public:
     /*
     void register_model(TowerDefense<OgreDisplay>* model)
     { td_model = model; }
-    */
-
     void register_tower_build_queue(std::shared_ptr<UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType> build_queue)
     {
         tower_build_evtqueue = build_queue;
     }
+   */
 
     Ogre::Root* get_root() const
     { return root.get(); }
@@ -116,7 +113,7 @@ private:
 
     //assume we don't own this object
     //TowerDefense<OgreDisplay>* td_model;
-    std::shared_ptr<UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType> tower_build_evtqueue;
+    //std::shared_ptr<UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType> tower_build_evtqueue;
 
     //the plan is to eventually have multiple threads running, so making this
     //atomic ahead of time (although this might change in the future...)

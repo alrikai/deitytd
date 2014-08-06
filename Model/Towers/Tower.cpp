@@ -13,7 +13,8 @@ std::ostream& operator <<(std::ostream& out_stream, const tower_properties& prop
 
 std::ostream& operator <<(std::ostream& out_stream, const Tower& t)
 {
-    out_stream << "Tower -- " << t.base_attributes;
+    out_stream << "Fundamental Tower -- " << t.base_attributes << std::endl;
+    out_stream << "Synthesized Tower -- " << t.attack_attributes << std::endl;
 	return out_stream;
 }
 

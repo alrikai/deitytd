@@ -17,12 +17,12 @@
 
 
 //this should be the main interface of the TD backend. Pretty uninspired name at the moment...
-template <class ViewType, class ModelType = TowerLogic>
+template <template <class>  class ViewType, class ModelType = TowerLogic>
 class TowerDefense
 {
 public:
     //it's possible that we'll move to normalized coordinates?
-    explicit TowerDefense(ViewType* view)
+    explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
         td_view->draw_maptiles(GameMap::MAP_WIDTH, GameMap::MAP_HEIGHT);
@@ -59,36 +59,30 @@ private:
     void gloop_postprocessing();
 
     //the frontend
-    std::unique_ptr<ViewType> td_view;
+    std::unique_ptr<ViewType<ModelType>> td_view;
     //the backend
     std::unique_ptr<TowerLogic> td_backend;
     
     std::unique_ptr<std::thread> gameloop_thread;
     std::atomic<bool> continue_gameloop;
 
-    //frontend events
-    using BuildEvtQueueType = UserTowerEvents::EventQueueType<UserTowerEvents::build_tower_event>::QType;
-    using EssenceModEvt = UserTowerEvents::modify_tower_event<typename ViewType::ModifierType>;
-    using ModEvtQueueType = typename UserTowerEvents::EventQueueType<EssenceModEvt>::QType;
-    std::shared_ptr<BuildEvtQueueType> towerbuild_events; 
-    std::shared_ptr<ModEvtQueueType> towermod_events; 
-
+    using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<ModelType>*>::QType;
+    std::shared_ptr<TowerEventQueueType> td_towerevents;
 };
 
-template <class ViewType, class ModelType>
+
+template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::init_game()
 {
-    //register the requisite event queues
-    towerbuild_events = std::make_shared<BuildEvtQueueType> ();
-    td_view->register_tower_build_queue(towerbuild_events);
-
-    towermod_events = std::make_shared<ModEvtQueueType> ();
-    td_view->register_tower_mod_queue(towermod_events);
+    //register the tower-event queues, as triggered by user input
+    td_towerevents = std::make_shared<TowerEventQueueType> ();
+    td_view->register_tower_eventqueue(td_towerevents);
 
     //...
 }
 
-template <class ViewType, class ModelType>
+
+template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gameloop()
 {
     
@@ -118,32 +112,22 @@ void TowerDefense<ViewType, ModelType>::gameloop()
 
 }
 
-template <class ViewType, class ModelType>
+template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gloop_preprocessing()
 {
-    //get any tower-build events -- note: if theyre all the same type of tower, we could just make them all in 1 go
-    if(!towerbuild_events->empty())
-    {
-        UserTowerEvents::build_tower_event build_evt;
-        while(!towerbuild_events->empty())
-        {
-            std::cout << "Dispatching Tower Construction @GameLoop" << std::endl;
-            towerbuild_events->pop(build_evt);
-            td_backend->make_tower(build_evt.tier_, build_evt.col_, build_evt.row_);
-        }
-    }
 
-    if(!towermod_events->empty())
+    //handle the dispatching of the user-input tower events
+    if(!td_towerevents->empty())
     {
-        EssenceModEvt mod_evt;
-        while(!towermod_events->empty())
+        UserTowerEvents::tower_event<ModelType>* td_evt = nullptr;
+        while(!td_towerevents->empty())
         {
-            std::cout << "Dispatching Tower Modification @GameLoop" << std::endl;
-            towermod_events->pop(mod_evt);
-            td_backend->modify_tower(mod_evt.modifier_, mod_evt.col_, mod_evt.row_);
+            td_towerevents->pop(td_evt);
+            td_evt->apply(td_backend.get());
+            //td_backend->make_tower(build_evt.tier_, build_evt.col_, build_evt.row_);
         }
+    
     }
-
 
     //TODO: also check for -- 
     //1. tower modifications
@@ -152,7 +136,7 @@ void TowerDefense<ViewType, ModelType>::gloop_preprocessing()
     //...
 }
 
-template <class ViewType, class ModelType>
+template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gloop_processing()
 {
     //TODO:  
@@ -162,11 +146,19 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
     //4. check for attack & monster collisions, apply attacks
     //...
 
+    //NOTE: these are all placeholders...
+    double timestamp = 0.0;
+    td_backend->cycle_update(timestamp);    
 
+    //assume we have some list of generated tower attacks from this cycle @here
+    //merge them with the existing list of attacks
+    //update all the attack positions
+    //update all the monster positions (and all oher moveables)
+    //check for collisions
 
 }
     
-template <class ViewType, class ModelType>
+template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gloop_postprocessing()
 {
 

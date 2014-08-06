@@ -3,11 +3,13 @@
 
 #include "GameMap.hpp"
 #include "Towers/Tower.hpp"
+#include "Towers/TowerAttack.hpp"
 #include "util/Types.hpp"
 
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <list>
 
 //holds the info needed for a tower model
 struct TowerModel
@@ -49,10 +51,13 @@ public:
         return tower_models.emplace(tower_name, TowerModel(std::move(polygon_mesh), std::move(polygon_points), tower_material)).second;  
     }
 
+    //methods called in response to frontend events, dispatched from the gameloop
 	bool make_tower(const int tier, const float x_coord, const float y_coord);
 	bool modify_tower(essence* modifier, const float x_coord, const float y_coord);
+    bool print_tower(const float x_coord, const float y_coord);
 
-    void trigger_attacks();
+
+    void cycle_update(const double onset_timestamp);
 
 private:
 
@@ -61,6 +66,11 @@ private:
     std::map<std::string, TowerModel> tower_models;
 
     std::unique_ptr<Tower> t_list [GameMap::MAP_HEIGHT][GameMap::MAP_WIDTH];
+    
+    //think if there's a better datastructure for these -- we will just be iterating through them,
+    //but we will also have to frequently insert and delete elements -- insertion can just be a 
+    //block insertion, while deletion will be of random elements. 
+    std::list<std::shared_ptr<TowerAttack>> attack_list;
 
 /*    
     void backend_evtloop();

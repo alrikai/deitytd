@@ -76,9 +76,34 @@ bool TowerLogic::modify_tower(essence* modifier, const float x_coord, const floa
 }
 
 
-void TowerLogic::trigger_attacks(const double onset_timestamp)
+bool TowerLogic::print_tower(const float x_coord, const float y_coord)
 {
-    
+    if(!map.is_obstructed(x_coord, y_coord))
+        return false;
+
+    auto t_tile = map.get_bounding_tile(x_coord, y_coord);
+    //this would eventually be displayed to the GUI rather than printed to the command line...
+    std::cout << *(t_list[t_tile.row][t_tile.col]) << std::endl;
+    return true;
+}
+
+void TowerLogic::cycle_update(const double onset_timestamp)
+{
+
+    //NOTE: we might want to return a list of generated tower attacks from here?
+
+    for (int t_row = 0; t_row < GameMap::MAP_HEIGHT; ++t_row)
+    {
+        for (int t_col = 0; t_col < GameMap::MAP_WIDTH; ++t_col)
+        {
+            if(t_list[t_row][t_col])
+            {
+                //TODO: apply updates and trigger attack if ready
+                //...
+                //
+            }
+        }
+    }
 
 }
 

@@ -27,6 +27,7 @@ public:
     {
         td_view->draw_maptiles(GameMap::MAP_WIDTH, GameMap::MAP_HEIGHT);
         td_backend = std::unique_ptr<TowerLogic>(new TowerLogic);
+        timestamp = 0;
     }
 
     void init_game();
@@ -66,8 +67,12 @@ private:
     std::unique_ptr<std::thread> gameloop_thread;
     std::atomic<bool> continue_gameloop;
 
-    using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<ModelType>*>::QType;
-    std::shared_ptr<TowerEventQueueType> td_towerevents;
+    using TowerEventQueueType = typename ViewType<ModelType>::TowerEventQueueType; 
+    std::unique_ptr<TowerEventQueueType> td_towerevents;
+
+    uint64_t timestamp;
+    std::list<std::shared_ptr<TowerAttack>> active_attacks;
+
 };
 
 
@@ -75,8 +80,8 @@ template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::init_game()
 {
     //register the tower-event queues, as triggered by user input
-    td_towerevents = std::make_shared<TowerEventQueueType> ();
-    td_view->register_tower_eventqueue(td_towerevents);
+    td_towerevents = std::unique_ptr<TowerEventQueueType> (new TowerEventQueueType());
+    td_view->register_tower_eventqueue(td_towerevents.get());
 
     //...
 }
@@ -119,12 +124,16 @@ void TowerDefense<ViewType, ModelType>::gloop_preprocessing()
     //handle the dispatching of the user-input tower events
     if(!td_towerevents->empty())
     {
-        UserTowerEvents::tower_event<ModelType>* td_evt = nullptr;
+        //std::shared_ptr<UserTowerEvents::tower_event<ModelType>> td_evt = nullptr;
+        std::unique_ptr<UserTowerEvents::tower_event<ModelType>> td_evt (nullptr);
         while(!td_towerevents->empty())
         {
-            td_towerevents->pop(td_evt);
-            td_evt->apply(td_backend.get());
-            //td_backend->make_tower(build_evt.tier_, build_evt.col_, build_evt.row_);
+            bool got_data = false;
+            td_evt = std::move(td_towerevents->pop(got_data));
+            //call the event functor -- since it's a pointer, I opted to use a regular 
+            //function rather than operator overloading (the syntax looks bad)
+            if(got_data && td_evt)
+                td_evt->apply(td_backend.get());
         }
     
     }
@@ -147,8 +156,9 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
     //...
 
     //NOTE: these are all placeholders...
-    double timestamp = 0.0;
-    td_backend->cycle_update(timestamp);    
+    std::list<std::shared_ptr<TowerAttack>> new_attacks;
+    td_backend->cycle_update(timestamp, new_attacks);    
+    active_attacks.splice(active_attacks.end(), new_attacks);
 
     //assume we have some list of generated tower attacks from this cycle @here
     //merge them with the existing list of attacks
@@ -156,6 +166,7 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
     //update all the monster positions (and all oher moveables)
     //check for collisions
 
+    timestamp++;
 }
     
 template <template <class>  class ViewType, class ModelType>

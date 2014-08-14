@@ -5,23 +5,12 @@
 #include "Towers/Tower.hpp"
 #include "Towers/TowerAttack.hpp"
 #include "util/Types.hpp"
+#include "TowerModel.hpp"
 
 #include <memory>
 #include <thread>
 #include <atomic>
 #include <list>
-
-//holds the info needed for a tower model
-struct TowerModel
-{
-    TowerModel(std::vector<std::vector<uint32_t>>&& polygon_mesh, std::vector<std::vector<float>>&& polygon_points, const std::string& material_name)
-        : polygon_mesh_(polygon_mesh), polygon_points_(polygon_points), tower_material_name_(material_name)
-    {}
-
-    const std::vector<std::vector<uint32_t>> polygon_mesh_; 
-    const std::vector<std::vector<float>> polygon_points_;
-    const std::string tower_material_name_;
-};
 
 class TowerLogic
 {
@@ -55,9 +44,9 @@ public:
 	bool make_tower(const int tier, const float x_coord, const float y_coord);
 	bool modify_tower(essence* modifier, const float x_coord, const float y_coord);
     bool print_tower(const float x_coord, const float y_coord);
+    bool tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord);
 
-
-    void cycle_update(const double onset_timestamp);
+    void cycle_update(const uint64_t onset_timestamp, std::list<std::shared_ptr<TowerAttack>>& new_attacks);
 
 private:
 
@@ -67,11 +56,6 @@ private:
 
     std::unique_ptr<Tower> t_list [GameMap::MAP_HEIGHT][GameMap::MAP_WIDTH];
     
-    //think if there's a better datastructure for these -- we will just be iterating through them,
-    //but we will also have to frequently insert and delete elements -- insertion can just be a 
-    //block insertion, while deletion will be of random elements. 
-    std::list<std::shared_ptr<TowerAttack>> attack_list;
-
 /*    
     void backend_evtloop();
     std::shared_ptr<UserTowerEvents::BuildTowerEventQueueType> tbuild_queue;

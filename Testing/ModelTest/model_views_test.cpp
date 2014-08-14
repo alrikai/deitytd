@@ -20,9 +20,6 @@
 
 int main()
 {
-
-
-    
     OgreDisplay display;
     Controller controller (display.get_root(), display.get_render_window());
 

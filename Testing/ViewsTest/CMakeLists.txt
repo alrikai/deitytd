@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-SET (VIEWS_SRCS views_test.cpp)                                                            
+SET (VIEWS_SRCS frontend_test.cpp)                                                            
 ADD_EXECUTABLE(TestView ${VIEWS_SRCS})
 TARGET_LINK_LIBRARIES(TestView 
                       ${TDView} 

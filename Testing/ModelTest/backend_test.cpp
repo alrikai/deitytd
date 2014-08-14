@@ -15,8 +15,6 @@
  *  The idea here is to test the Model/backend without the frontend
  *  involved. We will generate events akin to how the frontend will,
  *  then see how the backend does with them. We want to test:
- *
- *  1. Tower creation
  */
 
 //mock-up of the frontend
@@ -24,14 +22,14 @@ template <typename BackendType>
 struct FrontStub
 {
     using ModifierType = essence;
-    using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>*>::QType;
+    using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType;
 
     void draw_maptiles(const int width, const int height) {}
-    void register_tower_eventqueue(std::shared_ptr<TowerEventQueueType> tevt_queue)
+    void register_tower_eventqueue(TowerEventQueueType* tevt_queue)
     {
         td_event_queue = tevt_queue;
     }
-    std::shared_ptr<TowerEventQueueType> td_event_queue;
+    TowerEventQueueType* td_event_queue;
 };
 
 template <typename TDType>
@@ -67,6 +65,7 @@ int main()
 
     //now, mock-up some user inputs -- first, tower creation
 
+	using base_evt_t = UserTowerEvents::tower_event<TDBackendType>;
     std::string user_input {""};
     bool continue_running = true;
     while(continue_running)
@@ -93,8 +92,9 @@ int main()
                 float t_row = std::stof(input_tokens.at(token_cnt++));
                 float t_col = std::stof(input_tokens.at(token_cnt++));
 
-                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::print_tower_event<TDBackendType>(t_row, t_col);
-                view->td_event_queue->push(td_evt);
+				using print_evt_t = UserTowerEvents::print_tower_event<TDBackendType>;
+				std::unique_ptr<base_evt_t> td_evt = std::unique_ptr<print_evt_t>(new print_evt_t(t_row, t_col));
+                view->td_event_queue->push(std::move(td_evt));
                 std::cout << "Building a Tower..." << std::endl;
             }
             else if(input_tokens.at(token_cnt) == "bt")
@@ -105,8 +105,9 @@ int main()
                 float t_row = std::stof(input_tokens.at(token_cnt++));
                 float t_col = std::stof(input_tokens.at(token_cnt++));
 
-                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::build_tower_event<TDBackendType> (tier, t_row, t_col);
-                view->td_event_queue->push(td_evt);
+				using build_evt_t = UserTowerEvents::build_tower_event<TDBackendType>;
+				std::unique_ptr<base_evt_t> td_evt = std::unique_ptr<build_evt_t>(new build_evt_t(tier, t_row, t_col));
+                view->td_event_queue->push(std::move(td_evt));
                 std::cout << "Building a Tower..." << std::endl;
             }
             else if(input_tokens.at(token_cnt) == "mt")
@@ -157,8 +158,10 @@ int main()
                 float t_col = std::stof(input_tokens.at(token_cnt++));
 
                 std::cout << "Modifying a Tower..." << std::endl;
-                UserTowerEvents::tower_event<TDBackendType>* td_evt = new UserTowerEvents::modify_tower_event<FrontStub<TDBackendType>::ModifierType, TDBackendType> (e_type, t_row, t_col);
-                view->td_event_queue->push(td_evt);
+                
+				using evt_t = typename UserTowerEvents::modify_tower_event<FrontStub<TDBackendType>::ModifierType, TDBackendType>;
+				std::unique_ptr<base_evt_t> td_evt = std::unique_ptr<evt_t>(new evt_t (e_type, t_row, t_col));
+                view->td_event_queue->push(std::move(td_evt));
             }
         }
 

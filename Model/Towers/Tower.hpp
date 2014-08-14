@@ -100,6 +100,10 @@ public:
         return true;
     }
 
+    //TODO: decide how to handle the targetting -- will the projectiles follow the mob, or go to a location,
+    //or should we have a mix of both?
+    //bool set_target()
+
 	friend std::ostream& operator <<(std::ostream& out_stream, const Tower& t);   
 
 protected:

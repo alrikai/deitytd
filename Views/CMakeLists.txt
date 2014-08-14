@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-SET(SRCS OgreDisplay.cpp GameBackground.cpp)
+SET(SRCS GameBackground.cpp)   #OgreDisplay.cpp 
 
 include_directories( ${OIS_INCLUDE_DIRS}
 	${OGRE_INCLUDE_DIRS}

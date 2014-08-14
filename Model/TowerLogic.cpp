@@ -12,7 +12,6 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
     auto selected_tower = tower_models.begin();
     std::advance(selected_tower, dis(eng));
 
-    std::vector<float> world_offsets {0.0f, 0.0f, 0.0f};
     std::vector<float> map_offsets {0.0f, 0.0f, 0.0f};
     //using the user-coords, snap the tower model to the appropriate game map tile
     if(map.is_obstructed(x_coord, y_coord))
@@ -56,6 +55,7 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
 
     //get the average coordinate in WORLD COORDINATES. Also NOTE: Since the fractals are 
     //generated as [row, col, depth], we need to shuffle the indices to [col, row, depth]
+    std::vector<float> world_offsets {0.0f, 0.0f, 0.0f};
     const size_t fractal_ptfactor = selected_tower->second.polygon_points_.size();
     world_offsets[0] = dim_avgs[1] / fractal_ptfactor;
     world_offsets[1] = dim_avgs[0] / fractal_ptfactor;
@@ -87,24 +87,41 @@ bool TowerLogic::print_tower(const float x_coord, const float y_coord)
     return true;
 }
 
-void TowerLogic::cycle_update(const double onset_timestamp)
+//
+//  TODO: the below mehods are incomplete
+//
+
+
+bool TowerLogic::tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord)
 {
+    if(!map.is_obstructed(tower_xcoord, tower_ycoord))
+        return false;
 
-    //NOTE: we might want to return a list of generated tower attacks from here?
+    auto t_tile = map.get_bounding_tile(tower_xcoord, tower_ycoord);
 
+    //TODO: set the tower's current target -- still need to decide how exactly this should be done (e.g. are we targetting a location or a mob?)
+    //t_list[t_tile.row][t_tile.col]->set_target(target_xcoord, target_ycoord);
+
+    return true;
+}
+
+
+//NOTE: we might want to return a list of generated tower attacks from here?
+void TowerLogic::cycle_update(const uint64_t onset_timestamp, std::list<std::shared_ptr<TowerAttack>>& new_attacks)
+{
     for (int t_row = 0; t_row < GameMap::MAP_HEIGHT; ++t_row)
     {
         for (int t_col = 0; t_col < GameMap::MAP_WIDTH; ++t_col)
         {
             if(t_list[t_row][t_col])
             {
-                //TODO: apply updates and trigger attack if ready
+                //TODO: apply updates and trigger attack if ready and mob in range
                 //...
                 //
+                 
             }
         }
     }
-
 }
 
 

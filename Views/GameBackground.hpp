@@ -15,6 +15,9 @@ public:
     void draw_background();
     void draw_tiles(const int num_cols, const int num_rows);
 
+    Ogre::AxisAlignedBox get_map_aab() const
+    { return map_aab; }
+
     const static std::string map_name;
 private:
     void make_background();
@@ -29,6 +32,14 @@ private:
 
     Ogre::AxisAlignedBox map_aab;
 };
+
+namespace view_detail
+{
+
+void load_resources(const std::string& resource_cfg_filename);
+std::tuple<bool, float, Ogre::MovableObject*> check_point(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y);
+
+}
 
 #endif
 

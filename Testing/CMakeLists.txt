@@ -9,9 +9,9 @@ include_directories(${PCL_INCLUDE_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 link_directories(${PCL_LIBRARY_DIRS})
 
+include_directories(ViewsTest)
 SET(TDView "/home/alrik/TowerDefense/build/Views/libTDView.a")
 add_subdirectory(ViewsTest)
 
-include_directories(ViewsTest)
 add_subdirectory(ModelTest)
 

@@ -42,9 +42,38 @@ namespace RenderEvents
         std::vector<float> t_map_offsets;
         std::vector<float> t_world_offsets;
     };
+    using MakeTowerQType = EventQueue<create_tower>;
 
 
-    using QType = EventQueue<create_tower>;
+    struct create_attack
+	{
+        //create_attack(const std::string& atk_name, const std::vector<float>& location, const std::vector<float>& destination)
+        create_attack(const std::string& atk_name, const std::string& origin_tower, const std::vector<float>& destination)
+            : name(atk_name), origin_id(origin_tower), target(destination)
+        {}
+
+		const std::string name;
+		const std::string origin_id;
+		const std::vector<float> target;
+
+	};
+    using MakeAttackQType = EventQueue<create_attack>;
+
+    //the question is, how much do we move the attack per update? It should reflect the backend state, but then we'd have to 
+    //translate between front and backend coordinates better.... or that could even be PART of the attack, not part of the move
+    //update? --> for now, just make something up
+    struct move_attack
+	{
+        move_attack(const std::string& atk_name, const std::vector<float>& movement)
+            : name(atk_name), delta(movement) 
+        {}
+
+		const std::string name;
+		const std::vector<float> delta;
+
+	};
+    using MakeAttackMoveQType = EventQueue<move_attack>;
+
 
 };
 

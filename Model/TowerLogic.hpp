@@ -37,7 +37,7 @@ public:
         auto model_exists = tower_models.find(tower_name); 
         if(model_exists != tower_models.end())
             return false; 
-        return tower_models.emplace(tower_name, TowerModel(std::move(polygon_mesh), std::move(polygon_points), tower_material)).second;  
+        return tower_models.emplace(tower_name, TowerModel(tower_name, std::move(polygon_mesh), std::move(polygon_points), tower_material)).second;  
     }
 
     //methods called in response to frontend events, dispatched from the gameloop

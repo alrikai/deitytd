@@ -166,7 +166,26 @@ void load_resources(const std::string& resource_cfg_filename)
     }
 }
 
-//returns whether the click intersected the GameMap, and if so, what the distance was  
+Ogre::MovableObject* user_select(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y)
+{
+    auto cam = view_port->getCamera();
+    Ogre::Ray ray = cam->getCameraToViewportRay(x,y);
+
+    Ogre::MovableObject* selection = nullptr;
+    auto r_query = scene_mgmt->createRayQuery(ray);
+    r_query->setSortByDistance(true);
+    auto& q_hits = r_query->execute();
+    if(!q_hits.empty())
+        for (auto q_it = q_hits.begin(); q_it != q_hits.end(); ++q_it)
+            if(q_it->movable)
+            {
+                selection = q_it->movable;
+                break;
+            }
+    return selection;
+}
+
+//returns whether the click intersected the GameMap, and if so, what the distance was and a pointer to the object 
 std::tuple<bool, float, Ogre::MovableObject*> check_point(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y)
 {
     std::cout << "Viewport Actual Dim: [" << view_port->getActualLeft() << ", " << view_port->getActualTop() 
@@ -186,6 +205,7 @@ std::tuple<bool, float, Ogre::MovableObject*> check_point(Ogre::SceneManager* sc
     auto& q_hits = r_query->execute();
     if(!q_hits.empty())
     {
+        std::cout << "Click --> " << q_hits.size() << " # hits" << std::endl;
         for (auto q_it = q_hits.begin(); q_it != q_hits.end(); ++q_it)
         {
             if(q_it->movable)

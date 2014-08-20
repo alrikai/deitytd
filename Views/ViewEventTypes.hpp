@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <string>
-
+#include <memory>
 
 /*********************************************************************
  * the (experimental) backend to frontend events
@@ -42,40 +42,142 @@ namespace RenderEvents
         std::vector<float> t_map_offsets;
         std::vector<float> t_world_offsets;
     };
-    using MakeTowerQType = EventQueue<create_tower>;
 
 
     struct create_attack
-	{
+    {
         //create_attack(const std::string& atk_name, const std::vector<float>& location, const std::vector<float>& destination)
         create_attack(const std::string& atk_name, const std::string& origin_tower, const std::vector<float>& destination)
             : name(atk_name), origin_id(origin_tower), target(destination)
         {}
 
-		const std::string name;
-		const std::string origin_id;
-		const std::vector<float> target;
+        const std::string name;
+        const std::string origin_id;
+        const std::vector<float> target;
 
-	};
-    using MakeAttackQType = EventQueue<create_attack>;
+    };
 
     //the question is, how much do we move the attack per update? It should reflect the backend state, but then we'd have to 
     //translate between front and backend coordinates better.... or that could even be PART of the attack, not part of the move
     //update? --> for now, just make something up
     struct move_attack
-	{
+    {
         move_attack(const std::string& atk_name, const std::vector<float>& movement)
             : name(atk_name), delta(movement) 
         {}
 
-		const std::string name;
-		const std::vector<float> delta;
+        const std::string name;
+        const std::vector<float> delta;
 
-	};
-    using MakeAttackMoveQType = EventQueue<move_attack>;
+    };
 
+    struct remove_attack
+    {
+        remove_attack(const std::string& atk_name)
+            : name(atk_name)
+        {}
 
+        const std::string name;
+    };
 };
 
+
+/*
+ * This class should hold the backend to frontend events -- the gameloop will create this
+ * classes object, then register it with the front and backend. Then the backend will write 
+ * the events to be sent to the frontend into here, and the frontend will grab and process 
+ * events from here during its render cycle
+ */
+class ViewEvents
+{
+public:
+    using MakeTowerQueueType = EventQueue<RenderEvents::create_tower>; 
+    using MakeAttackQueueType = EventQueue<RenderEvents::create_attack>;
+    using MoveAttackQueueType = EventQueue<RenderEvents::move_attack>;
+    using RemoveAttackQueueType = EventQueue<RenderEvents::remove_attack>;
+
+    enum class EventTypes { MakeTower, DestroyTower, MakeAttack, MoveAttack, DestroyAttack };
+
+    ViewEvents()
+    {
+        maketower_evtqueue = std::unique_ptr<MakeTowerQueueType>(new MakeTowerQueueType());
+        makeattack_evtqueue = std::unique_ptr<MakeAttackQueueType>(new MakeAttackQueueType());
+        moveattack_evtqueue = std::unique_ptr<MoveAttackQueueType>(new MoveAttackQueueType());
+        removeattack_evtqueue = std::unique_ptr<RemoveAttackQueueType>(new RemoveAttackQueueType());
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    void add_maketower_event(std::unique_ptr<RenderEvents::create_tower> evt)
+    {
+        std::cout << "Adding Render Event -- @name " << evt->t_name << std::endl;
+        maketower_evtqueue->push(std::move(evt)); 
+    }
+    void add_makeatk_event(std::unique_ptr<RenderEvents::create_attack> evt)
+    {
+        makeattack_evtqueue->push(std::move(evt));
+    }
+    void add_moveatk_event(std::unique_ptr<RenderEvents::move_attack> evt)
+    {
+        std::cout << "Adding Attack Move Event @ View" << std::endl;
+        moveattack_evtqueue->push(std::move(evt));
+    }
+    void add_removeatk_event(std::unique_ptr<RenderEvents::remove_attack> evt)
+    {
+        std::cout << "Adding Attack Move Event @ View" << std::endl;
+        removeattack_evtqueue->push(std::move(evt));
+    }
+
+
+    template <typename ViewFcn>
+    void apply_towerbuild_events(ViewFcn& vfcn)
+    {
+        execute_event_type<MakeTowerQueueType, ViewFcn>(maketower_evtqueue.get(), vfcn);
+    }
+
+    template <typename ViewFcn>
+    void apply_attackbuild_events(ViewFcn& vfcn)
+    {
+        execute_event_type<MakeAttackQueueType, ViewFcn>(makeattack_evtqueue.get(), vfcn);
+    }    
+
+    template <typename ViewFcn>
+    void apply_attackmove_events(ViewFcn& vfcn)
+    {
+        execute_event_type<MoveAttackQueueType, ViewFcn>(moveattack_evtqueue.get(), vfcn);
+    }        
+
+    template <typename ViewFcn>
+    void apply_attackremove_events(ViewFcn& vfcn)
+    {
+        execute_event_type<RemoveAttackQueueType, ViewFcn>(removeattack_evtqueue.get(), vfcn);
+    }           
+
+/*
+ * The question is, what do we do with the frontend executing the events?
+ * We will have N different events, and the frontend has to do various things
+ * for all N of them. The 
+ */
+private:    
+
+    //NOTE: this doesn't actually have to be in this class, as it's written
+    template <typename QueueType, typename ViewFcn>
+    void execute_event_type(QueueType* evt_queue, ViewFcn& vfcn)
+    {
+       while(!evt_queue->empty())
+       {
+           bool got_evt = false;
+           auto render_evt = evt_queue->pop(got_evt);
+           if(got_evt && render_evt)
+           {
+               vfcn(std::move(render_evt));
+           }
+        } 
+    }
+
+    std::unique_ptr<MakeTowerQueueType> maketower_evtqueue;
+    std::unique_ptr<MakeAttackQueueType> makeattack_evtqueue;
+    std::unique_ptr<MoveAttackQueueType> moveattack_evtqueue;
+    std::unique_ptr<RemoveAttackQueueType> removeattack_evtqueue;
+};
 
 #endif

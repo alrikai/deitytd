@@ -26,13 +26,14 @@ class OgreDisplay
 
 public:
     using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType; 
+/*
     using RenderEventQueueType = RenderEvents::MakeTowerQType; 
     using RenderAttackEventQueueType = RenderEvents::MakeAttackQType;
     using RenderAttackMoveEventQueueType = RenderEvents::MakeAttackMoveQType;
-
+*/
     OgreDisplay()
         : root (new Ogre::Root(plugins_cfg_filename)), cam_rotate(0.10f), cam_move(10.0f),
-        background(nullptr), close_display(false)
+        background(nullptr), td_event_queue(nullptr), game_events(nullptr), close_display(false)
     {
         ogre_setup();
         setup_camera(); 
@@ -61,11 +62,6 @@ public:
 
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
-
-
-        render_event_queue = std::unique_ptr<RenderEventQueueType>(new RenderEventQueueType());
-        render_attackevent_queue = std::unique_ptr<RenderAttackEventQueueType>(new RenderAttackEventQueueType());
-        render_attackmove_event_queue = std::unique_ptr<RenderAttackMoveEventQueueType>(new RenderAttackMoveEventQueueType());
     }
 
 	void start_display();
@@ -78,28 +74,17 @@ public:
         controller->register_input_listener(id, input_events.get());
     }
 
+    //for enqueueing frontend --> backend events
     void register_tower_eventqueue(TowerEventQueueType* tevt_queue)
     {
         td_event_queue = tevt_queue;
     }
-
-    /////////////////////////////////////////////////////////////////////
-    void add_render_event(std::unique_ptr<RenderEvents::create_tower> evt)
+    
+    //for processing backend --> frontend events
+    void register_backend_eventqueue(ViewEvents* events)
     {
-        std::cout << "Adding Render Event -- @name " << evt->t_name << std::endl;
-        render_event_queue->push(std::move(evt)); 
+        game_events = events;
     }
-    void add_atk_event(std::unique_ptr<RenderEvents::create_attack> evt)
-    {
-        render_attackevent_queue->push(std::move(evt));
-    }
-    void add_atkmove_event(std::unique_ptr<RenderEvents::move_attack> evt)
-    {
-        std::cout << "Adding Attack Move Event @ View" << std::endl;
-        render_attackmove_event_queue->push(std::move(evt));
-    }
-    /////////////////////////////////////////////////////////////////////
-
 
     Ogre::Root* get_root() const
     { return root.get(); }
@@ -140,13 +125,10 @@ private:
     std::unique_ptr<GameBackground> background;
     std::unique_ptr<ControllerUtil::ControllerBufferType> input_events;
 
-    //the tower event queue -- owned by the TowerDefense class
+    //the tower event queues, for frontend --> backend and backend --> frontend communication
+    //-- these are both owned by the TowerDefense class, hence the raw ponters
     TowerEventQueueType* td_event_queue;
-
-
-    std::unique_ptr<RenderEventQueueType> render_event_queue;
-    std::unique_ptr<RenderAttackEventQueueType> render_attackevent_queue;
-    std::unique_ptr<RenderAttackMoveEventQueueType> render_attackmove_event_queue;
+    ViewEvents* game_events;
 
     //the plan is to eventually have multiple threads running, so making this
     //atomic ahead of time (although this might change in the future...)
@@ -155,15 +137,6 @@ private:
     //holds the state of the current selection of the user (or nullptr if none selected)
     //this will presumably either be towers or mobs -- wouldn't make sense to be able to click attacks
     Ogre::MovableObject* current_selection;
-
-    /*
-    //we want to render things when the backend sends the updated locations -- we could go about this a couple of ways,
-    //but the one I'm leaning towards now is having the rendering thread waiting on the updated locations
-    std::atomic<bool> render_ready;
-    std::list<TowerModel> render_towers;
-    std::condition_variable render_cv;
-    std::mutex render_mutx;
-    */
 };
 
 
@@ -183,6 +156,59 @@ template <class BackendType>
 void OgreDisplay<BackendType>::start_display()
 {
     background->draw_background();
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    auto tbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_tower> render_evt)
+    {
+        Ogre::Vector3 t_map_offsets {render_evt->t_map_offsets[0], render_evt->t_map_offsets[1], render_evt->t_map_offsets[2]};
+        Ogre::Vector3 t_world_offsets {render_evt->t_world_offsets[0], render_evt->t_world_offsets[1], render_evt->t_world_offsets[2]};                 
+
+        //NOTE: this is the last piece of the puzzle. Should be the GameMap (GameBGMap), but I formally would get it from a scene query.
+        Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
+        this->place_tower(render_evt->t_model.get(), render_evt->t_name, map_box, t_map_offsets, t_world_offsets);
+    };
+
+    auto atkbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_attack> render_evt)
+    {
+        auto origin_id = render_evt->origin_id;
+        Ogre::Vector3 origin = scene_mgmt->getEntity(origin_id)->getParentSceneNode()->getPosition();
+
+        auto dest = render_evt->target;
+        std::cout << " Made attack @ [" << origin[0] << ", " << origin[1] << ", " << origin[2] << "] --> [" 
+             << dest[0] << ", " << dest[1] << ", " << dest[2] << "]" << std::endl;
+
+        Ogre::Entity* tower_atk = scene_mgmt->createEntity(render_evt->name, Ogre::SceneManager::PT_SPHERE);
+        tower_atk->setMaterialName("Examples/Chrome");
+        tower_atk->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
+        auto child_node = root_node->createChildSceneNode(render_evt->name);
+
+        //scale the attack to a more sensible size...
+        Ogre::Vector3 scale_vec(1/25.0f,1/25.0f, 1/25.0f);
+        child_node->setScale(scale_vec);
+        child_node->setPosition(origin.x, origin.y, origin.z);
+        child_node->attachObject(tower_atk);   
+    };
+
+
+    auto atkmove_evt_fcn = [this](std::unique_ptr<RenderEvents::move_attack> render_evt)
+    {
+        //TODO: get the real logic for this going
+        std::cout << "Move event @ " << render_evt->name << std::endl;
+
+        auto attack_id = render_evt->name;
+        Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], 0};
+        scene_mgmt->getEntity(attack_id)->getParentSceneNode()->translate(movement);
+    };
+
+    auto atkremove_evt_fcn = [this](std::unique_ptr<RenderEvents::remove_attack> render_evt)
+    {
+        auto attack_id = render_evt->name;
+        Ogre::SceneNode* t_scenenode = scene_mgmt->getEntity(attack_id)->getParentSceneNode(); 
+        OgreUtil::nuke_scenenode(t_scenenode);
+    };
+    ////////////////////////////////////////////////////////////////////////////////////
+
+
 
     //10 FPS is the bare minimum
     constexpr int max_ms_perframe = 100;
@@ -204,75 +230,13 @@ void OgreDisplay<BackendType>::start_display()
         //how best to do this? check the input queues for messages? In this thread, or in another one?
         handle_user_input();        
 
-
         /////////////////////////////////////////////////////////////////////////////////////////////
-        //TODO: handling input rendering events should be factored out into its own function or class
-        /////////////////////////////////////////////////////////////////////////////////////////////
-        while(!render_event_queue->empty())
-        {
-            bool got_evt = false;
-            auto render_evt = render_event_queue->pop(got_evt);
-            if(got_evt && render_evt)
-            {
-                Ogre::Vector3 t_map_offsets {render_evt->t_map_offsets[0], render_evt->t_map_offsets[1], render_evt->t_map_offsets[2]};
-                Ogre::Vector3 t_world_offsets {render_evt->t_world_offsets[0], render_evt->t_world_offsets[1], render_evt->t_world_offsets[2]};                 
 
-                //NOTE: this is the last piece of the puzzle. Should be the GameMap (GameBGMap), but I formally would get it from a scene query.
-                Ogre::AxisAlignedBox map_box = background->get_map_aab();
-                place_tower(render_evt->t_model.get(), render_evt->t_name, map_box, t_map_offsets, t_world_offsets);
-            }
-        }
-        
-        while(!render_attackevent_queue->empty())
-        {
-            bool got_evt = false;
-            auto render_evt = render_attackevent_queue->pop(got_evt);
-            if(got_evt && render_evt)
-            {
-                //NOTE: these coordinates are in terms of TILES. Need to convert to world coords, or at least to have the
-                //attack originate from the tower that spawned it. How best to do this?
-                auto origin_id = render_evt->origin_id;
-
-               
-                /*
-                auto t_origin = scene_mgmt->getEntity(origin_id)->getBoundingBox();
-                std::cout << "T Origin: " << t_origin << std::endl;
-                Ogre::Vector3 origin = t_origin.getCenter();
-                */
-                Ogre::Vector3 origin = scene_mgmt->getEntity(origin_id)->getParentSceneNode()->getPosition();
-
-                auto dest = render_evt->target;
-                std::cout << " Made attack @ [" << origin[0] << ", " << origin[1] << ", " << origin[2] << "] --> [" 
-                     << dest[0] << ", " << dest[1] << ", " << dest[2] << "]" << std::endl;
-
-                Ogre::Entity* tower_atk = scene_mgmt->createEntity(render_evt->name, Ogre::SceneManager::PT_SPHERE);
-                tower_atk->setMaterialName("Examples/Chrome");
-                tower_atk->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
-                auto child_node = root_node->createChildSceneNode(render_evt->name);
-
-                //scale the attack to a more sensible size...
-                Ogre::Vector3 scale_vec(1/25.0f,1/25.0f, 1/25.0f);
-                child_node->setScale(scale_vec);
-                child_node->setPosition(origin.x, origin.y, origin.z);
-                child_node->attachObject(tower_atk);   
-            }
-        }
-
-        while(!render_attackmove_event_queue->empty())
-        {
-            bool got_evt = false;
-            auto render_evt = render_attackmove_event_queue->pop(got_evt);
-            if(got_evt && render_evt)
-            {
-                //TODO
-                std::cout << "Move event @ " << render_evt->name << std::endl;
-
-                auto attack_id = render_evt->name;
-                Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], 0};
-                scene_mgmt->getEntity(attack_id)->getParentSceneNode()->translate(movement);
-            }
-        }
-        
+        game_events->apply_towerbuild_events(tbuild_evt_fcn);
+        game_events->apply_attackbuild_events(atkbuild_evt_fcn);
+        game_events->apply_attackmove_events(atkmove_evt_fcn);
+        game_events->apply_attackremove_events(atkremove_evt_fcn);
+         
         /////////////////////////////////////////////////////////////////////////////////////////////
 
          

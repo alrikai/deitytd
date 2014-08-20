@@ -49,6 +49,9 @@ struct GLooper
         td_towerevents = std::unique_ptr<TowerEventQueueType>(new TowerEventQueueType());
         view->register_tower_eventqueue(td_towerevents.get());
 
+        td_front_to_backend_events = std::unique_ptr<ViewEvents>(new ViewEvents());
+        view->register_backend_eventqueue(td_front_to_backend_events.get());
+
         gloop_stop.store(false);
         gloop_thread = std::unique_ptr<std::thread>(new std::thread(&GLooper::gloop, this));
     }
@@ -105,8 +108,7 @@ struct GLooper
                     std::vector<float> map_offset {col_map_offset, row_map_offset, 0.0f};
                     std::unique_ptr<RenderEvents::create_tower> t_evt = std::unique_ptr<RenderEvents::create_tower>
                         (new RenderEvents::create_tower(t_list[tile_row][tile_col], tower_id, std::move(map_offset)));
-                    
-                    view->add_render_event(std::move(t_evt));
+                    td_front_to_backend_events->add_maketower_event(std::move(t_evt));
                 }
             }
 
@@ -135,7 +137,7 @@ struct GLooper
                             //std::vector<float> map_offset {static_cast<float>(col), static_cast<float>(row), 0.0f};
                             std::unique_ptr<RenderEvents::create_attack> t_evt = std::unique_ptr<RenderEvents::create_attack>
                                 (new RenderEvents::create_attack(attack_name, tower_atkid, std::move(target)));
-                            view->add_atk_event(std::move(t_evt));   
+                            td_front_to_backend_events->add_makeatk_event(std::move(t_evt));
 
                             current_attacks.emplace_back(new TowerAttackStub(attack_name, round_idx, row, col));
                         } 
@@ -162,7 +164,7 @@ struct GLooper
                     const std::vector<float> movement {10.0f, 10.0f, 10.0f};
                     std::unique_ptr<RenderEvents::move_attack> t_evt = std::unique_ptr<RenderEvents::move_attack>
                         (new RenderEvents::move_attack((*attack_it)->name, movement));
-                    view->add_atkmove_event(std::move(t_evt));   
+                    td_front_to_backend_events->add_moveatk_event(std::move(t_evt));
                 }
 
                 
@@ -173,6 +175,14 @@ struct GLooper
                 auto t_delta = static_cast<double>(round_idx - (*attack_it)->timestamp);
                 if(t_delta/5000000 > 7)
                     remove_atk = true;
+
+                if(remove_atk)
+                {
+                    std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
+                        (new RenderEvents::remove_attack((*attack_it)->name));
+                    td_front_to_backend_events->add_removeatk_event(std::move(t_evt));
+                }
+
                 attack_it = ((remove_atk) ? current_attacks.erase(attack_it) : std::next(attack_it, 1));
             }
        
@@ -183,7 +193,8 @@ struct GLooper
 
     using TowerEventQueueType = typename ViewType<ModelType>::TowerEventQueueType; 
     std::unique_ptr<TowerEventQueueType> td_towerevents;
-    
+    std::unique_ptr<ViewEvents> td_front_to_backend_events;
+
     ViewType<ModelType>* view;
     std::unique_ptr<std::thread> gloop_thread;
     std::atomic<bool> gloop_stop;

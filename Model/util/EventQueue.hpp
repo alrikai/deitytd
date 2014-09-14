@@ -7,13 +7,13 @@
 #include <condition_variable>
 #include <iostream>
 #include <atomic>
-
+#include <thread>
 
 template <typename EventType>
 class EventQueue
 {
 public:
-    explicit EventQueue(const int max_sz = 500, const int max_wait = 100) 
+    explicit EventQueue(const int max_sz = 500, const int max_wait = 0) 
         : buffer_size(max_sz), timeout_len(max_wait) 
     {}
 
@@ -93,6 +93,10 @@ template <typename EventType>
 std::unique_ptr<EventType> EventQueue<EventType>::pop(bool& got_data)
 {
     std::unique_lock<std::mutex> lock(dlock_);
+
+    //to avoid unnecessary timeouts (even if it's short)
+    if(buffer_.empty())
+        return nullptr;
 
     //have a bounded wait, such that the thread waits for (up to) the timeout_len for data
     if(dcond_.wait_for(lock, std::chrono::milliseconds(timeout_len), [this] 

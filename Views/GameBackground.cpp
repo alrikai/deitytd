@@ -7,7 +7,22 @@ const std::string GameBackground::map_name {"GameBGMap"};
 GameBackground::GameBackground(Ogre::SceneManager* scene, Ogre::Viewport* vport)
     : scene_mgmt(scene), root_node(scene_mgmt->getRootSceneNode()), view_port(vport)
 {
+    //the image size to generate for the background. Will likely need to dynamically resize this (and have a 4:3 aspect ratio?)
+    bg_width = 1024;
+    bg_height = 1024;
+
+    //make the background generator
+    bg_generator = std::unique_ptr<fflame_generator<data_t, pixel_t>> (new fflame_generator<data_t, pixel_t>(bg_height, bg_width, 1));
+    //pass in a queue to hold the finished flame frames
+    bg_framequeue = std::unique_ptr<EventQueue<uint8_t []>>(new EventQueue<uint8_t []>(MAX_BGQUEUE));
+    bg_generator->register_framequeue(bg_framequeue.get());
     make_background();
+}
+
+GameBackground::~GameBackground()
+{
+    bg_generator->stop_generation();
+    delete bg_rect;
 }
 
 //set up the background
@@ -52,16 +67,78 @@ void GameBackground::make_background()
     map_node->attachObject(map_plane);
 
     map_aab = map_plane->getBoundingBox();
+
+/*
+    //create the background 
+    scene_mgmt->setSkyDome(true, skybox_material, 1.0f, 1.0f, 5000.0f);
+    view_port->setSkiesEnabled(true);
+*/
+    std::cout << "height: " << view_port->getActualHeight() << std::endl;
+    std::cout << "width: " << view_port->getActualWidth() << std::endl;
+
+    //how much of this will we have to update when we want to draw a new frame?
+    bg_texture = Ogre::TextureManager::getSingleton().createManual("fflame_bgtexture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::TEX_TYPE_2D, bg_width, bg_height, 0, Ogre::PF_BYTE_RGBA, Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+    bg_material = Ogre::MaterialManager::getSingleton().create("fflame_bgmaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    bg_material->getTechnique(0)->getPass(0)->createTextureUnitState("fflame_bgtexture");
+    bg_material->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+    bg_material->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+    bg_material->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+    bg_material->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+
+    bg_rect = new Ogre::Rectangle2D(true);
+    bg_rect->setCorners(-1.0, 1.0, 1.0, -1.0);
+    //bg_rect->setMaterial("TD/SpaceBG");
+    bg_rect->setMaterial("fflame_bgmaterial");
+    bg_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_1); 
+    infinite_bgaab.setInfinite();
+    bg_rect->setBoundingBox(infinite_bgaab);
+    bg_node = scene_mgmt->getRootSceneNode()->createChildSceneNode("fflame_bgnode");
+    bg_node->attachObject(bg_rect);
+    
+    //start making the backgrounds
+    bg_generator->start_generation();
 }
 
 void GameBackground::draw_background()
 {
-    //create the background 
-    scene_mgmt->setSkyDome(true, skybox_material, 1.0f, 1.0f, 5000.0f);
-    view_port->setSkiesEnabled(true);
+    bool got_frame = false;
+    auto texture_buffer = bg_framequeue->pop(got_frame);
+    //dont do anything if nothing new. Normally we'd be doing the interpolation in this case
+    if(!(got_frame && texture_buffer))
+        return;
 
-    std::cout << "height: " << view_port->getActualHeight() << std::endl;
-    std::cout << "width: " << view_port->getActualWidth() << std::endl;
+    //static int gchannel = 0; 
+
+    std::cout << "Updating game background..." << std::endl;
+
+    auto bg_pixelbuffer = bg_texture->getBuffer();
+    //locking the pixel buffer to write the data to the texture
+    bg_pixelbuffer->lock(Ogre::HardwareBuffer::HBL_WRITE_ONLY);
+    auto bg_pixelbox = bg_pixelbuffer->getCurrentLock();
+    uint8_t* bg_data = static_cast<uint8_t *>(bg_pixelbox.data);
+
+    //NOTE: bg_texture is RGB (should eventually add an alpha channel)
+    for (int i = 0; i < bg_height; ++i)
+    {
+        for (int j = 0; j < bg_width; ++j)
+        {
+            //RGB
+            *bg_data++ = texture_buffer[3*(i*bg_width+j)    ];
+            *bg_data++ = texture_buffer[3*(i*bg_width+j) + 1];
+            *bg_data++ = texture_buffer[3*(i*bg_width+j) + 2];
+            *bg_data++ = std::numeric_limits<uint8_t>::max();
+        }
+        //ogre doesnt guarentee the requested format, so we need to to this to have the correct buffer stride
+        bg_data += bg_pixelbox.getRowSkip() * Ogre::PixelUtil::getNumElemBytes(bg_pixelbox.format);
+    }
+    bg_pixelbuffer->unlock();
+
+    //update the material to use the new texture (this doesn't seem to happen automatically)
+    auto bg_texturestate = bg_material->getTechnique(0)->getPass(0)->getTextureUnitState(0); 
+    bg_texturestate->setTextureName("fflame_bgtexture");
+
+    //gchannel = (gchannel+1) % 255;
 }
 
 //

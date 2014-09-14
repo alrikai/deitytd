@@ -4,6 +4,8 @@
 #include "Model/GameMap.hpp"
 #include "Views/ViewEventTypes.hpp"
 
+#include <chrono>
+#include <thread>
 
 /*
  * much like the backend test, this one should test the frontend without the
@@ -62,6 +64,8 @@ struct GLooper
         gloop_thread->join();
     }
 
+    
+
     void gloop()
     {
         using PixelType = uint8_t;
@@ -70,8 +74,14 @@ struct GLooper
         uint64_t round_idx = 0;
         std::list<std::shared_ptr<TowerAttackStub>> current_attacks;
 
+        //aim for 60Hz
+        const double TIME_PER_ROUND = 1000.0/30.0;
+        double iter_lag = 0;
+
         while(!gloop_stop.load())
         {
+            auto start_time = std::chrono::high_resolution_clock::now();
+
             //have to handle certain events in here? 
             while(!td_towerevents->empty())
             {
@@ -112,8 +122,12 @@ struct GLooper
                 }
             }
 
-            //pretend we have an (actual) tower, with an attack speed. spawn attacks based on that speed
-            bool spawn_attack = ((round_idx % 10000000) == 0);
+            
+            //pretend we have an (actual) tower, with an attack speed. spawn attacks based on that speed.
+            //Here we simulate 1 attack per second. Also, we may have to optimize the attack generation -- 
+            //instead, collect all of the attacks together, then spawn 1 event with all the attacks resident.
+            //Or, just leave the attack movement up to the frontend
+            bool spawn_attack = ((round_idx % 60) == 0);
           
             if(spawn_attack)
             {
@@ -154,9 +168,8 @@ struct GLooper
             auto attack_it = current_attacks.begin();
             while(attack_it != current_attacks.end()) 
             {
-                //TODO: read the remove_attack events and remove the corresponding attack object
-                //TODO: calculate next attack position and spawn an attack_movement event for the frontend
-                bool do_movement = ((round_idx % 5000000) == 0);
+                //move the attack every 500ms
+                bool do_movement = ((round_idx % 30) == 0);
                 if(do_movement)
                 {
                     std::cout << "Spawning Movement Event -- " << current_attacks.size() << " # attacks" << std::endl;
@@ -173,7 +186,8 @@ struct GLooper
                 //      we will simulate that with timestamp measurements. Note that we would also have to notify the
                 //      frontend to stop them from being rendered... 
                 auto t_delta = static_cast<double>(round_idx - (*attack_it)->timestamp);
-                if(t_delta/5000000 > 7)
+                //have the attacks last for 5 rounds (5 seconds
+                if(t_delta/60 > 5)
                     remove_atk = true;
 
                 if(remove_atk)
@@ -185,7 +199,21 @@ struct GLooper
 
                 attack_it = ((remove_atk) ? current_attacks.erase(attack_it) : std::next(attack_it, 1));
             }
+            
        
+            //still not sure how to do the time steps -- want to have a fixed timestep, but how to do it here?
+            auto current_time = std::chrono::high_resolution_clock::now();
+            double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+            
+            if(time_elapsed > TIME_PER_ROUND)
+                std::cout << "Over the per-round target!" << std::endl;
+            else
+            {
+                //std::cout << "Sleeping for " << (TIME_PER_ROUND - time_elapsed) << " ms" << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+            }
+            
+            start_time = current_time;
             round_idx++;
         }
 

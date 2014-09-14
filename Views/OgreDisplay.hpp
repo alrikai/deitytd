@@ -155,7 +155,7 @@ const std::string OgreDisplay<BackendType>::plugins_cfg_filename {"plugins.cfg"}
 template <class BackendType>
 void OgreDisplay<BackendType>::start_display()
 {
-    background->draw_background();
+    //background->draw_background();
 
     ////////////////////////////////////////////////////////////////////////////////////
     auto tbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_tower> render_evt)
@@ -229,6 +229,7 @@ void OgreDisplay<BackendType>::start_display()
       
         //how best to do this? check the input queues for messages? In this thread, or in another one?
         handle_user_input();        
+        background->draw_background();
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 

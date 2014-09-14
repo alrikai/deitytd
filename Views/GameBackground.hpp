@@ -1,17 +1,21 @@
 #ifndef TD_GAME_BACKGROUND_HPP
 #define TD_GAME_BACKGROUND_HPP
 
+#include "FflameGenerator.hpp"
+
 #include <OGRE/Ogre.h>
+#include <opencv2/opencv.hpp>
 
 #include <string>
-
+#include <memory>
 
 //holds the data and functionality for drawing the background
 class GameBackground
 {
 public:
     GameBackground(Ogre::SceneManager*, Ogre::Viewport*);
-    
+    ~GameBackground();
+
     void draw_background();
     void draw_tiles(const int num_cols, const int num_rows);
 
@@ -22,6 +26,15 @@ public:
 private:
     void make_background();
 
+    using data_t = double;
+    using pixel_t = cv::Vec<data_t, 3>;
+
+    //maximum size of background frame queue buffer
+    static constexpr uint8_t MAX_BGQUEUE = 50;
+    //procedurally generates the background textures
+    std::unique_ptr<fflame_generator<data_t, pixel_t>> bg_generator;
+    std::unique_ptr<EventQueue<uint8_t[]>> bg_framequeue;
+
     const static std::string map_material;
     const static std::string skybox_material;
 
@@ -30,6 +43,14 @@ private:
     Ogre::Viewport* view_port;
     Ogre::SceneNode* map_node;
 
+    //we want to have a dynamic texture for the background that we update as we compute new fflames
+    int bg_width;
+    int bg_height;
+    Ogre::Rectangle2D* bg_rect;
+    Ogre::TexturePtr bg_texture;
+    Ogre::MaterialPtr bg_material; 
+    Ogre::SceneNode* bg_node;
+    Ogre::AxisAlignedBox infinite_bgaab;     
     Ogre::AxisAlignedBox map_aab;
 };
 

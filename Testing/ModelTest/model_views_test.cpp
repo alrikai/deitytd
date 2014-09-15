@@ -1,5 +1,5 @@
 #include "Controller/Controller.hpp"
-#include "views_util.hpp"
+#include "../fractal_util.hpp"
 #include "Model/TowerDefense.hpp"
 
 #include <memory>
@@ -18,17 +18,20 @@
  *  This will mostly be the ViewsTest, but with the backend game logic in the loop
  */
 
-int main()
-{
-    OgreDisplay display;
+/*
+    OgreDisplay<TDBackendStub> display;
     Controller controller (display.get_root(), display.get_render_window());
+    display.register_input_controller(&controller);
+    GLooper<OgreDisplay, TDBackendStub> gloop (&display);
 
-    using TDType = TowerDefense<OgreDisplay>;
-    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(&display));
+    display.draw_maptiles(TDBackendStub::MAP_W, TDBackendStub::MAP_H);
+    display.start_display();
 
-    display.register_input_controller(&controller);   
-//    display.register_model(td.get());
-
+    gloop.stop_gloop();
+*/
+template <typename TDType>
+void add_testtower(TDType* td)
+{
     using PixelType = uint8_t;
     std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
 
@@ -38,7 +41,24 @@ int main()
 
     const std::string tower_material {"Examples/Chrome"};
     const std::string tower_name {"ViewTest"};
-
     td->add_tower(std::move(polygon_mesh), std::move(polygon_points), tower_material, tower_name);
+}
+
+int main()
+{
+    using TDBackendType = TowerLogic;
+    using TDType = TowerDefense<OgreDisplay, TDBackendType>;
+
+    OgreDisplay<TDBackendType> display;
+    Controller controller (display.get_root(), display.get_render_window());
+
+    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(&display));
+    display.register_input_controller(&controller);  
+
+    td->init_game();
+    td->start_game();
+    add_testtower(td.get());
+
     display.start_display();
+    std::cout << "All Done" << std::endl;
 }

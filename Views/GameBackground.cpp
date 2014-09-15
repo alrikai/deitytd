@@ -1,6 +1,6 @@
 #include "GameBackground.hpp"
 
-const std::string GameBackground::map_material {"Examples/GrassFloor"};
+const std::string GameBackground::map_material {"GameMap"};  //{"Examples/GrassFloor"};
 const std::string GameBackground::skybox_material {"TD/StarSky"};     //{"Examples/CloudySky"};  //SpaceSkyBox"};
 const std::string GameBackground::map_name {"GameBGMap"};
 
@@ -86,6 +86,11 @@ void GameBackground::make_background()
     bg_material->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     bg_material->getTechnique(0)->getPass(0)->setLightingEnabled(false);
 
+    //initialize the background to black
+    auto texture_buffer = std::unique_ptr<uint8_t[]>(new uint8_t [3 * bg_height * bg_width]);
+    std::fill(texture_buffer.get(), texture_buffer.get() + 3 * bg_height * bg_width, 0);
+    render_background_texture(std::move(texture_buffer));
+
     bg_rect = new Ogre::Rectangle2D(true);
     bg_rect->setCorners(-1.0, 1.0, 1.0, -1.0);
     //bg_rect->setMaterial("TD/SpaceBG");
@@ -100,18 +105,8 @@ void GameBackground::make_background()
     bg_generator->start_generation();
 }
 
-void GameBackground::draw_background()
+void GameBackground::render_background_texture(std::unique_ptr<uint8_t[]> texture_buffer)
 {
-    bool got_frame = false;
-    auto texture_buffer = bg_framequeue->pop(got_frame);
-    //dont do anything if nothing new. Normally we'd be doing the interpolation in this case
-    if(!(got_frame && texture_buffer))
-        return;
-
-    //static int gchannel = 0; 
-
-    std::cout << "Updating game background..." << std::endl;
-
     auto bg_pixelbuffer = bg_texture->getBuffer();
     //locking the pixel buffer to write the data to the texture
     bg_pixelbuffer->lock(Ogre::HardwareBuffer::HBL_WRITE_ONLY);
@@ -133,12 +128,22 @@ void GameBackground::draw_background()
         bg_data += bg_pixelbox.getRowSkip() * Ogre::PixelUtil::getNumElemBytes(bg_pixelbox.format);
     }
     bg_pixelbuffer->unlock();
+}
+
+void GameBackground::draw_background()
+{
+    bool got_frame = false;
+    auto texture_buffer = bg_framequeue->pop(got_frame);
+    //dont do anything if nothing new. Normally we'd be doing the interpolation in this case
+    if(!(got_frame && texture_buffer))
+        return;
+
+    std::cout << "Updating game background..." << std::endl;
+    render_background_texture(std::move(texture_buffer));
 
     //update the material to use the new texture (this doesn't seem to happen automatically)
     auto bg_texturestate = bg_material->getTechnique(0)->getPass(0)->getTextureUnitState(0); 
     bg_texturestate->setTextureName("fflame_bgtexture");
-
-    //gchannel = (gchannel+1) % 255;
 }
 
 //

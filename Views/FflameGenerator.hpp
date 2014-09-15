@@ -148,6 +148,8 @@ void fflame_generator<data_t, pixel_t>:: start_fflame_generation()
         bool flame_run;
         std::thread::id tid;
         std::tie(flame_run, tid) = fflame_workers.at(th_idx)->do_flame(&fflame_generator::generate_fflame, this);
+
+        //this would be sort of a big deal. should probably throw something here
         if(!flame_run)
             std::cout << "NOTE: flame task failed" << std::endl;
 
@@ -177,11 +179,9 @@ void fflame_generator<data_t, pixel_t>::generate_fflame(fflame_randutil::fast_ra
         run_fflame<data_t, pixel_t>(flamer.get(), fflame_constants::num_samples/num_workers, fflame_histdata.get(), rand_gen);
         
         //2. wait for all the threads to finish the previous round. have 1 thread execute the following steps:
-        std::cout << "TID START " << std::this_thread::get_id() << std::endl;
         flame_prebarrier.wait();
         if(std::this_thread::get_id() == worker_overloard_id)
         {
-            std::cout << "TID @ " << std::this_thread::get_id() << " @semaphore section " << std::endl;
             //somewhat unfortunate, but need to have this on the heap to avoid scoping problems
             auto hist_info = std::unique_ptr<std::vector<histogram_info<pixel_t>>>(new std::vector<histogram_info<pixel_t>>(imheight * imwidth));
             fflame_histdata->get_and_reset(*hist_info);
@@ -200,10 +200,8 @@ void fflame_generator<data_t, pixel_t>::generate_fflame(fflame_randutil::fast_ra
         }
         flame_postbarrier.wait();
         
-        std::cout << "TID END " << std::this_thread::get_id() << std::endl;
         if(std::this_thread::get_id() == worker_overloard_id)
             flame_postbarrier.reset(num_workers);
-
     }
 }
 
@@ -214,6 +212,7 @@ void fflame_generator<data_t, pixel_t>::render_fflame()
 {
     bool got_histdata = false;
     cv::Mat_<pixel_t> image;
+    int raw_counter = 0; 
 
     while(fflame_state.load())
     {
@@ -221,7 +220,6 @@ void fflame_generator<data_t, pixel_t>::render_fflame()
         auto hist_info = fflame_histoqueue.pop(got_histdata);
         if(got_histdata && hist_info)
         {
-            std::cout << "Got histogram to render... -- #elem: " << hist_info->size() << std::endl;
             //2. call the rendering routine, get resultant image
             image = cv::Mat_<pixel_t>::zeros(fflame_constants::imheight, fflame_constants::imwidth);
             render_fractal_flame<data_t, pixel_t>(image, std::move(hist_info));
@@ -229,6 +227,29 @@ void fflame_generator<data_t, pixel_t>::render_fflame()
             //I think we need to normalize the pixels for Ogre3d to show them
             cv::Mat outfile_image;
             image.convertTo(outfile_image, CV_8UC3); 
+
+            //filter out the flames that are too sparse
+            int num_nonzero = 0;
+            const double image_threshold = 0.1 * imwidth * imheight;
+            const double px_threshold = 1.0;
+            for (int r = 0; r < imheight; ++r)
+            {
+                for (int c = 0; c < imwidth; ++c)
+                {
+                    size_t px_sum = cv::sum(outfile_image.at<cv::Vec<uint8_t,3>>(r, c))[0];
+                    if(px_sum > px_threshold)
+                        num_nonzero++;
+                }
+            }
+            if(num_nonzero < image_threshold)
+            {
+                std::cout << "NOTE: flame too dark" << std::endl;
+                continue;
+            }
+
+            //mostly for debugging -- save the images to disk
+            const std::string raw_impath = "TDraw_image_" + std::to_string(raw_counter++) + ".png";
+            cv::imwrite(raw_impath, image);
 
             //get the raw image data from the rendered image
             std::unique_ptr<uint8_t []> im_data = std::unique_ptr<uint8_t[]>(new uint8_t [3 * fflame_constants::imheight * fflame_constants::imwidth]);

@@ -1,19 +1,5 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-#SET (Model_SRCS model_views_test.cpp)                                                            
-#ADD_EXECUTABLE(TestModel ${Model_SRCS})
-#TARGET_LINK_LIBRARIES(TestModel 
-#                      ${TDView} 
-#                      ${Controller}
-#					  ${TowersBackend}
-#                      ${OPENCL_LIBRARIES} 
-#					  ${OpenCV_LIBS} 
-#					  ${PCL_COMMON_LIBRARIES}
-#					  ${PCL_SURFACE_LIBRARIES}
-#					  ${PCL_FEATURES_LIBRARIES}
-#					  ${OIS_LIBRARIES} 
-#					  ${OGRE_LIBRARIES})
-
 SET (ModelBackend_SRCS backend_test.cpp)                                                            
 ADD_EXECUTABLE(TestModelBackend ${ModelBackend_SRCS})
 
@@ -31,4 +17,21 @@ TARGET_LINK_LIBRARIES(TestModelBackend
     ${OGRE_LIBRARIES}
     ${PCL_COMMON_LIBRARIES}
     ${PCL_SURFACE_LIBRARIES}
-    ${PCL_FEATURES_LIBRARIES})			  
+    ${PCL_FEATURES_LIBRARIES})			 
+
+SET (Model_SRCS model_views_test.cpp)                                                            
+ADD_EXECUTABLE(TestModel ${Model_SRCS})
+TARGET_LINK_LIBRARIES(TestModel 
+                      ${TDView} 
+	                  ${TDTowers_LIB}
+                      ${Controller}
+					  ${TowersBackend}
+                      ${OPENCL_LIBRARIES} 
+					  ${OpenCV_LIBS} 
+					  ${PCL_COMMON_LIBRARIES}
+					  ${PCL_SURFACE_LIBRARIES}
+					  ${PCL_FEATURES_LIBRARIES}
+					  ${OIS_LIBRARIES} 
+					  ${OGRE_LIBRARIES})
+
+

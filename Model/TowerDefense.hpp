@@ -27,6 +27,7 @@ public:
     {
         td_view->draw_maptiles(GameMap::MAP_WIDTH, GameMap::MAP_HEIGHT);
         td_backend = std::unique_ptr<TowerLogic>(new TowerLogic);
+        
         timestamp = 0;
     }
 
@@ -52,6 +53,7 @@ public:
     { return td_backend->add_tower(std::move(polygon_mesh), std::move(polygon_points), tower_material, tower_name); }
 
 private:
+    static constexpr double TIME_PER_ROUND = 1000.0/30.0;
 
     void gameloop();
     //break out the gameloop stages
@@ -83,6 +85,9 @@ void TowerDefense<ViewType, ModelType>::init_game()
     td_towerevents = std::unique_ptr<TowerEventQueueType> (new TowerEventQueueType());
     td_view->register_tower_eventqueue(td_towerevents.get());
 
+    //hook up the backend and frontends, so we can send events from backend to frontend 
+    td_view->register_backend_eventqueue(td_backend->get_frontend_eventqueue());
+
     //...
 }
 
@@ -106,12 +111,13 @@ void TowerDefense<ViewType, ModelType>::gameloop()
         gloop_processing();
         gloop_postprocessing();
 
-        //check if we're too slow
+        //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
         auto end_iter_time = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> time_duration (end_iter_time - start_iter_time);
-        double iter_time = time_duration.count();
-        if(iter_time > 33)
-            std::cout << "Iteration took: " << iter_time << " ms" << std::endl;
+        double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - start_iter_time).count(); 
+        if(time_elapsed > TIME_PER_ROUND)
+              std::cout << "Over the per-round target!" << std::endl;
+        else
+            std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
     }
     std::cout << "Exiting GameLoop" << std::endl;
 
@@ -122,20 +128,18 @@ void TowerDefense<ViewType, ModelType>::gloop_preprocessing()
 {
 
     //handle the dispatching of the user-input tower events
-    if(!td_towerevents->empty())
+    std::unique_ptr<UserTowerEvents::tower_event<ModelType>> td_evt (nullptr);
+    while(!td_towerevents->empty())
     {
-        //std::shared_ptr<UserTowerEvents::tower_event<ModelType>> td_evt = nullptr;
-        std::unique_ptr<UserTowerEvents::tower_event<ModelType>> td_evt (nullptr);
-        while(!td_towerevents->empty())
-        {
-            bool got_data = false;
-            td_evt = std::move(td_towerevents->pop(got_data));
-            //call the event functor -- since it's a pointer, I opted to use a regular 
-            //function rather than operator overloading (the syntax looks bad)
-            if(got_data && td_evt)
-                td_evt->apply(td_backend.get());
-        }
-    
+        bool got_data = false;
+        td_evt = std::move(td_towerevents->pop(got_data));
+
+        std::cout << "Got frontend event, dispatching!" << std::endl;
+
+        //call the event functor -- since it's a pointer, I opted to use a regular 
+        //function rather than operator overloading (the syntax looks bad)
+        if(got_data && td_evt)
+            td_evt->apply(td_backend.get());
     }
 
     //TODO: also check for -- 

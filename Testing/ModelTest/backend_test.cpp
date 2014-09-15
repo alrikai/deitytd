@@ -1,6 +1,7 @@
 #include "Model/TowerDefense.hpp"
 #include "util/Types.hpp"
 #include "../fractal_util.hpp"
+#include "Views/ViewEventTypes.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -25,6 +26,9 @@ struct FrontStub
     using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType;
 
     void draw_maptiles(const int width, const int height) {}
+
+    void register_backend_eventqueue(ViewEvents* events) {}
+    
     void register_tower_eventqueue(TowerEventQueueType* tevt_queue)
     {
         td_event_queue = tevt_queue;

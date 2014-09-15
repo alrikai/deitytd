@@ -25,7 +25,7 @@ namespace TowerGenerator
  * then the user will upgrade it with various items, which will change its stats and character model.
  * Presumably its attack projectile as well. What about the element distribution?
  */
-std::unique_ptr<Tower> make_fundamentaltower(const int tier)
+std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id)
 {
     //make some base stats based on the tower tier
     tower_properties base_attributes;
@@ -39,9 +39,17 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier)
 
     auto base_tower = std::unique_ptr<Tower>(new Tower(std::move(base_attributes), tier));
 
-    //anything else? --> make the tower model. Actually this needs a bit more thought -- where should the stuff
-    //related to the display in the Model be? Should we have a central tower-model making class?
+    //load a fractal mesh -- the base tower will always look the same, but the tower models will diverge as they're upgraded.
+    //would it be worth sharing the base tower model and using a copy-on-write scheme for it?
+    std::vector<std::vector<uint32_t>> polygon_mesh;
+    std::vector<std::vector<float>> polygon_points;
+    const std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
     
+    TowerModelUtil::load_mesh(mesh_filename, polygon_mesh, polygon_points);
+    std::string t_material {"BaseWhiteNoLighting"};
+    auto tower_model = std::make_shared<TowerModel>(tower_id, std::move(polygon_mesh), std::move(polygon_points), t_material); 
+    base_tower->set_model(tower_model);
+
     return base_tower;
 }
 

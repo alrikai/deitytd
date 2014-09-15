@@ -2,6 +2,7 @@
 #define TD_TOWER_HPP
 
 #include "util/Elements.hpp"
+#include "TowerModel.hpp"
 
 #include "Essences.hpp"
 #include "EssenceSynthesis.hpp"
@@ -35,6 +36,16 @@ public:
         mod_count = 0;
 
         tier = static_cast<Tier>(tier_roll);
+    }
+
+    virtual void set_model(std::shared_ptr<TowerModel> t_model)
+    {
+        tower_model = t_model;
+    }
+    
+    virtual std::shared_ptr<TowerModel> get_model() const
+    {
+        return tower_model;
     }
    
     virtual void attack()
@@ -125,10 +136,7 @@ protected:
     double cost;
 
     //should we keep the tower model here? Will probably want to pull this out into its own class soon
-    using MeshType = std::vector<std::vector<uint32_t>>;
-    using PointType = std::vector<std::vector<float>>;
-    MeshType tower_mesh;
-    PointType tower_pts;
+    std::shared_ptr<TowerModel> tower_model;
 
     //assume we'll have tower tiers be in the range [1, 11). 
     Tier tier;
@@ -144,6 +152,6 @@ protected:
 
 namespace TowerGenerator
 {
-std::unique_ptr<Tower> make_fundamentaltower(const int tier);
+std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id);
 }
 #endif

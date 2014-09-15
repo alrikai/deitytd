@@ -6,6 +6,8 @@
 #include "Towers/TowerAttack.hpp"
 #include "util/Types.hpp"
 #include "TowerModel.hpp"
+#include "Views/ViewEventTypes.hpp"
+
 
 #include <memory>
 #include <thread>
@@ -18,6 +20,7 @@ public:
     TowerLogic() 
      {
          //anything else to initialize goes here...
+         td_frontend_events = std::unique_ptr<ViewEvents>(new ViewEvents());    
      }
 
 //    void register_tower_build_queue(std::shared_ptr<UserTowerEvents::BuildTowerEventQueueType> build_queue);
@@ -48,6 +51,11 @@ public:
 
     void cycle_update(const uint64_t onset_timestamp, std::list<std::shared_ptr<TowerAttack>>& new_attacks);
 
+    ViewEvents* get_frontend_eventqueue() const 
+    {
+        return td_frontend_events.get();
+    }
+
 private:
 
     GameMap map;
@@ -55,6 +63,7 @@ private:
     std::map<std::string, TowerModel> tower_models;
 
     std::unique_ptr<Tower> t_list [GameMap::MAP_HEIGHT][GameMap::MAP_WIDTH];
+    std::unique_ptr<ViewEvents> td_frontend_events;
     
 /*    
     void backend_evtloop();

@@ -12,6 +12,10 @@
 //holds the data and functionality for drawing the background
 class GameBackground
 {
+    using texture_t = uint8_t;
+    using data_t = double;
+    using pixel_t = cv::Vec<data_t, 3>;
+
 public:
     GameBackground(Ogre::SceneManager*, Ogre::Viewport*);
     ~GameBackground();
@@ -24,16 +28,14 @@ public:
 
     const static std::string map_name;
 private:
+    void render_background_texture(std::unique_ptr<texture_t []> texture_buffer);
     void make_background();
-
-    using data_t = double;
-    using pixel_t = cv::Vec<data_t, 3>;
 
     //maximum size of background frame queue buffer
     static constexpr uint8_t MAX_BGQUEUE = 50;
     //procedurally generates the background textures
     std::unique_ptr<fflame_generator<data_t, pixel_t>> bg_generator;
-    std::unique_ptr<EventQueue<uint8_t[]>> bg_framequeue;
+    std::unique_ptr<EventQueue<texture_t []>> bg_framequeue;
 
     const static std::string map_material;
     const static std::string skybox_material;

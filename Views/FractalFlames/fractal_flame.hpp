@@ -233,10 +233,6 @@ void render_fractal_flame(cv::Mat_<pixel_t>& image, std::unique_ptr<std::vector<
     }
 
     std::cout << "... Done rendering fflame" << std::endl;
-
-    static int counter = 0;
-    const std::string raw_impath = "raw_image__" + std::to_string(counter++) + ".png";
-    cv::imwrite(raw_impath, raw_image);
 }
 
 

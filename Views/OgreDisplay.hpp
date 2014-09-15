@@ -23,7 +23,6 @@
 template <class BackendType>
 class OgreDisplay
 {
-
 public:
     using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType; 
 /*

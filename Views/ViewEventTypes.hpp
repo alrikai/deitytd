@@ -14,7 +14,6 @@
   
 namespace RenderEvents
 {
-
     struct create_tower
     {
         create_tower(std::shared_ptr<TowerModel> model, const std::string& name, std::vector<float>&& map_offsets) 

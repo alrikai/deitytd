@@ -38,11 +38,11 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
  
 	//FOR TESTING: generate a random tower
     //add the tower to a backing list -- decide how this should interact with the GameMap
-    t_list[tilename.row][tilename.col] = TowerGenerator::make_fundamentaltower(tier); 
+    const std::string tower_name {"tower_" + selected_tower->first + "__" + std::to_string(tilename.col) + "_" + std::to_string(tilename.row)};
+    t_list[tilename.row][tilename.col] = TowerGenerator::make_fundamentaltower(tier, tower_name); 
     std::cout << "Generating Tower: " << *(t_list[tilename.row][tilename.col].get()) << "@ " << tilename.row << ", " << tilename.col << std::endl;   
 
-    const std::string tower_name {"tower_" + selected_tower->first + "__" + std::to_string(tilename.col) + "_" + std::to_string(tilename.row)};
-
+    
     //get the average for each dimension (to get the center point)
     std::vector<float> dim_avgs (3, 0);
     std::for_each(selected_tower->second.polygon_points_.begin(), selected_tower->second.polygon_points_.end(), [&dim_avgs]
@@ -61,6 +61,11 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
     world_offsets[1] = dim_avgs[0] / fractal_ptfactor;
     world_offsets[2] = dim_avgs[2] / fractal_ptfactor;
 
+    //notify the frontend that a tower has been made
+    std::unique_ptr<RenderEvents::create_tower> t_evt = std::unique_ptr<RenderEvents::create_tower>
+               (new RenderEvents::create_tower(t_list[tilename.row][tilename.col]->get_model(), tower_name, std::move(map_offsets)));
+    td_frontend_events->add_maketower_event(std::move(t_evt));
+    
     return true;
 }
 

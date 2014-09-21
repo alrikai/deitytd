@@ -25,7 +25,7 @@ public:
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
-        td_view->draw_maptiles(GameMap::MAP_WIDTH, GameMap::MAP_HEIGHT);
+        td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
         td_backend = std::unique_ptr<TowerLogic>(new TowerLogic);
         
         timestamp = 0;
@@ -73,8 +73,6 @@ private:
     std::unique_ptr<TowerEventQueueType> td_towerevents;
 
     uint64_t timestamp;
-    std::list<std::shared_ptr<TowerAttack>> active_attacks;
-
 };
 
 
@@ -159,10 +157,7 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
     //4. check for attack & monster collisions, apply attacks
     //...
 
-    //NOTE: these are all placeholders...
-    std::list<std::shared_ptr<TowerAttack>> new_attacks;
-    td_backend->cycle_update(timestamp, new_attacks);    
-    active_attacks.splice(active_attacks.end(), new_attacks);
+    td_backend->cycle_update(timestamp);    
 
     //assume we have some list of generated tower attacks from this cycle @here
     //merge them with the existing list of attacks

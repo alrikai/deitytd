@@ -270,16 +270,21 @@ Ogre::MovableObject* user_select(Ogre::SceneManager* scene_mgmt, Ogre::Viewport*
 //returns whether the click intersected the GameMap, and if so, what the distance was and a pointer to the object 
 std::tuple<bool, float, Ogre::MovableObject*> check_point(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y)
 {
-    std::cout << "Viewport Actual Dim: [" << view_port->getActualLeft() << ", " << view_port->getActualTop() 
-              << " -- " << view_port->getActualHeight() << ", " << view_port->getActualWidth() << "]" << std::endl;
-    std::cout << "Viewport Relative  Dim: [" << view_port->getLeft() << ", " << view_port->getTop() 
-              << " -- " << view_port->getHeight() << ", " << view_port->getWidth() << "]" << std::endl;
-      
+    bool verbose_print = false;
+ 
     auto cam = view_port->getCamera();
     Ogre::Ray ray = cam->getCameraToViewportRay(x,y);
-    std::cout << "Ray [" << x << ", " << y << "] origin: " << ray.getOrigin() << " @direction " << ray.getDirection() << std::endl;
-    std::cout << "Ray @ near plane: " << ray.getPoint(cam->getNearClipDistance()) << "Ray @ far plane: " << ray.getPoint(cam->getFarClipDistance()) << std::endl;
-    std::cout << "Ray (non-normalized) [" << x * view_port->getActualWidth() << ", " << y * view_port->getActualHeight() << "]" << std::endl;
+
+    if(verbose_print)
+    {
+        std::cout << "Viewport Actual Dim: [" << view_port->getActualLeft() << ", " << view_port->getActualTop() 
+                  << " -- " << view_port->getActualHeight() << ", " << view_port->getActualWidth() << "]" << std::endl;
+        std::cout << "Viewport Relative  Dim: [" << view_port->getLeft() << ", " << view_port->getTop() 
+                  << " -- " << view_port->getHeight() << ", " << view_port->getWidth() << "]" << std::endl;
+        std::cout << "Ray [" << x << ", " << y << "] origin: " << ray.getOrigin() << " @direction " << ray.getDirection() << std::endl;
+        std::cout << "Ray @ near plane: " << ray.getPoint(cam->getNearClipDistance()) << "Ray @ far plane: " << ray.getPoint(cam->getFarClipDistance()) << std::endl;
+        std::cout << "Ray (non-normalized) [" << x * view_port->getActualWidth() << ", " << y * view_port->getActualHeight() << "]" << std::endl;
+    }
 
     std::tuple<bool, float, Ogre::MovableObject*> click_intersection {false, 0, nullptr};
     auto r_query = scene_mgmt->createRayQuery(ray);

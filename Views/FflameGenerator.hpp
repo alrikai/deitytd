@@ -263,7 +263,6 @@ void fflame_generator<data_t, pixel_t>::render_fflame()
                 px_it++;
             }
             fflame_imagequeue->push(std::move(im_data));
-            std::cout << "Added rendered image" << std::endl;
         }
 
 /*

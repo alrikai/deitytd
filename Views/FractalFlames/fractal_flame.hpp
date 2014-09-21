@@ -47,7 +47,6 @@ public:
     {
         std::lock_guard<std::mutex> lk (histdata_mtx);
 
-        std::cout << "NOTE: Resetting histogram!!!" << std::endl;
         std::copy(fflame_hist.begin(), fflame_hist.end(), hist_data.begin());
         std::for_each(fflame_hist.begin(), fflame_hist.end(), 
                 [](histogram_info<pixel_t>& hdata)
@@ -73,7 +72,6 @@ void run_fflame(const affine_fcns::invoker<data_t>* const flamer, const int num_
 {
     std::map<std::pair<size_t, size_t>, histogram_info<pixel_t>> hist_data;
 
-    std::cout << "Running fflame generation..." << std::endl;
 
     //for generating the random point to use
     std::uniform_real_distribution<> dis(fflame_constants::min_pt, fflame_constants::max_pt);
@@ -113,7 +111,6 @@ void run_fflame(const affine_fcns::invoker<data_t>* const flamer, const int num_
         }
     }
 
-    std::cout << "tid " << std::this_thread::get_id() << " updating hist" << std::endl;
     //apply the data gathered from this run to the overall histograms
     fdata->apply_fflame_run(std::move(hist_data));
 }
@@ -121,7 +118,6 @@ void run_fflame(const affine_fcns::invoker<data_t>* const flamer, const int num_
 template <typename data_t, typename pixel_t = cv::Vec<data_t, 3>>
 void render_fractal_flame(cv::Mat_<pixel_t>& image, std::unique_ptr<std::vector<histogram_info<pixel_t>>> hist_data)
 {
-    std::cout << "Running fflame rendering..." << std::endl;
 
     cv::Mat_<pixel_t> raw_image = cv::Mat_<data_t>::zeros(fflame_constants::imheight, fflame_constants::imwidth);
     const int max_freq = (*std::max_element(hist_data->begin(), hist_data->end(), 
@@ -231,8 +227,6 @@ void render_fractal_flame(cv::Mat_<pixel_t>& image, std::unique_ptr<std::vector<
                 image(im_row, im_col) = raw_image(im_row, im_col);
         }
     }
-
-    std::cout << "... Done rendering fflame" << std::endl;
 }
 
 

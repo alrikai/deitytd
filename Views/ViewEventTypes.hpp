@@ -53,7 +53,6 @@ namespace RenderEvents
         const std::string name;
         const std::string origin_id;
         const std::vector<float> target;
-
     };
 
     //the question is, how much do we move the attack per update? It should reflect the backend state, but then we'd have to 
@@ -67,7 +66,6 @@ namespace RenderEvents
 
         const std::string name;
         const std::vector<float> delta;
-
     };
 
     struct remove_attack

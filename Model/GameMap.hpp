@@ -1,10 +1,12 @@
 #ifndef TD_GAME_MAP_HPP
 #define TD_GAME_MAP_HPP
 
+#include "MapTile.hpp"
+#include "Monster.hpp"
+
 #include <array>
 #include <cmath>
 
-#include "MapTile.hpp"
 
 /*
  * will have 2 seperate space metrics; space in pixels, and space in tiles. 
@@ -17,17 +19,32 @@ class GameMap
 public:
     using IndexCoordinate = Coordinate<int>;
     using PointCoordinate = Coordinate<float>;
-    //number of tiles to have in the map -- 3:4 ratio of height:width
-    const static int MAP_HEIGHT = 15;
-    const static int MAP_WIDTH = 20;
 
+    //towers can cover a range of tiles (e.g. a 2x2 block)
+    using TowerCoordinate = Coordinate<std::tuple<int, int>>;
+
+    //number of tiles to have in the map -- 3:4 ratio of height:width
+    static constexpr int MAP_HEIGHT = 128;    //15;
+    static constexpr int MAP_WIDTH = 128;     //20;
+
+    //number of map tiles each tower occupies
+    static constexpr int TowerTileHeight = 8;
+    static constexpr int TowerTileWidth = 8;
+
+    static constexpr double NormFactorHeight = 1.0/MAP_HEIGHT;
+    static constexpr double NormFactorWidth = 1.0/MAP_WIDTH;
     //indexed as [row][column]
     using MapElements = std::array<std::array<MapTile, MAP_WIDTH>, MAP_HEIGHT>;
 
     GameMap() 
-        : tile_height(1.0/MAP_HEIGHT), tile_width(1.0/MAP_WIDTH)
+        : tile_height(NormFactorHeight), tile_width(NormFactorWidth)
     {
         setmap_dims();
+    }
+
+    MapTile* get_tile(const int t_col, const int t_row)
+    {
+        return &map[t_row][t_col];
     }
 
     //assume these are normalized coordinates 
@@ -43,10 +60,18 @@ public:
         return IndexCoordinate (tile_col, tile_row);
     }
 
-    //return the index of the tile containing the point (note: the point is in terms of pixels)
-    IndexCoordinate get_bounding_tile(PointCoordinate location) const 
+    TowerCoordinate get_tower_block(const float col_location, const float row_location) const
     {
-        return get_bounding_tile(location.col, location.row);
+        //check boundary
+        if(row_location > 1.0f || col_location > 1.0f || row_location < 0.0f || col_location < 0.0f)
+            return TowerCoordinate(std::make_tuple(-1, -1), std::make_tuple(-1, -1));
+
+        const int tower_row = GameMap::TowerTileHeight * (std::lround(std::floor(row_location/tile_height)) / GameMap::TowerTileHeight);
+        const int tower_col = GameMap::TowerTileWidth * (std::lround(std::floor(col_location/tile_width)) / GameMap::TowerTileWidth);
+       
+        //NOTE: returned range is [inclusive, exclusive)
+        return TowerCoordinate(std::make_tuple(tower_col, tower_col + GameMap::TowerTileWidth), 
+                               std::make_tuple(tower_row, tower_row + GameMap::TowerTileHeight));
     }
 
     bool is_obstructed(const float col_location, const float row_location) const 
@@ -55,16 +80,39 @@ public:
         return map[map_coord.row][map_coord.col].occupied;
     }
 
+    bool is_obstructed(const TowerCoordinate& tcoord) const
+    {
+        for (int map_r = std::get<0>(tcoord.row); map_r < std::get<1>(tcoord.row); ++map_r)
+            for (int map_c = std::get<0>(tcoord.col); map_c < std::get<1>(tcoord.col); ++map_c)
+                if(map[map_r][map_c].occupied)
+                    return true;
+        return false;
+    }
+
     void set_obstructed(const float col_location, const float row_location, bool obstruct_flag)
     {
         auto map_coord = get_bounding_tile(col_location, row_location);
         map[map_coord.row][map_coord.col].occupied = obstruct_flag;
     }
 
+    void set_obstructed(const TowerCoordinate& tcoord, bool obstruct_flag)
+    {
+        for (int map_r = std::get<0>(tcoord.row); map_r < std::get<1>(tcoord.row); ++map_r)
+            for (int map_c = std::get<0>(tcoord.col); map_c < std::get<1>(tcoord.col); ++map_c)
+                map[map_r][map_c].occupied = obstruct_flag;
+    }
+
     Coordinate<double> get_tile_center(const float col_location, const float row_location) const
     {
         auto map_coord = get_bounding_tile(col_location, row_location);
         return map[map_coord.row][map_coord.col].tile_center;
+    }
+
+    Coordinate<double> get_block_center(const TowerCoordinate& tcoord) const
+    {
+        double block_center_row = std::get<0>(tcoord.row) + (std::get<1>(tcoord.row) - std::get<0>(tcoord.row))/2.0;
+        double block_center_col = (std::get<0>(tcoord.col) + (std::get<1>(tcoord.col) - std::get<0>(tcoord.col))/2.0);
+        return Coordinate<double>(tile_width * block_center_col, tile_height * block_center_row);
     }
 
     //would likely have other helper functions -- 

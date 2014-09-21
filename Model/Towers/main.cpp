@@ -34,14 +34,17 @@ int main()
     tower_generator tower_gen;
     props = tower_gen.combine(r_aph.get(), r_apo.get());
     
+    std::string tower_id {"tower_"};
 	props = tower_gen.combine(r_ath.get(), r_art.get());
-    Tower ta(std::move(props), 6);
+    const std::string ta_id = tower_id + "ath_art";
+    Tower ta(std::move(props), ta_id, 6);
 	std::cout << ta << std::endl;
     
 	props = tower_gen.combine(r_aph.get(), r_apo.get(), r_are.get());
     props = tower_gen.combine(r_ath.get(), r_art.get(), r_dem.get());
     props = tower_gen.combine(r_ath.get(), r_ath.get(), r_dem.get());
-    Tower tz(std::move(props), 3);
+    const std::string tz_id = tower_id + "apo_art_ath";
+    Tower tz(std::move(props), tz_id, 3);
 	std::cout << tz << std::endl;
 
     return 0;

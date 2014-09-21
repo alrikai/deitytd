@@ -248,8 +248,7 @@ public:
             {
                 return barrier_count <= 0;
             });
-        barrier_cv.notify_all();                                                                                                                                                                                                             
-        std::cout << "barrier count: " << barrier_count << std::endl;
+        barrier_cv.notify_all();
     }
 
     void reset(int count)

@@ -1,7 +1,11 @@
 #ifndef TD_MAP_TILE_HPP
 #define TD_MAP_TILE_HPP
 
+#include "Monster.hpp"
+
 #include <tuple>
+#include <memory>
+#include <list>
 
 template <typename T>
 struct Coordinate
@@ -32,6 +36,8 @@ struct MapTile
     double height;
 
     Coordinate<double> tile_center;
+
+    std::list<std::shared_ptr<Monster>> resident_mobs;
     bool occupied;
 };
 

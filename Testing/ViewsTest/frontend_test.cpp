@@ -101,7 +101,6 @@ struct GLooper
                         std::cout << "Already Occupied" << std::endl;
                         continue;
                     }
-                    const std::string tower_id = "Tower_" + std::to_string(tile_row * TDBackendStub::MAP_W + tile_col);
 
                     //load a fractal mesh
                     std::vector<std::vector<uint32_t>> polygon_mesh;
@@ -109,13 +108,14 @@ struct GLooper
                     views_utils::add_mesh<PixelType>(polygon_mesh, polygon_points, mesh_filename);
                     std::string t_material {"BaseWhiteNoLighting"};
 
-                    t_list[tile_row][tile_col] = std::make_shared<TowerModel>(tower_id, std::move(polygon_mesh), std::move(polygon_points), t_material);
+                    t_list[tile_row][tile_col] = std::make_shared<TowerModel>(std::move(polygon_mesh), std::move(polygon_points), t_material);
            
                     std::cout << "Tower @ [" << tile_row << ", " << tile_col << "]" << std::endl;
 
                     const float col_map_offset = TDBackendStub::TILE_W * (tile_col + 0.5);
                     const float row_map_offset = TDBackendStub::TILE_H * (tile_row + 0.5);
                     std::vector<float> map_offset {col_map_offset, row_map_offset, 0.0f};
+                    const std::string tower_id = "Tower_" + std::to_string(tile_row * TDBackendStub::MAP_W + tile_col);
                     std::unique_ptr<RenderEvents::create_tower> t_evt = std::unique_ptr<RenderEvents::create_tower>
                         (new RenderEvents::create_tower(t_list[tile_row][tile_col], tower_id, std::move(map_offset)));
                     td_front_to_backend_events->add_maketower_event(std::move(t_evt));
@@ -145,7 +145,7 @@ struct GLooper
                             //B. a normalized map location (i.e. between [0.0, 1.0] for the map)
                             //option A is preferrable
 
-                            std::string tower_atkid = t_list[row][col]->tower_id_;
+                            std::string tower_atkid = "tower_" + std::to_string(row) + "_" + std::to_string(col);
                             const std::string attack_name = tower_atkid + "_attack_" + std::to_string(round_idx);
 
                             //std::vector<float> map_offset {static_cast<float>(col), static_cast<float>(row), 0.0f};

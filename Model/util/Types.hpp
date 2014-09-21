@@ -1,12 +1,9 @@
 #ifndef TD_TYPES_HPP
 #define TD_TYPES_HPP
 
-#include "Types.hpp"
 #include "EventQueue.hpp"
-
 //gotta get the build system ironed out better..
 //#include </home/alrik/boost_1_55_0/boost/lockfree/spsc_queue.hpp>
-
 
 namespace UserTowerEvents 
 {

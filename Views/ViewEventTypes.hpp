@@ -60,11 +60,12 @@ namespace RenderEvents
     //update? --> for now, just make something up
     struct move_attack
     {
-        move_attack(const std::string& atk_name, const std::vector<float>& movement)
-            : name(atk_name), delta(movement) 
+        move_attack(const std::string& atk_name, const std::string& origin_tower, const std::vector<float>& movement)
+            : name(atk_name), origin_id(origin_tower), delta(movement) 
         {}
 
         const std::string name;
+        const std::string origin_id;
         const std::vector<float> delta;
     };
 
@@ -106,7 +107,6 @@ public:
     /////////////////////////////////////////////////////////////////////
     void add_maketower_event(std::unique_ptr<RenderEvents::create_tower> evt)
     {
-        std::cout << "Adding Render Event -- @name " << evt->t_name << std::endl;
         maketower_evtqueue->push(std::move(evt)); 
     }
     void add_makeatk_event(std::unique_ptr<RenderEvents::create_attack> evt)
@@ -115,12 +115,10 @@ public:
     }
     void add_moveatk_event(std::unique_ptr<RenderEvents::move_attack> evt)
     {
-        std::cout << "Adding Attack Move Event @ View" << std::endl;
         moveattack_evtqueue->push(std::move(evt));
     }
     void add_removeatk_event(std::unique_ptr<RenderEvents::remove_attack> evt)
     {
-        std::cout << "Adding Attack Move Event @ View" << std::endl;
         removeattack_evtqueue->push(std::move(evt));
     }
 

@@ -139,10 +139,6 @@ private:
 };
 
 
-
-
-
-
 template <class BackendType>
 const std::string OgreDisplay<BackendType>::resource_cfg_filename {"resources.cfg"};
 
@@ -154,9 +150,8 @@ const std::string OgreDisplay<BackendType>::plugins_cfg_filename {"plugins.cfg"}
 template <class BackendType>
 void OgreDisplay<BackendType>::start_display()
 {
-    //background->draw_background();
 
-    ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
     auto tbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_tower> render_evt)
     {
         Ogre::Vector3 t_map_offsets {render_evt->t_map_offsets[0], render_evt->t_map_offsets[1], render_evt->t_map_offsets[2]};
@@ -171,11 +166,6 @@ void OgreDisplay<BackendType>::start_display()
     {
         auto origin_id = render_evt->origin_id;
         Ogre::Vector3 origin = scene_mgmt->getEntity(origin_id)->getParentSceneNode()->getPosition();
-
-        auto dest = render_evt->target;
-        std::cout << " Made attack @ [" << origin[0] << ", " << origin[1] << ", " << origin[2] << "] --> [" 
-             << dest[0] << ", " << dest[1] << ", " << dest[2] << "]" << std::endl;
-
         Ogre::Entity* tower_atk = scene_mgmt->createEntity(render_evt->name, Ogre::SceneManager::PT_SPHERE);
         tower_atk->setMaterialName("Examples/Chrome");
         tower_atk->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
@@ -188,15 +178,16 @@ void OgreDisplay<BackendType>::start_display()
         child_node->attachObject(tower_atk);   
     };
 
-
     auto atkmove_evt_fcn = [this](std::unique_ptr<RenderEvents::move_attack> render_evt)
     {
-        //TODO: get the real logic for this going
-        std::cout << "Move event @ " << render_evt->name << std::endl;
-
+        //NOTE: coordinates for the delta are NORMALIZED -- hence, we need to scale them 
+        //const float mv_factor = 10;
+        Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
+        auto map_dimensions = map_box.getSize();
         auto attack_id = render_evt->name;
         Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], 0};
-        scene_mgmt->getEntity(attack_id)->getParentSceneNode()->translate(movement);
+        movement = map_dimensions * movement - map_box.getHalfSize();
+        scene_mgmt->getEntity(attack_id)->getParentSceneNode()->setPosition(movement);
     };
 
     auto atkremove_evt_fcn = [this](std::unique_ptr<RenderEvents::remove_attack> render_evt)
@@ -205,7 +196,7 @@ void OgreDisplay<BackendType>::start_display()
         Ogre::SceneNode* t_scenenode = scene_mgmt->getEntity(attack_id)->getParentSceneNode(); 
         OgreUtil::nuke_scenenode(t_scenenode);
     };
-    ////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -286,7 +277,7 @@ void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y
 
     std::cout << "World Click: " << world_click << " vs " << map_box << std::endl;
     //convert the click to map coordinates
-    Ogre::Vector3 map_coord_mapping = (map_box.getMaximum() - map_box.getMinimum());
+    Ogre::Vector3 map_coord_mapping = map_box.getSize(); //(map_box.getMaximum() - map_box.getMinimum());
 
     float n_map_col = 0;
     float n_map_row = 0;
@@ -304,20 +295,14 @@ void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y
     const float norm_mapcoords_row = n_map_row;
     std::cout << world_click << " --> [" << norm_mapcoords_col << ", " << norm_mapcoords_row << "]" << std::endl;
 
-/*
- * instead, what we should do is notify the gameloop that a tower has been placed by the user -- 
- * (or rather, we could have a queue of tower generation events that the game loop will read on
- * each iteration), and the game loop will notify the backend of a tower generation action (with
- * the pertinant information). The backend will then act on the user's tower generation action,
- * and give the gameloop back one or more tower models, which the game loop will give to the
- * frontend to render. 
- */
+    //this would come from the GUI (someday we'll have a GUI...)
     const int tier = 1;
+
+    //tell the backend that the user built a tower
     using tower_evt_t = UserTowerEvents::build_tower_event<BackendType>;
     std::unique_ptr<UserTowerEvents::tower_event<BackendType>> td_evt = 
         std::unique_ptr<tower_evt_t> (new tower_evt_t(tier, norm_mapcoords_row, norm_mapcoords_col));
     td_event_queue->push(std::move(td_evt));
-    return;
 }
 
 template <class BackendType>

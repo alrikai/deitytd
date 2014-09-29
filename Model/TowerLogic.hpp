@@ -7,6 +7,7 @@
 #include "Towers/TowerAttack.hpp"
 #include "TowerModel.hpp"
 #include "util/Types.hpp"
+#include "util/TDEventTypes.hpp"
 #include "Views/ViewEventTypes.hpp"
 
 #include <memory>
@@ -65,7 +66,7 @@ public:
 private:
 
     //handles tower auto-targeting: attacks closest (L2 distance) mob
-    bool get_targets(Tower* tower, const int t_row, const int t_col);
+    bool get_targets(Tower* tower, const int t_col, const int t_row);
 
     GameMap map;
     tower_generator tower_gen;
@@ -77,16 +78,6 @@ private:
     //the set of monsters still among the living
     std::list<std::shared_ptr<Monster>> live_mobs;
     std::list<std::unique_ptr<TowerAttack>> active_attacks; 
-
-/*    
-    void backend_evtloop();
-    std::shared_ptr<UserTowerEvents::BuildTowerEventQueueType> tbuild_queue;
-
-    //NOTE: still conflicted on whether to have a backend event loop as well -- might make sense when
-    //we get to managing the monsters as well?
-    std::unique_ptr<std::thread> backend_thread;
-    std::atomic<bool> backend_continue;
-*/    
 };
 
 #endif

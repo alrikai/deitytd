@@ -2,25 +2,11 @@
 #define TD_MAP_TILE_HPP
 
 #include "Monster.hpp"
+#include "util/Types.hpp"
 
 #include <tuple>
 #include <memory>
 #include <list>
-
-template <typename T>
-struct Coordinate
-{
-    Coordinate()
-        : col(0), row(0)
-    {}
-
-    Coordinate (const T col_, const T row_)
-        : col(col_), row(row_)    
-    {}
-
-    T col;
-    T row;
-};
 
 struct MapTile
 {

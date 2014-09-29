@@ -50,7 +50,7 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
 
     //TODO: need to refactor t_list to work on TOWER-indices (e.g. [MAP_HEIGHT/TowerTileHeight][MAP_WIDTH/TowerTileWidth] array)
    
-    t_list[tower_row][tower_col] = TowerGenerator::make_fundamentaltower(tier, tower_name); 
+    t_list[tower_row][tower_col] = TowerGenerator::make_fundamentaltower(tier, tower_name, block_offset.row, block_offset.col); 
     std::cout << "Generating Tower: " << "@ [" << block_offset.row << ", " << block_offset.col << "]: \n" << *(t_list[tower_row][tower_col].get()) << std::endl; 
     
     //get the average for each dimension (to get the center point)
@@ -119,15 +119,18 @@ bool TowerLogic::tower_taget(const float tower_xcoord, const float tower_ycoord,
 }
 
 //not sure where this function should actually live -- part of TowerLogic, GameMap, or Tower?
-bool TowerLogic::get_targets(Tower* tower, const int t_row, const int t_col)
+bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
 {   
     //get the tower tile extents, in terms of map tiles. location is [inclusive, exclusive)
     int tile_row = t_row * GameMap::TowerTileHeight;
     int tile_col = t_col * GameMap::TowerTileWidth;
     //NOTE: centers of tiles have to be normalized
+    /*
     constexpr double THeight = 1.0 / GameMap::MAP_HEIGHT;
     constexpr double TWidth = 1.0 / GameMap::MAP_WIDTH;
     auto tile_center = Coordinate<float>(THeight * (tile_row + GameMap::TowerTileHeight/2.0f), TWidth * (tile_col + GameMap::TowerTileWidth/2.0f));
+    */
+    auto tile_center = tower->get_position();
 
     //check if the cached target is still valid
     auto prev_target = tower->get_target();
@@ -256,6 +259,44 @@ bool TowerLogic::get_targets(Tower* tower, const int t_row, const int t_col)
 //NOTE: we might want to return a list of generated tower attacks from here?
 void TowerLogic::cycle_update(const uint64_t onset_timestamp)
 {
+    //cycle through the attacks and remove the finished ones
+    auto attack_it = active_attacks.begin();
+    while(attack_it != active_attacks.end())
+    {
+        //get rid of attacks that are out of bounds (e.g. if they missed)
+        if (!(*attack_it)->in_bounds())
+        {
+            //signal the frontend to remove the attack
+            std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
+                        (new RenderEvents::remove_attack((*attack_it)->get_id()));
+            td_frontend_events->add_removeatk_event(std::move(t_evt));     
+            
+            //remove the attack internally
+            attack_it = active_attacks.erase(attack_it);
+            continue;
+        }
+
+        //what other things to check? --> collisions, timers (e.g. if the attack explodes after N seconds), etc.
+        if((*attack_it)->hit_target())
+        {
+            std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
+
+            //we would trigger the attack on-hit animation here...
+            //... but instead, signal the frontend to remove the attack
+            std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
+                        (new RenderEvents::remove_attack((*attack_it)->get_id()));
+            td_frontend_events->add_removeatk_event(std::move(t_evt));     
+            
+            //remove the attack internally
+            attack_it = active_attacks.erase(attack_it);
+            continue;        
+        }
+
+        attack_it++;
+    }
+    static int debug_spawn = 0;
+
+    //perform the tower updates
     for (int t_row = 0; t_row < TLIST_HEIGHT; ++t_row)
     {
         for (int t_col = 0; t_col < TLIST_WIDTH; ++t_col)
@@ -267,11 +308,11 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
                 //
    
                 //trigger attack if mob in range (ignoring attack speed, user-specified targetting, and prior targets 
-                bool mob_in_range = get_targets(t_list[t_row][t_col].get(), t_row, t_col);
+                bool mob_in_range = get_targets(t_list[t_row][t_col].get(), t_col, t_row);
                 if(mob_in_range)
                 {
                     //spawn attack -- will need to take attack speed into account (maybe prior to checking the range?)
-
+                    
                     const std::string origin_tower_id = t_list[t_row][t_col]->get_id();
                     const std::string attack_id = origin_tower_id + "_attack_" + std::to_string(onset_timestamp);
 
@@ -289,25 +330,32 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
                     td_frontend_events->add_makeatk_event(std::move(t_evt));
 
                     //what parameters to have? perhaps a name and a timestamp?
-                    active_attacks.emplace_back(t_list[t_row][t_col]->generate_attack(attack_id, onset_timestamp));
+                    auto t_attack = t_list[t_row][t_col]->generate_attack(attack_id, onset_timestamp);
+                    t_attack->set_target(Coordinate<float>(mob_col, mob_row));
+                    active_attacks.emplace_back(std::move(t_attack));
                 }
             }
         }
     }
 
-    //update }he attack positions, spawn relevant events for the frontend
-    //for (int attack_idx = 0; attack_idx < active_attacks.size(); ++attack_idx)
+    //update the attack positions, spawn relevant events for the frontend
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
     {
-        //get the amount the attack should move. Will probably need some time-element 
-        //const std::vector<float> movement = active_attacks.at(attack_idx)->get_movement();
+        if(debug_spawn++ % 10 == 0)
+        {
+        //get the amount the attack should move. Will probably need some time-element   
+        auto atk_movement = (*attack_it)->move_update(onset_timestamp);
+        const std::vector<float> movement {atk_movement.col, atk_movement.row, 0.0f};
+
         //use this as a placeholder
-        const std::vector<float> movement {GameMap::TowerTileWidth, GameMap::TowerTileHeight, 0.0f};
+        //const std::vector<float> movement {GameMap::TowerTileWidth, GameMap::TowerTileHeight, 0.0f};
+        
         auto attack_id = (*attack_it)->get_id();
+        auto origin_id = (*attack_it)->get_origin_id();
 
-        auto t_evt = std::unique_ptr<RenderEvents::move_attack>(new RenderEvents::move_attack(attack_id, movement));
+        auto t_evt = std::unique_ptr<RenderEvents::move_attack>(new RenderEvents::move_attack(attack_id, origin_id, movement));
         td_frontend_events->add_moveatk_event(std::move(t_evt));
-
+        }
     }
 }
 
@@ -326,133 +374,5 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     N: retarget
 
  Retarget:
- 
 
- 
 */
-
-/*
- * the question is, what kind of things should we handle in the backend thread,
- * and what kind of things do we handle in the gameloop thread? need to get a 
- * clear idea of this asap
- *
-void TowerLogic::backend_evtloop()
-{
-    while(backend_continue.load())
-    {
-        //handle tower creation events
-        UserTowerEvents::build_tower_event t_evt;
-        while(!tbuild_queue->empty())  
-        {
-            tbuild_queue->pop(t_evt); 
-            //check here for: 
-            //1. does the player have enough $$
-            //2. is the selected maptile obstructed
-            //???
-            //if the above all check out, then make the tower!
-
-            generate_tower(t_evt.tier_);
-        }
-    }
-}
-
-void TowerLogic::start_backend()
-{
-     backend_continue.store(true);
-     backend_thread = std::unique_ptr<std::thread>(new std::thread(&TowerLogic::backend_evtloop, this));
-}
-
-void TowerLogic::register_tower_build_queue(std::shared_ptr<UserTowerEvents::BuildTowerEventQueueType> build_queue);
-{
-    tbuild_queue = build_queue;     
-}
-*/
-
-
-
-//some testing code for generating randomized towers
-
-/*
-namespace TowerTesting
-{
-    template <class... Args>
-    struct essence_typelist
-    {
-       template <std::size_t N>
-       using ttype = typename std::tuple_element<N, std::tuple<Args...>>::type;
-    };
-
-    template <std::size_t N, typename ... RuneTypes>
-    struct generate_essencelist;
-
-    template <typename Rune, typename ... RuneTypes>
-    struct generate_essencelist<1, Rune, RuneTypes ...>
-    {
-        static void generate(std::vector<std::unique_ptr<essence>>& essence_list)
-        {
-            //using rtype = typename essence_typelist<Rune>::ttype<0>;
-            essence_list[0] = std::unique_ptr<essence>(new Rune);
-        }
-    };
-
-    template <std::size_t N, typename Rune, typename ... RuneTypes>
-    struct generate_essencelist<N, Rune, RuneTypes ...>
-    {
-        static void generate(std::vector<std::unique_ptr<essence>>& essence_list)
-        {
-            //using rtype = typename essence_typelist<Rune>::ttype<N-1>;
-            essence_list[N-1] = std::unique_ptr<essence>(new Rune);
-            generate_essencelist<N-1, RuneTypes ...>::generate(essence_list);
-        }
-    };
-
-    //for testing: generate a random tower
-    std::unique_ptr<Tower> generate_random_tower(const int tier)
-    {
-        tower_generator tower_gen;
-
-        std::random_device rdev{};
-        std::default_random_engine eng{rdev()};
-        
-        //cap the tower tiers to the currently-valid range
-        const int num_essences = std::min(std::max(2,tier+1), 4);
-
-        //need to choose a random set of essences now too
-        using essence_types = std::tuple<aphrodite, apollo, ares, artemis, 
-                          athena, demeter, dionysus, hades, hephaestus, 
-                          hera, hermes, hestia, poseidon, zeus>;
-        
-        std::vector<std::unique_ptr<essence>> essence_list (std::tuple_size<essence_types>::value);
-        //make_essencelist<essence_types, std::tuple_size<essence_types>::value-1>(essence_list);
-        //generate_essencelist<std::tuple_size<essence_types>::value, essence_types>::generate(essence_list);
-        generate_essencelist<std::tuple_size<essence_types>::value, aphrodite, apollo, ares, artemis,athena, demeter, 
-             dionysus, hades, hephaestus, hera, hermes, hestia, poseidon, zeus>::generate(essence_list);    
-                          
-                          
-        std::uniform_int_distribution<> essence_pick_dist(0, std::tuple_size<essence_types>::value-1);
-        tower_properties props;
-        switch(num_essences)
-        {
-          case 2:
-              props = tower_gen.combine(essence_list.at(essence_pick_dist(eng)).get(), essence_list.at(essence_pick_dist(eng)).get());
-              break;
-          case 3:
-              props = tower_gen.combine(essence_list.at(essence_pick_dist(eng)).get(), essence_list.at(essence_pick_dist(eng)).get(), 
-                                        essence_list.at(essence_pick_dist(eng)).get());
-              break;
-          case 4:
-              props = tower_gen.combine(essence_list.at(essence_pick_dist(eng)).get(), essence_list.at(essence_pick_dist(eng)).get(),
-                                        essence_list.at(essence_pick_dist(eng)).get(), essence_list.at(essence_pick_dist(eng)).get());
-              break;
-          default:
-              std::cout << "Well, this shouldn't have happened..." << std::endl;
-        }
-
-        //just have #essences == tier (for now))
-        return std::unique_ptr<Tower>(new Tower(std::move(props), num_essences));
-    }  
-
-}
-*/
-
-

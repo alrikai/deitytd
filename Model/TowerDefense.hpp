@@ -3,7 +3,7 @@
 
 #include "GameMap.hpp"
 #include "TowerLogic.hpp"
-#include "util/Types.hpp"
+#include "util/TDEventTypes.hpp"
 
 #include <memory>
 #include <random>

@@ -14,6 +14,7 @@ public:
         : row_pos(starting_row), col_pos(starting_col)
     {}
 
+    //returned as [row, col]
     std::tuple<float, float> get_position() const
     {
         return std::make_tuple(row_pos, col_pos);

@@ -5,7 +5,5 @@ INCLUDE_DIRECTORIES(${OIS_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${OGRE_INCLUDE_DIRS})
 #INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-ADD_LIBRARY(Controller ${SRCS})
+ADD_LIBRARY(Controller SHARED ${SRCS})
 TARGET_LINK_LIBRARIES(Controller ${OIS_LIBRARIES} ${OGRE_LIBRARIES})
-
-#will want to have some central output location for the libraries?

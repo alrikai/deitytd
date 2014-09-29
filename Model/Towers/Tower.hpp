@@ -2,6 +2,7 @@
 #define TD_TOWER_HPP
 
 #include "util/Elements.hpp"
+#include "util/Types.hpp"
 #include "TowerModel.hpp"
 #include "TowerAttack.hpp"
 
@@ -34,8 +35,8 @@ class Tower
 public:
     enum class Tier : int { ONE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN };
    
-    Tower(tower_properties&& attributes, const std::string& id, const int tier_roll)
-        : base_attributes(std::move(attributes)), tower_id(id), current_target(nullptr)
+    Tower(tower_properties&& attributes, const std::string& id, const int tier_roll, const float row, const float col)
+        : base_attributes(std::move(attributes)), tower_id(id), position(col, row), current_target(nullptr)
     {
         modifiers.resize(tier_roll);
         mod_count = 0;
@@ -86,6 +87,11 @@ public:
         return tower_id;
     }
 
+    inline Coordinate<float> get_position() const
+    {
+        return position;
+    }
+
 	friend std::ostream& operator <<(std::ostream& out_stream, const Tower& t);   
 
 protected:
@@ -118,7 +124,9 @@ protected:
     std::vector<std::unique_ptr<essence>> modifiers;
     int mod_count;
 
-    double last_timestamp;
+    uint64_t last_timestamp;
+    //the tower center position
+    Coordinate<float> position;
 
     //cache the last found target (as having to do lookups every iteration takes too long)
     Monster* current_target;
@@ -126,6 +134,6 @@ protected:
 
 namespace TowerGenerator
 {
-std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id);
+std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id, const float row, const float col);
 }
 #endif

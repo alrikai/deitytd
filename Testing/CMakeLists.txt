@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 set(CMAKE_INCLUDE_CURRENT_DIR on)
-SET(Controller "/home/alrik/TowerDefense/build/Controller/libController.a")
+#SET(Controller "/home/alrik/TowerDefense/build/Controller/libController.a")
 add_subdirectory(ControllerTest)
 
 find_package(PCL REQUIRED COMPONENTS common surface features)
@@ -10,8 +10,8 @@ add_definitions(${PCL_DEFINITIONS})
 link_directories(${PCL_LIBRARY_DIRS})
 
 include_directories(ViewsTest)
-SET(TDView "/home/alrik/TowerDefense/build/Views/libTDView.a")
-add_subdirectory(ViewsTest)
+#SET(TDView "/home/alrik/TowerDefense/build/Views/libTDView.a")
+#add_subdirectory(ViewsTest)
 
 add_subdirectory(ModelTest)
 

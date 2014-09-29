@@ -70,7 +70,21 @@ bool Tower::add_modifier(tower_generator tower_gen, essence* modifier)
 std::unique_ptr<TowerAttack> Tower::generate_attack(const std::string& attack_id, const uint64_t timestamp)
 {
     //return std::unique_ptr<TowerAttack>(new TowerAttack( attack_id, tower_id));
-    return std::unique_ptr<TowerAttack>(new TowerAttack(base_attributes, attack_id, tower_id, timestamp));
+   
+    //set the attack parameters  
+    TowerAttackParams params (base_attributes, attack_id, tower_id);
+
+    //attack movement type -- homing updates the attack movement wrt a target,
+    //while non-homing has an initial destination and moves towards it
+    params.has_homing = false;
+    //distance the attack can move per round (in terms of map tiles?)
+    params.move_speed = 8; //GameMap::TowerTileHeight;
+  
+    //the game time at the point of creation
+    params.origin_timestamp = timestamp;
+    //starting location
+    params.origin_position = position;
+    return std::unique_ptr<TowerAttack>(new TowerAttack(std::move(params)));
 }
 
 namespace TowerGenerator
@@ -80,7 +94,7 @@ namespace TowerGenerator
  * then the user will upgrade it with various items, which will change its stats and character model.
  * Presumably its attack projectile as well. What about the element distribution?
  */
-std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id)
+std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id, const float row, const float col)
 {
     //make some base stats based on the tower tier
     tower_properties base_attributes;
@@ -92,7 +106,7 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& 
 
     //etc...
 
-    auto base_tower = std::unique_ptr<Tower>(new Tower(std::move(base_attributes), tower_id, tier));
+    auto base_tower = std::unique_ptr<Tower>(new Tower(std::move(base_attributes), tower_id, tier, row, col));
 
     //load a fractal mesh -- the base tower will always look the same, but the tower models will diverge as they're upgraded.
     //would it be worth sharing the base tower model and using a copy-on-write scheme for it?
@@ -101,7 +115,7 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& 
     const std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
     
     TowerModelUtil::load_mesh(mesh_filename, polygon_mesh, polygon_points);
-    std::string t_material {"BaseWhiteNoLighting"};
+    std::string t_material {"FractalTower"}; //{"BaseWhiteNoLighting"};
     auto tower_model = std::make_shared<TowerModel>(std::move(polygon_mesh), std::move(polygon_points), t_material); 
     base_tower->set_model(tower_model);
 

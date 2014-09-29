@@ -176,7 +176,7 @@ struct GLooper
                     //TODO: figure out how to actually do this. Need a simple way to go from frontend global coords <--> backend coords
                     const std::vector<float> movement {10.0f, 10.0f, 10.0f};
                     std::unique_ptr<RenderEvents::move_attack> t_evt = std::unique_ptr<RenderEvents::move_attack>
-                        (new RenderEvents::move_attack((*attack_it)->name, movement));
+                        (new RenderEvents::move_attack((*attack_it)->name,  (*attack_it)->origin_id, movement));
                     td_front_to_backend_events->add_moveatk_event(std::move(t_evt));
                 }
 

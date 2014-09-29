@@ -12,10 +12,9 @@ include_directories(
 	${OGRE_Overlay_INCLUDE_DIRS})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
-add_library(TDView ${ViewSRCS})
-set(TowersBackend "/home/alrik/TowerDefense/build/Model/libTowersBackend.so")
+add_library(TDView SHARED ${ViewSRCS})
 target_link_libraries(TDView 
-	${TowersBackend}
+	TowersBackend
 	${OpenCV_LIBS}
 	${OGRE_LIBRARIES} 
 	${OIS_LIBRARIES} 

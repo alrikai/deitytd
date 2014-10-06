@@ -181,13 +181,14 @@ void OgreDisplay<BackendType>::start_display()
     auto atkmove_evt_fcn = [this](std::unique_ptr<RenderEvents::move_attack> render_evt)
     {
         //NOTE: coordinates for the delta are NORMALIZED -- hence, we need to scale them 
-        //const float mv_factor = 10;
+        //also, we need to interpolate s.t. the attacks dont jump around
         Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
         auto map_dimensions = map_box.getSize();
         auto attack_id = render_evt->name;
-        Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], 0};
+        auto parent_snode = scene_mgmt->getEntity(attack_id)->getParentSceneNode();
+        Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], parent_snode->getPosition().z};
         movement = map_dimensions * movement - map_box.getHalfSize();
-        scene_mgmt->getEntity(attack_id)->getParentSceneNode()->setPosition(movement);
+        parent_snode->setPosition(movement);
     };
 
     auto atkremove_evt_fcn = [this](std::unique_ptr<RenderEvents::remove_attack> render_evt)
@@ -235,6 +236,9 @@ void OgreDisplay<BackendType>::start_display()
         std::chrono::duration<double, std::milli> time_duration (end_time - start_time);
         time_elapsed = time_duration.count();
     } while(time_elapsed < TOTAL_TIME && !close_display.load());
+
+    //at this point we have to kill the background generator as well
+    //...
  }
 
 

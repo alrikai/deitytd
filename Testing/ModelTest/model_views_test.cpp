@@ -49,16 +49,20 @@ int main()
     using TDBackendType = TowerLogic;
     using TDType = TowerDefense<OgreDisplay, TDBackendType>;
 
-    OgreDisplay<TDBackendType> display;
-    Controller controller (display.get_root(), display.get_render_window());
+    auto display = new OgreDisplay<TDBackendType>();
+    Controller controller (display->get_root(), display->get_render_window());
 
-    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(&display));
-    display.register_input_controller(&controller);  
+    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(display));
+    display->register_input_controller(&controller);  
 
     td->init_game();
     td->start_game();
     add_testtower(td.get());
 
-    display.start_display();
+    display->start_display();
     std::cout << "All Done" << std::endl;
+
+    //kill the backend too
+    td->stop_game();
+    std::cout << "All Done fo' realz" << std::endl;
 }

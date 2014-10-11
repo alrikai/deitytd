@@ -64,5 +64,4 @@ int main()
 
     //kill the backend too
     td->stop_game();
-    std::cout << "All Done fo' realz" << std::endl;
 }

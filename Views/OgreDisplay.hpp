@@ -20,8 +20,10 @@
 #include <string>
 #include <atomic>
 
+//might want to consider breaking this class up into smaller ones reeeal soon
+
 template <class BackendType>
-class OgreDisplay
+class OgreDisplay : public Ogre::FrameListener, public Ogre::WindowEventListener
 {
 public:
     using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType; 
@@ -61,6 +63,7 @@ public:
 
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
+        Ogre::Root::getSingletonPtr()->addFrameListener(this);
     }
 
 	void start_display();
@@ -94,6 +97,12 @@ public:
 
     void draw_maptiles(const int num_col_tiles, const int num_row_tiles)
     { background->draw_tiles(num_col_tiles, num_row_tiles); }
+
+    //Adjust mouse clipping area
+    //void windowResized(Ogre::RenderWindow* rw) override;
+    //Unattach OIS before window shutdown (very important under Linux)
+    //void windowClosed(Ogre::RenderWindow* rw) override;
+    bool frameRenderingQueued(const Ogre::FrameEvent& evt) override;
 
 private:        
     bool ogre_setup();
@@ -136,6 +145,9 @@ private:
     //holds the state of the current selection of the user (or nullptr if none selected)
     //this will presumably either be towers or mobs -- wouldn't make sense to be able to click attacks
     Ogre::MovableObject* current_selection;
+
+    //note: ogre manages the animation lifetimes 
+    std::map<std::string, Ogre::AnimationState*> tower_animations;
 };
 
 
@@ -230,8 +242,7 @@ void OgreDisplay<BackendType>::start_display()
         game_events->apply_attackremove_events(atkremove_evt_fcn);
          
         /////////////////////////////////////////////////////////////////////////////////////////////
-
-         
+     
         auto end_time = std::chrono::high_resolution_clock::now(); 
         std::chrono::duration<double, std::milli> time_duration (end_time - start_time);
         time_elapsed = time_duration.count();
@@ -314,10 +325,14 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
                                            Ogre::Vector3 map_coord_offsets, Ogre::Vector3 world_coord_offsets)
 {
     std::cout << "TileCenter Offset: [" << map_coord_offsets.x << ", " << map_coord_offsets.y << "]" << std::endl;
+
+    //TODO: want the scale to be based on a few factors, such as the resolution, map size, and fractal dimensions
+    const float tower_scale = 1.0f/4.0f;
+
     //NOTE: we want to have the tower ABOVE the map -- thus, its z coordinate has to be non-zero 
     const Ogre::Vector3 target_location { map_box.getHalfSize().x * (2 * (map_coord_offsets.x - 0.5f)), 
                                           map_box.getHalfSize().y * (2 * (map_coord_offsets.y - 0.5f)),
-                                          world_coord_offsets.z};    
+                                          tower_scale * world_coord_offsets.z};    
 
     Ogre::ManualObject* tower_obj = scene_mgmt->createManualObject(tower_name); 
     std::string tower_material_name {selected_tower->tower_material_name_};
@@ -349,16 +364,13 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     
     Ogre::Entity* tower_entity = scene_mgmt->createEntity(tower_name, tower_mesh);
     tower_entity->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
-    auto child_node = root_node->createChildSceneNode(tower_name);
-    child_node->attachObject(tower_entity);   
+    auto tower_snode = root_node->createChildSceneNode(tower_name);
+    tower_snode->attachObject(tower_entity);   
      
-    //TODO: want the scale to be based on a few factors, such as the resolution, map size, and fractal dimensions
-    const float tower_scale = 1.0f/4.0f;
-
     //NOTE: position is (x, y, z)
-    child_node->setPosition(target_location.x, target_location.y, tower_scale * target_location.z);
-    child_node->scale(tower_scale, tower_scale, tower_scale);
-    //child_node->showBoundingBox(true);
+    tower_snode->setPosition(target_location.x, target_location.y, target_location.z);
+    tower_snode->scale(tower_scale, tower_scale, tower_scale);
+    tower_snode->showBoundingBox(true);
 
     /*
     std::vector<std::string> particle_types
@@ -386,7 +398,48 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     {
         particle_node->getEmitter(0)->setColour(Ogre::ColourValue(0.0f, 0.0f, 1.0f, 1.0f));
     }
-    child_node->attachObject(particle_node);
+    tower_snode->attachObject(particle_node);
+
+
+    ///////////////////////////////////////////
+    //attempt at animation....
+    ///////////////////////////////////////////
+
+    const float step = 10.0f;
+    const float duration = 4.0f * step;
+    const std::string animation_id {tower_name + "_animation"};
+    Ogre::Animation* tower_animation = scene_mgmt->createAnimation(animation_id, duration);
+    tower_animation->setInterpolationMode(Ogre::Animation::IM_SPLINE);
+    Ogre::NodeAnimationTrack* tower_track = tower_animation->createNodeTrack(0, tower_snode);
+
+    //make some animation keyframes
+    Ogre::TransformKeyFrame* tower_keyf;
+    
+    //t0
+    tower_keyf = tower_track->createNodeKeyFrame(0);
+    tower_keyf->setTranslate(Ogre::Vector3(target_location.x, target_location.y, target_location.z));
+    tower_keyf->setScale(Ogre::Vector3(tower_scale, tower_scale, tower_scale));
+    //t1
+    tower_keyf = tower_track->createNodeKeyFrame(1.0f * step);
+    tower_keyf->setTranslate(Ogre::Vector3(target_location.x, target_location.y, target_location.z + 5));
+    tower_keyf->setScale(Ogre::Vector3(tower_scale, tower_scale, tower_scale));
+    //etc...
+    tower_keyf = tower_track->createNodeKeyFrame(2.0f * step);
+    tower_keyf->setTranslate(Ogre::Vector3(target_location.x, target_location.y, target_location.z - 5));
+    tower_keyf->setScale(Ogre::Vector3(tower_scale, tower_scale, tower_scale));
+
+    tower_keyf = tower_track->createNodeKeyFrame(3.0f * step);
+    tower_keyf->setTranslate(Ogre::Vector3(target_location.x, target_location.y, target_location.z + 5));
+    tower_keyf->setScale(Ogre::Vector3(tower_scale, tower_scale, tower_scale));
+
+    tower_keyf = tower_track->createNodeKeyFrame(4.0f * step);
+    tower_keyf->setTranslate(Ogre::Vector3(target_location.x, target_location.y, target_location.z));
+    tower_keyf->setScale(Ogre::Vector3(tower_scale, tower_scale, tower_scale));
+
+    auto tower_animation_mgmt = scene_mgmt->createAnimationState(animation_id);
+    tower_animation_mgmt->setEnabled(true);
+    tower_animation_mgmt->setLoop(true);
+    tower_animations.emplace(std::make_pair(animation_id, tower_animation_mgmt));
 }
 
 
@@ -539,5 +592,20 @@ void OgreDisplay<BackendType>::handle_user_input()
     camera->yaw(Ogre::Degree(cam_yaw)*-0.2f);
     camera->pitch(Ogre::Degree(cam_pitch)*-0.2f);
 }
+
+//void windowResized(Ogre::RenderWindow* rw) override;
+//void windowClosed(Ogre::RenderWindow* rw) override;
+
+template <class BackendType>
+bool OgreDisplay<BackendType>::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+    //spin the towers
+    for (auto tower_it : tower_animations)
+        tower_it.second->addTime(evt.timeSinceLastFrame);
+     
+    return true;
+}
+
+
 
 #endif

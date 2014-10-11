@@ -279,7 +279,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
         //what other things to check? --> collisions, timers (e.g. if the attack explodes after N seconds), etc.
         if((*attack_it)->hit_target())
         {
-            std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
+            //std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
 
             //we would trigger the attack on-hit animation here...
             //... but instead, signal the frontend to remove the attack
@@ -309,7 +309,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
    
                 //trigger attack if mob in range (ignoring attack speed, user-specified targetting, and prior targets 
                 bool mob_in_range = get_targets(t_list[t_row][t_col].get(), t_col, t_row);
-                if(mob_in_range)
+                if(mob_in_range && debug_spawn++ %100 == 0)
                 {
                     //spawn attack -- will need to take attack speed into account (maybe prior to checking the range?)
                     
@@ -341,7 +341,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     //update the attack positions, spawn relevant events for the frontend
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
     {
-        if(debug_spawn++ % 10 == 0)
+        if(debug_spawn % 10 == 0)
         {
         //get the amount the attack should move. Will probably need some time-element   
         auto atk_movement = (*attack_it)->move_update(onset_timestamp);

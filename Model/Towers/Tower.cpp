@@ -112,7 +112,7 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& 
     //would it be worth sharing the base tower model and using a copy-on-write scheme for it?
     std::vector<std::vector<uint32_t>> polygon_mesh;
     std::vector<std::vector<float>> polygon_points;
-    const std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
+    const std::string mesh_filename { TDHelpers::get_basepath() + "/data/meshfractal3d.vtk"};
     
     TowerModelUtil::load_mesh(mesh_filename, polygon_mesh, polygon_points);
     std::string t_material {"FractalTower"}; //{"BaseWhiteNoLighting"};

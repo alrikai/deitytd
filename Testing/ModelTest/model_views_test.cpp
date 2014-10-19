@@ -1,7 +1,7 @@
 #include "Controller/Controller.hpp"
 #include "../fractal_util.hpp"
 #include "Model/TowerDefense.hpp"
-
+#include "Model/util/Types.hpp"
 #include <memory>
 
 /*
@@ -33,7 +33,7 @@ template <typename TDType>
 void add_testtower(TDType* td)
 {
     using PixelType = uint8_t;
-    std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
+    std::string mesh_filename { TDHelpers::get_basepath() + "/data/meshfractal3d.vtk"};
 
     std::vector<std::vector<uint32_t>> polygon_mesh;
     std::vector<std::vector<float>> polygon_points;
@@ -46,6 +46,8 @@ void add_testtower(TDType* td)
 
 int main()
 {
+
+  	std::cout << "Path is: " << TDHelpers::get_basepath() << std::endl;
     using TDBackendType = TowerLogic;
     using TDType = TowerDefense<OgreDisplay, TDBackendType>;
 

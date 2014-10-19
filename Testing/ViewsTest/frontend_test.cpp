@@ -2,6 +2,7 @@
 #include "../fractal_util.hpp"
 
 #include "Model/GameMap.hpp"
+#include "Model/util/Types.hpp"
 #include "Views/ViewEventTypes.hpp"
 
 #include <chrono>
@@ -69,7 +70,7 @@ struct GLooper
     void gloop()
     {
         using PixelType = uint8_t;
-        std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
+        std::string mesh_filename {TDHelpers::get_basepath() + "/data/meshfractal3d.vtk"};
 
         uint64_t round_idx = 0;
         std::list<std::shared_ptr<TowerAttackStub>> current_attacks;

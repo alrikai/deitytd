@@ -9,7 +9,7 @@
 #include <OGRE/Ogre.h>
 
 #include "TowerModel.hpp"
-#include "pcl_mesh.hpp"
+//#include "pcl_mesh.hpp"
 #include "Views/OgreDisplay.hpp"
 
 
@@ -26,9 +26,10 @@ void add_mesh(std::vector<std::vector<uint32_t>>& polygon_mesh, std::vector<std:
     bool loaded_meshfile = false;
     loaded_meshfile = TowerModelUtil::load_mesh(mesh_filename, polygon_mesh, polygon_points);
     //the fallback measure...
-    if(!loaded_meshfile)
-        std::tie(polygon_mesh, polygon_points) = MeshMaker::make_mesh<PixelType>();
+    //if(!loaded_meshfile)
+    //    std::tie(polygon_mesh, polygon_points) = MeshMaker::make_mesh<PixelType>();
 
+/*
     //have an optional comparison mode for the loaded mesh files
     bool compare_ref = false;
     if(compare_ref)
@@ -50,7 +51,7 @@ void add_mesh(std::vector<std::vector<uint32_t>>& polygon_mesh, std::vector<std:
                 if(std::abs(polygon_points_ref[i][j] - polygon_points[i][j]) > 1)
                     std::cout << "ERR@ [" << i << ", " << j << "]: " << polygon_points_ref[i][j] << " vs " << polygon_points[i][j] << std::endl;
     }
-
+*/
     std::cout << "...Done Generating Point Cloud + Mesh" << std::endl;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 // just some stuff for verifying the point cloud/polygon correctness

@@ -1,9 +1,10 @@
+#include "Model/util/Types.hpp"
 
 #include <CL/cl.hpp>
 #include <opencv2/opencv.hpp>
 
-#include <pcl/common/common.h>
-#include <pcl/point_types.h>
+//#include <pcl/common/common.h>
+//#include <pcl/point_types.h>
 
 #include <iostream>
 #include <cstring>
@@ -142,7 +143,9 @@ bool load_kernel_file(const std::string& file_name, std::string& kernel_source)
     return true;
 }
 
-void generate_mesh(pcl::PointCloud<pcl::PointXYZ>::Ptr& pt_cloud, const int imheight, const int imwidth, const int imdepth, bool debug_mode = false)
+
+//void generate_mesh(pcl::PointCloud<pcl::PointXYZ>::Ptr& pt_cloud, const int imheight, const int imwidth, const int imdepth, bool debug_mode = false)
+void generate_mesh(std::vector<std::tuple<float, float, float>>& pt_cloud, const int imheight, const int imwidth, const int imdepth, bool debug_mode = false)
 {
     std::string target_platform_id {"NVIDIA"};
     //get ONE GPU device on the target platform 
@@ -174,7 +177,7 @@ void generate_mesh(pcl::PointCloud<pcl::PointXYZ>::Ptr& pt_cloud, const int imhe
     // Create a command queue for the device in the context
     cl_command_queue ocl_command_queue = clCreateCommandQueue(ocl_context, device_id, 0, nullptr);
 
-    const std::string file_name { "/home/alrik/TowerDefense/Testing/ocl_fractal.cl" };
+    const std::string file_name {  TDHelpers::get_basepath() + "/Testing/ocl_fractal.cl" };
     std::string program_source;
     load_kernel_file(file_name, program_source);
 
@@ -282,7 +285,7 @@ void generate_mesh(pcl::PointCloud<pcl::PointXYZ>::Ptr& pt_cloud, const int imhe
             {
                 auto fractal_itval = h_image_slice[i*imwidth+j];
                 if(fractal_itval == MAX_ITER-1)
-                    pt_cloud->push_back(pcl::PointXYZ(j,i,k));
+                    pt_cloud->push_back(std::make_tuple(j,i,k));
 
                 if(debug_mode)
                 {

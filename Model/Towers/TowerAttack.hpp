@@ -88,7 +88,6 @@ public:
         //float ms = (time - timestamp) * params.move_speed;
         float ms = 0.1;
         timestamp = time;        
-        auto prev_pos = current_position; 
 
         float nx_factor = (params.target_position.col - current_position.col);
         float ny_factor = (params.target_position.row - current_position.row);

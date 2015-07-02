@@ -8,24 +8,25 @@ TARGET_LINK_LIBRARIES(TestModelBackend
 	TDTowers
     ${OPENCL_LIBRARIES} 
     ${OpenCV_LIBS} 
-    ${OGRE_LIBRARIES}
-    ${PCL_COMMON_LIBRARIES}
-    ${PCL_SURFACE_LIBRARIES}
-    ${PCL_FEATURES_LIBRARIES})			 
+    ${OGRE_LIBRARIES})
+#    ${PCL_COMMON_LIBRARIES}
+#    ${PCL_SURFACE_LIBRARIES}
+#    ${PCL_FEATURES_LIBRARIES})			 
 
 SET (Model_SRCS model_views_test.cpp)                                                            
 ADD_EXECUTABLE(TestModel ${Model_SRCS})
 TARGET_LINK_LIBRARIES(TestModel 
                       TDView 
-	                  TDTowers
+	              TDTowers
                       Controller
-					  TowersBackend
+		      TowersBackend
                       ${OPENCL_LIBRARIES} 
-					  ${OpenCV_LIBS} 
-					  ${PCL_COMMON_LIBRARIES}
-					  ${PCL_SURFACE_LIBRARIES}
-					  ${PCL_FEATURES_LIBRARIES}
-					  ${OIS_LIBRARIES} 
-					  ${OGRE_LIBRARIES})
-
+		      ${OpenCV_LIBS} 
+  		      ${OIS_LIBRARIES} 
+		      ${OGRE_LIBRARIES})
+ 
+#${PCL_COMMON_LIBRARIES}
+#${PCL_SURFACE_LIBRARIES}
+#${PCL_FEATURES_LIBRARIES}
+					  
 

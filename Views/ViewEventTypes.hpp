@@ -60,13 +60,14 @@ namespace RenderEvents
     //update? --> for now, just make something up
     struct move_attack
     {
-        move_attack(const std::string& atk_name, const std::string& origin_tower, const std::vector<float>& movement)
-            : name(atk_name), origin_id(origin_tower), delta(movement) 
+        move_attack(const std::string& atk_name, const std::string& origin_tower, const std::vector<float>& movement, float time_duration)
+            : name(atk_name), origin_id(origin_tower), delta(movement), duration(time_duration) 
         {}
 
         const std::string name;
         const std::string origin_id;
         const std::vector<float> delta;
+        const float duration;
     };
 
     struct remove_attack

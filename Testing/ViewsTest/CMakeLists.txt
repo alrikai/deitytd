@@ -6,9 +6,11 @@ TARGET_LINK_LIBRARIES(TestView
                       TDView 
                       Controller 
                       ${OPENCL_LIBRARIES} 
-					  ${OpenCV_LIBS} 
-					  ${PCL_COMMON_LIBRARIES}
-					  ${PCL_SURFACE_LIBRARIES}
-					  ${PCL_FEATURES_LIBRARIES}
-					  ${OIS_LIBRARIES} 
-					  ${OGRE_LIBRARIES})
+ 		      ${OpenCV_LIBS} 
+ 		      ${OIS_LIBRARIES} 
+		      ${OGRE_LIBRARIES})
+
+#					  ${PCL_COMMON_LIBRARIES}
+#					  ${PCL_SURFACE_LIBRARIES}
+#					  ${PCL_FEATURES_LIBRARIES}
+	

@@ -16,6 +16,7 @@
 #include <atomic>
 
 
+
 //this should be the main interface of the TD backend. Pretty uninspired name at the moment...
 template <template <class>  class ViewType, class ModelType = TowerLogic>
 class TowerDefense
@@ -29,6 +30,9 @@ public:
         td_backend = std::unique_ptr<TowerLogic>(new TowerLogic);
         
         timestamp = 0;
+
+        std::string td_rootpath = TDHelpers::get_TD_path(); 
+        std::cout << "TD rootpath: " << td_rootpath << std::endl;
     }
 
     void init_game();
@@ -53,6 +57,7 @@ public:
     { return td_backend->add_tower(std::move(polygon_mesh), std::move(polygon_points), tower_material, tower_name); }
 
 private:
+    //aim for 30Hz 
     static constexpr double TIME_PER_ROUND = 1000.0/30.0;
 
     void gameloop();
@@ -113,9 +118,16 @@ void TowerDefense<ViewType, ModelType>::gameloop()
         auto end_iter_time = std::chrono::high_resolution_clock::now();
         double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - start_iter_time).count(); 
         if(time_elapsed > TIME_PER_ROUND)
-              std::cout << "Over the per-round target!" << std::endl;
+              std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
         else
             std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+
+        //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
+        //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 
+        //associated with them). The issue would arise in the frontend, where we would move based on the conversion of the backend timestamp 
+        //value to ms. However, if we have all of our backend->frontend events as absolute positions (e.g. attack destination, mob destination,
+        //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
+        timestamp++;
     }
     std::cout << "Exiting GameLoop" << std::endl;
 
@@ -165,7 +177,6 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
     //update all the monster positions (and all oher moveables)
     //check for collisions
 
-    timestamp++;
 }
     
 template <template <class>  class ViewType, class ModelType>

@@ -1,7 +1,7 @@
 #include "Controller/Controller.hpp"
 #include "../fractal_util.hpp"
 #include "Model/TowerDefense.hpp"
-
+#include "Model/util/Types.hpp"
 #include <memory>
 
 /*
@@ -33,7 +33,7 @@ template <typename TDType>
 void add_testtower(TDType* td)
 {
     using PixelType = uint8_t;
-    std::string mesh_filename {"/home/alrik/TowerDefense/build/meshfractal3d.vtk"};
+    std::string mesh_filename { TDHelpers::get_basepath() + "/data/meshfractal3d.vtk"};
 
     std::vector<std::vector<uint32_t>> polygon_mesh;
     std::vector<std::vector<float>> polygon_points;
@@ -46,19 +46,24 @@ void add_testtower(TDType* td)
 
 int main()
 {
+
+  	std::cout << "Path is: " << TDHelpers::get_basepath() << std::endl;
     using TDBackendType = TowerLogic;
     using TDType = TowerDefense<OgreDisplay, TDBackendType>;
 
-    OgreDisplay<TDBackendType> display;
-    Controller controller (display.get_root(), display.get_render_window());
+    auto display = new OgreDisplay<TDBackendType>();
+    Controller controller (display->get_root(), display->get_render_window());
 
-    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(&display));
-    display.register_input_controller(&controller);  
+    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(display));
+    display->register_input_controller(&controller);  
 
     td->init_game();
     td->start_game();
     add_testtower(td.get());
 
-    display.start_display();
+    display->start_display();
     std::cout << "All Done" << std::endl;
+
+    //kill the backend too
+    td->stop_game();
 }

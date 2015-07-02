@@ -96,7 +96,10 @@ std::unique_ptr<EventType> EventQueue<EventType>::pop(bool& got_data)
 
     //to avoid unnecessary timeouts (even if it's short)
     if(buffer_.empty())
+    {
+        got_data = false;
         return nullptr;
+    }
 
     //have a bounded wait, such that the thread waits for (up to) the timeout_len for data
     if(dcond_.wait_for(lock, std::chrono::milliseconds(timeout_len), [this] 

@@ -1,7 +1,7 @@
 #ifndef TD_CONTROLLER_UTIL_HPP
 #define TD_CONTROLLER_UTIL_HPP
 
-#include </home/alrik/boost_1_55_0/boost/lockfree/spsc_queue.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include <iostream>
 

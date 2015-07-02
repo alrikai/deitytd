@@ -1,0 +1,50 @@
+material FractalTower
+{
+    technique
+	{
+	    pass
+		{
+            depth_write on
+		    
+            texture_unit 
+			{
+                lighting on
+                texture /home/alrik/TowerDefense/data/TDraw_image_1.png 2d
+			}
+		}
+	}
+
+}
+
+material DefaultTower 
+{
+    technique
+	{
+	    pass
+		{
+            depth_write on
+		    
+            texture_unit 
+			{
+                lighting on
+			    texture /usr/local/share/OGRE/Media/materials/textures/waveNM.png 2d
+			}
+		}
+	}
+}
+
+material pointmaterial
+{                             
+    technique                  
+    {
+        scene_blend alpha_blend
+        pass                   
+        {                      
+            point_sprites on   
+            point_size 1.5     
+            lighting off       
+        }
+    }
+}
+
+

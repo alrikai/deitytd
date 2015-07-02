@@ -24,6 +24,23 @@ private:
     //normalized positions wrt the map
     float row_pos;
     float col_pos;
+
+		float row_dest;
+    float col_dest;
+
+		/*
+		 * TODO: determine which stats are needed for the monster type
+		 *
+		 */
+		float health;
+		float speed;
+
+
+
+    //TODO: need some armor type and amount
+		//TODO: need some model
+
+
 };
 
 #endif

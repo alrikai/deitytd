@@ -39,7 +39,6 @@ struct TowerAttackParams
     uint64_t origin_timestamp;
     //starting location
     Coordinate<float> origin_position;
-    
     Coordinate<float> target_position;
 };
 

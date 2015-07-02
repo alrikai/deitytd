@@ -281,6 +281,19 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
         {
             //std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
 
+					  //call the logic for the tower attack hitting the mob -- if there's multiple mobs in a tile, how do we choose which one it hits?
+            auto hit_tile = map.get_tile(map.get_bounding_tile((*attack_it)->get_position()));
+						auto resident_mobs = hit_tile->resident_mobs;
+            if(hit_tile->resident_mobs.size() > 0)
+						{
+              //if only 1 mob, then that's the target. What do we do if there's more than 1?
+							//
+						}
+						else
+						{
+							std::cout << "NOTE: target location had no targets -- what do we do?" << std::endl;
+						}
+
             //we would trigger the attack on-hit animation here...
             //... but instead, signal the frontend to remove the attack
             std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>

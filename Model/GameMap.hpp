@@ -47,6 +47,11 @@ public:
         return &map[t_row][t_col];
     }
 
+		MapTile* get_tile(const IndexCoordinate& coord)
+    {
+        return &map[coord.row][coord.col];
+    }
+
     //assume these are normalized coordinates 
     IndexCoordinate get_bounding_tile(const float col_location, const float row_location) const 
     {
@@ -57,6 +62,19 @@ public:
         //we want to get incides row e [0, MAP_HEIGHT), col e [0, MAP_WIDTH) from the normalized input row | col vals
         const int tile_row = std::floor(row_location/tile_height);
         const int tile_col = std::floor(col_location/tile_width);
+        return IndexCoordinate (tile_col, tile_row);
+    }
+
+    //assume these are normalized coordinates 
+    IndexCoordinate get_bounding_tile(const Coordinate<float>& location) const 
+    {
+        //check boundary
+        if(location.row > 1.0f || location.col > 1.0f || location.row < 0.0f || location.col < 0.0f)
+            return IndexCoordinate(-1, -1);
+
+        //we want to get incides row e [0, MAP_HEIGHT), col e [0, MAP_WIDTH) from the normalized input row | col vals
+        const int tile_row = std::floor(location.row/tile_height);
+        const int tile_col = std::floor(location.col/tile_width);
         return IndexCoordinate (tile_col, tile_row);
     }
 

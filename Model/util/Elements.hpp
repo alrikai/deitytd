@@ -161,7 +161,7 @@ struct tower_properties
             this_it++;
             rhs_it++;
         }
-		attack_speed += rhs_modifier.attack_speed;
+		    attack_speed += rhs_modifier.attack_speed;
         attack_range += rhs_modifier.attack_range;
 
         crit_chance += rhs_modifier.crit_chance;

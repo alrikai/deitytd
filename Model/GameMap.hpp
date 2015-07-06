@@ -34,7 +34,9 @@ public:
     static constexpr double NormFactorHeight = 1.0/MAP_HEIGHT;
     static constexpr double NormFactorWidth = 1.0/MAP_WIDTH;
     //indexed as [row][column]
+    using MapTileT = MapTile;
     using MapElements = std::array<std::array<MapTile, MAP_WIDTH>, MAP_HEIGHT>;
+    
 
     GameMap() 
         : tile_height(NormFactorHeight), tile_width(NormFactorWidth)
@@ -90,6 +92,11 @@ public:
         //NOTE: returned range is [inclusive, exclusive)
         return TowerCoordinate(std::make_tuple(tower_col, tower_col + GameMap::TowerTileWidth), 
                                std::make_tuple(tower_row, tower_row + GameMap::TowerTileHeight));
+    }
+
+    bool is_obstructed(const int col_location, const int row_location) const 
+    {
+      return map[row_location][col_location].occupied;
     }
 
     bool is_obstructed(const float col_location, const float row_location) const 

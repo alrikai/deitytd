@@ -138,6 +138,8 @@ public:
 
     void place_tower(TowerModel* selected_tower, const std::string& tower_name, const Ogre::AxisAlignedBox& map_box,
                      Ogre::Vector3 map_coord_offsets, Ogre::Vector3 world_coord_offsets);
+    void place_mob(const CharacterModels::ModelIDs id, const std::string& mob_name, const Ogre::AxisAlignedBox& map_box, 
+                                         Ogre::Vector3 map_coord_offsets);
     void register_input_controller(Controller* controller)
     {
         const std::string id {"ThisShouldBeSomethingMeaningful"};
@@ -216,6 +218,8 @@ private:
 
     //note: ogre manages the animation lifetimes 
     std::map<std::string, Ogre::AnimationState*> tower_animations;
+    std::map<std::string, Ogre::AnimationState*> mob_animations;
+
     std::map<std::string, TowerAttackAnimation> tower_attacks;
 };
 
@@ -289,6 +293,16 @@ void OgreDisplay<BackendType>::start_display()
         Ogre::SceneNode* t_scenenode = scene_mgmt->getEntity(attack_id)->getParentSceneNode(); 
         OgreUtil::nuke_scenenode(t_scenenode);
     };
+
+    auto mbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_mob> render_evt)
+    {
+        Ogre::Vector3 m_map_offsets {render_evt->m_map_offsets[0], render_evt->m_map_offsets[1], render_evt->m_map_offsets[2]};
+
+        //NOTE: this is the last piece of the puzzle. Should be the GameMap (GameBGMap), but I formally would get it from a scene query.
+        Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
+        this->place_mob(render_evt->model_id, render_evt->m_name, map_box, m_map_offsets);
+    };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -316,6 +330,7 @@ void OgreDisplay<BackendType>::start_display()
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
+        game_events->apply_mobbuild_events(mbuild_evt_fcn);
         game_events->apply_towerbuild_events(tbuild_evt_fcn);
         game_events->apply_attackbuild_events(atkbuild_evt_fcn);
         game_events->apply_attackmove_events(atkmove_evt_fcn);
@@ -461,7 +476,7 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     "Examples/PurpleFountain"
     };
     */
-    std::vector<std::string> particle_types
+    const std::vector<std::string> particle_types
     {
     "Tower/GreenGlow",
     "Tower/Sparks"
@@ -522,6 +537,45 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     tower_animations.emplace(std::make_pair(animation_id, tower_animation_mgmt));
 }
 
+template <class BackendType>
+void OgreDisplay<BackendType>::place_mob(const CharacterModels::ModelIDs id, const std::string& mob_name, const Ogre::AxisAlignedBox& map_box, 
+                                         Ogre::Vector3 map_coord_offsets)
+{
+  //NOTE: we want to have the tower ABOVE the map -- thus, its z coordinate has to be non-zero 
+  const Ogre::Vector3 target_location { map_box.getHalfSize().x * (2 * (map_coord_offsets.x - 0.5f)), 
+                                        map_box.getHalfSize().y * (2 * (map_coord_offsets.y - 0.5f)),
+                                        1};    
+
+  const auto model_id = CharacterModels::id_names.at(static_cast<int>(id));
+  auto model_ent = scene_mgmt->createEntity(mob_name, model_id + ".mesh");
+  model_ent->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
+  
+  auto mob_snode = root_node->createChildSceneNode(mob_name);
+  mob_snode->attachObject(model_ent);   
+
+  //OgreUtil::load_model(mob_snode, id, mob_name);
+
+  //NOTE: position is (x, y, z)
+  constexpr float mob_scale = 1.0f;
+  mob_snode->setPosition(target_location.x, target_location.y, target_location.z);
+  mob_snode->scale(mob_scale, mob_scale, mob_scale);
+  mob_snode->showBoundingBox(true);
+
+  //NOTE: if we have things specific to the animation, where should we do those?
+  //TODO: figure out how generic we need this to be. Every character will have some state machine
+  //that determines how it acts / how it appears (i.e. idle, active, stunned, dead, etc)
+  auto base_animation = model_ent->getAnimationState("IdleBase");
+  auto top_animation = model_ent->getAnimationState("IdleTop");
+  base_animation->setLoop(true);
+  top_animation->setLoop(true);
+  base_animation->setEnabled(true);
+  top_animation->setEnabled(true);
+
+  const std::string bot_animation_id {mob_name + "_animation_B"};
+  mob_animations.emplace(std::make_pair(bot_animation_id, base_animation));
+  const std::string top_animation_id {mob_name + "_animation_T"};
+  mob_animations.emplace(std::make_pair(top_animation_id, top_animation));
+}
 
 template <class BackendType>
 void OgreDisplay<BackendType>::handle_user_input()

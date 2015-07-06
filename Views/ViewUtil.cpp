@@ -37,4 +37,28 @@ namespace OgreUtil
        t_scenenode->getCreator()->destroySceneNode(t_scenenode);
     }
 
+
+    void load_model(Ogre::SceneNode* t_scenenode, const CharacterModels::ModelIDs id, const std::string model_handleid)
+    {
+/*
+      const auto model_id = CharacterModels::id_names.at(static_cast<int>(id));
+      auto model_ent = t_scenenode->createEntity(model_handleid, model_id + ".mesh");
+      model_ent->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
+      t_scenenode->attachObject(model_ent);
+*/
+      /*
+      auto model_idit = CharacterModels::id_names.find(id);
+      if(model_idit != CharacterModels::id_names.end()) {
+        auto model_ent = t_scenenode->createEntity(model_handleid, *(model_id) + ".mesh");
+        model_ent->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
+        t_scenenode->attachObject(model_ent);
+      } else {
+        //should we throw an exception? 
+      }
+      */
+    }
+
 } //namespace OgreUtil
+
+
+

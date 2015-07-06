@@ -3,6 +3,7 @@
 
 #include "util/EventQueue.hpp"
 #include "Model/TowerModel.hpp"
+#include "ModelUtils.hpp"
 
 #include <vector>
 #include <string>
@@ -78,7 +79,25 @@ namespace RenderEvents
 
         const std::string name;
     };
-};
+//NOTE: since we also have to animate characters (and possibly anything else), we should probably look at
+//ways to do this in a more generic manner. 
+//TODO: for now we are going to just have a secondary event queue arrangement for the mobs, but the end
+//goal will be to extract the core categories (i.e. creation, removal, movement, etc) and using some 
+//combination of polymorphism and genericity to keep the number of events and event queues to a manageable
+//number (otherwise we'll have dozens of largely overlapping event types and event queues)
+    struct create_mob
+    {
+        create_mob(const CharacterModels::ModelIDs id, const std::string& name, std::vector<float>&& map_offsets) 
+          : model_id(id), m_name(name), m_map_offsets(std::move(map_offsets))
+        {}
+  
+        const CharacterModels::ModelIDs model_id;
+        std::string m_name;
+        std::vector<float> m_map_offsets;
+    };
+
+} //namespace RenderEvents
+
 
 
 /*
@@ -95,7 +114,9 @@ public:
     using MoveAttackQueueType = EventQueue<RenderEvents::move_attack>;
     using RemoveAttackQueueType = EventQueue<RenderEvents::remove_attack>;
 
-    enum class EventTypes { MakeTower, DestroyTower, MakeAttack, MoveAttack, DestroyAttack };
+    using MakeMobQueueType = EventQueue<RenderEvents::create_mob>; 
+
+    enum class EventTypes { MakeTower, DestroyTower, MakeAttack, MoveAttack, DestroyAttack, MakeMob };
 
     ViewEvents()
     {
@@ -103,6 +124,8 @@ public:
         makeattack_evtqueue = std::unique_ptr<MakeAttackQueueType>(new MakeAttackQueueType());
         moveattack_evtqueue = std::unique_ptr<MoveAttackQueueType>(new MoveAttackQueueType());
         removeattack_evtqueue = std::unique_ptr<RemoveAttackQueueType>(new RemoveAttackQueueType());
+        
+        makemob_evtqueue = std::unique_ptr<MakeMobQueueType>(new MakeMobQueueType());
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -123,6 +146,11 @@ public:
         removeattack_evtqueue->push(std::move(evt));
     }
 
+
+    void add_makemob_event(std::unique_ptr<RenderEvents::create_mob> evt)
+    {
+        makemob_evtqueue->push(std::move(evt)); 
+    }
 
     template <typename ViewFcn>
     void apply_towerbuild_events(ViewFcn& vfcn)
@@ -147,6 +175,13 @@ public:
     {
         execute_event_type<RemoveAttackQueueType, ViewFcn>(removeattack_evtqueue.get(), vfcn);
     }           
+
+
+    template <typename ViewFcn>
+    void apply_mobbuild_events(ViewFcn& vfcn)
+    {
+        execute_event_type<MakeMobQueueType, ViewFcn>(makemob_evtqueue.get(), vfcn);
+    }
 
 /*
  * The question is, what do we do with the frontend executing the events?
@@ -174,6 +209,9 @@ private:
     std::unique_ptr<MakeAttackQueueType> makeattack_evtqueue;
     std::unique_ptr<MoveAttackQueueType> moveattack_evtqueue;
     std::unique_ptr<RemoveAttackQueueType> removeattack_evtqueue;
+
+
+    std::unique_ptr<MakeMobQueueType> makemob_evtqueue;
 };
 
 #endif

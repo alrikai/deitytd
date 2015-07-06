@@ -140,8 +140,9 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
         std::tie(mob_row, mob_col) = prev_target->get_position();
         auto t_dist = L2dist(mob_row - tile_center.row, mob_col - tile_center.col);            
         //if old target is still in range, nothing else to do
-        if(tower->in_range(t_dist))   
+        if(tower->in_range(t_dist)) { 
             return true;
+        }
     }
 
     using cmp_type = MapTile*;
@@ -355,6 +356,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     //update the attack positions, spawn relevant events for the frontend
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
     {
+      //dont move the attacks every round, just to save on work (still looks smooth enough)
         if(onset_timestamp % 5 == 0)
         {
         //get the amount the attack should move. Will probably need some time-element   

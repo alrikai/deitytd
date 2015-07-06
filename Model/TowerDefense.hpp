@@ -27,8 +27,9 @@ public:
         : td_view(view)
     {
         td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
-        td_backend = std::unique_ptr<TowerLogic>(new TowerLogic);
-        
+        td_backend = std::unique_ptr<ModelType>(new ModelType);
+
+        spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, 0); //GameMap::MAP_HEIGHT-1); 
         timestamp = 0;
 
         std::string td_rootpath = TDHelpers::get_TD_path(); 
@@ -69,7 +70,7 @@ private:
     //the frontend
     std::unique_ptr<ViewType<ModelType>> td_view;
     //the backend
-    std::unique_ptr<TowerLogic> td_backend;
+    std::unique_ptr<ModelType> td_backend;
     
     std::unique_ptr<std::thread> gameloop_thread;
     std::atomic<bool> continue_gameloop;
@@ -77,6 +78,9 @@ private:
     using TowerEventQueueType = typename ViewType<ModelType>::TowerEventQueueType; 
     std::unique_ptr<TowerEventQueueType> td_towerevents;
 
+    //NOTE: this is where the monsters should spawn at -- this likely(?) won't ever change during the course of the game
+    //these are normalized coordinates
+    GameMap::IndexCoordinate spawn_point;
     uint64_t timestamp;
 };
 
@@ -98,6 +102,15 @@ void TowerDefense<ViewType, ModelType>::init_game()
 template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gameloop()
 {
+  
+  //TODO: we will need to come up with some state machine structure that models the game state -- i.e. 
+  //if we are between rounds, or in a round (need to decide how this will be first however)...
+
+  //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
+  const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
+  //nomenclature (at the moment) -- model_id + wave id
+  const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
+  td_backend->make_mob(mob_model_id, mob_id, spawn_point);
     
     //the main gameloop. checks the frontend and backend, mediates communication between the two
     //applies updates, etc

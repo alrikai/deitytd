@@ -6,6 +6,7 @@ ADD_EXECUTABLE(TestModelBackend ${ModelBackend_SRCS})
 TARGET_LINK_LIBRARIES(TestModelBackend 
     TowersBackend
     TDTowers
+		TDCommon
     ${OPENCL_LIBRARIES} 
     ${OpenCV_LIBS} 
     ${OGRE_LIBRARIES})
@@ -20,6 +21,7 @@ TARGET_LINK_LIBRARIES(TestModel
 	  TDTowers
     Controller
 		TowersBackend
+		TDCommon
     ${OPENCL_LIBRARIES} 
 		${OpenCV_LIBS} 
   	${OIS_LIBRARIES} 

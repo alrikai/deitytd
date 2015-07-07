@@ -136,9 +136,8 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
     auto prev_target = tower->get_target();
     if(prev_target != nullptr)
     {
-        float mob_row, mob_col;
-        std::tie(mob_row, mob_col) = prev_target->get_position();
-        auto t_dist = L2dist(mob_row - tile_center.row, mob_col - tile_center.col);            
+        auto mob_pos = prev_target->get_position();
+        auto t_dist = L2dist(mob_pos.row - tile_center.row, mob_pos.col - tile_center.col);            
         //if old target is still in range, nothing else to do
         if(tower->in_range(t_dist)) { 
             return true;
@@ -257,6 +256,29 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
     return false;
 }
 
+bool TowerLogic::find_paths(const GameMap::IndexCoordinate spawn_idx, const GameMap::IndexCoordinate dest_idx)
+{
+  //run the path-finding for the (entire) game maps' current state 
+  bool has_valid_path = path_finder(map, spawn_idx, dest_idx);
+
+  if(has_valid_path) {
+    //@HERE: need to loop through the mobs to get their path lists 
+    //TODO: figure out how the mob organization should be -- will we have the mobs belong to the tiles, or to the central list (live_mobs)? 
+
+    for (auto mob_it : live_mobs) {
+      //get the mob's tile index coordinate
+      auto mob_pos = mob_it->get_position();
+      auto mob_tile = map.get_tile(mob_pos.col, mob_pos.row);
+      //get the mob path list...
+      //auto mob_path = path_finder.get_path(mob_tile);
+      //... and set the mob path
+      mob_it->set_path(path_finder.get_path(mob_tile));
+    }
+  }
+
+  return has_valid_path;
+}
+
 //NOTE: we might want to return a list of generated tower attacks from here?
 void TowerLogic::cycle_update(const uint64_t onset_timestamp)
 {
@@ -333,10 +355,10 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
 
                     //get the normalized position of the target -- convert to tile position 
                     auto attack_target = t_list[t_row][t_col]->get_target();
-                    float mob_row, mob_col;
-                    std::tie(mob_row, mob_col) = attack_target->get_position();
-                    const int mob_tile_row = std::floor(mob_row/GameMap::NormFactorHeight);
-                    const int mob_tile_col = std::floor(mob_col/GameMap::NormFactorWidth);
+                    
+                    auto mob_pos = attack_target->get_position();
+                    const int mob_tile_row = std::floor(mob_pos.row/GameMap::NormFactorHeight);
+                    const int mob_tile_col = std::floor(mob_pos.col/GameMap::NormFactorWidth);
                     std::vector<float> target {static_cast<float>(mob_tile_col), static_cast<float>(mob_tile_row), 0.0f};
 
                     //make the attack generation event
@@ -346,11 +368,25 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
 
                     //what parameters to have? perhaps a name and a timestamp?
                     auto t_attack = t_list[t_row][t_col]->generate_attack(attack_id, onset_timestamp);
-                    t_attack->set_target(Coordinate<float>(mob_col, mob_row));
+                    t_attack->set_target(Coordinate<float>(mob_pos.col, mob_pos.row));
                     active_attacks.emplace_back(std::move(t_attack));
                 }
             }
         }
+    }
+
+    //update the monster positions, update the frontend (these are the mobs that weren't killed in the above attack logic loop)
+    for (auto mob_it : live_mobs) {
+       //dont move the attacks every round, just to save on work (still looks smooth enough)
+        if(onset_timestamp % 5 == 0)
+        {
+        //get the amount the attack should move. Will probably need some time-element   
+        auto mob_movement = mob_it->move_update(onset_timestamp);
+        const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};
+        auto mob_id = mob_it->get_name();
+        auto m_evt = std::unique_ptr<RenderEvents::move_mob>(new RenderEvents::move_mob(mob_id, movement, 150.0f));
+        td_frontend_events->add_movemob_event(std::move(m_evt));
+        }       
     }
 
     //update the attack positions, spawn relevant events for the frontend

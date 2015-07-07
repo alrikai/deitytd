@@ -22,6 +22,11 @@ template <template <class>  class ViewType, class ModelType = TowerLogic>
 class TowerDefense
 {
 public:
+
+  //the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and
+  //idle (between rounds, so towers building, upgrading, etc).
+  enum class TD_STATE { INROUND, IDLE };
+
     //it's possible that we'll move to normalized coordinates?
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
@@ -29,7 +34,8 @@ public:
         td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
         td_backend = std::unique_ptr<ModelType>(new ModelType);
 
-        spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, 0); //GameMap::MAP_HEIGHT-1); 
+        spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, 0);  
+        dest_point = GameMap::IndexCoordinate (0, 0); 
         timestamp = 0;
 
         std::string td_rootpath = TDHelpers::get_TD_path(); 
@@ -60,12 +66,16 @@ public:
 private:
     //aim for 30Hz 
     static constexpr double TIME_PER_ROUND = 1000.0/30.0;
+    static constexpr double TIME_BETWEEN_ROUND = 1000.0*30.0;
+
 
     void gameloop();
     //break out the gameloop stages
     void gloop_preprocessing();
     void gloop_processing();
     void gloop_postprocessing();
+
+    TD_STATE game_state;
 
     //the frontend
     std::unique_ptr<ViewType<ModelType>> td_view;
@@ -81,6 +91,7 @@ private:
     //NOTE: this is where the monsters should spawn at -- this likely(?) won't ever change during the course of the game
     //these are normalized coordinates
     GameMap::IndexCoordinate spawn_point;
+    GameMap::IndexCoordinate dest_point;
     uint64_t timestamp;
 };
 
@@ -106,41 +117,81 @@ void TowerDefense<ViewType, ModelType>::gameloop()
   //TODO: we will need to come up with some state machine structure that models the game state -- i.e. 
   //if we are between rounds, or in a round (need to decide how this will be first however)...
 
-  //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
-  const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
-  //nomenclature (at the moment) -- model_id + wave id
-  const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
-  td_backend->make_mob(mob_model_id, mob_id, spawn_point);
-    
+  
+
+  //TODO: have a timer to keep track of how long it has been in the current state, and transition accordingly
+  //at the game state transitions, we need to do certain things (i.e. at the transition from IDLE --> INROUND, 
+  //we need to spawn the mobs, calculate the pathfinding, etc)
+  
+  //std::chrono::system_clock::time_point timer_count;
+  game_state = TD_STATE::IDLE;
+
     //the main gameloop. checks the frontend and backend, mediates communication between the two
     //applies updates, etc
     while(continue_gameloop.load())
     {
         auto start_iter_time = std::chrono::high_resolution_clock::now();
 
-        //cycle through the 3 stages:
-        //1. pre-processing stage
-        //2. processing stage
-        //3. post-processing stage
+        //TODO: this is a very simple approach to the game state management. We will need an intelligent way to:
+        //- interface with the frontend (i.e. we would want a timer countdown, etc)
+        //- elegantly handle the state transition logic (should use the GoF state pattern)
+        //- not get too cluttered with the state 
+        //
+        //...
+        //for now, we'll just have the IDLE here as a placeholder (won't be called), and will mock up most of 
+        //the stuff that it needs so that we can test
+        switch(game_state)
+        {
+          case TD_STATE::IDLE:
+          {
+            //timer_count += start_iter_time;
 
-        gloop_preprocessing();
-        gloop_processing();
-        gloop_postprocessing();
 
-        //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
-        auto end_iter_time = std::chrono::high_resolution_clock::now();
-        double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - start_iter_time).count(); 
-        if(time_elapsed > TIME_PER_ROUND)
-              std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
-        else
-            std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+            //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
+            const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
+            //nomenclature (at the moment) -- model_id + wave id
+            const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
+            td_backend->make_mob(mob_model_id, mob_id, spawn_point);
+           
+            const bool has_valid_path = td_backend->find_paths(spawn_point, dest_point);
 
-        //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
-        //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 
-        //associated with them). The issue would arise in the frontend, where we would move based on the conversion of the backend timestamp 
-        //value to ms. However, if we have all of our backend->frontend events as absolute positions (e.g. attack destination, mob destination,
-        //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
-        timestamp++;
+            /*
+            double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(timer_count).count(); 
+            if(time_elapsed >= TIME_BETWEEN_ROUND) {
+              std::cout << "... would ordinarily transition states here..." << std::endl;
+            }
+            */
+
+            //TODO: just using the above to do some initialization
+            game_state = TD_STATE::INROUND;
+            break;
+          }
+          case TD_STATE::INROUND: 
+          { 
+            //in-round, cycle through the 3 stages:
+            //1. pre-processing stage
+            //2. processing stage
+            //3. post-processing stage
+            gloop_preprocessing();
+            gloop_processing();
+            gloop_postprocessing();
+
+            //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
+            auto end_iter_time = std::chrono::high_resolution_clock::now();
+            double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - start_iter_time).count(); 
+            if(time_elapsed > TIME_PER_ROUND)
+                  std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+
+            //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
+            //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 
+            //associated with them). The issue would arise in the frontend, where we would move based on the conversion of the backend timestamp 
+            //value to ms. However, if we have all of our backend->frontend events as absolute positions (e.g. attack destination, mob destination,
+            //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
+            timestamp++;
+          }
+        };
     }
     std::cout << "Exiting GameLoop" << std::endl;
 

@@ -22,27 +22,27 @@
 
 //might want to consider breaking this class up into smaller ones reeeal soon
 
-struct TowerAttackAnimation
+struct MoveableObject
 {
-    TowerAttackAnimation(const std::string id, const Ogre::Vector3& dest, Ogre::SceneNode* snode)
-      : origin_id(id), attack_destination(dest), attack_snode(snode)
-    {
-        move_destination = attack_destination;
-        x_delta = 0.0f;
-        y_delta = 0.0f;
-        is_active = false;
-    }
+  MoveableObject(const Ogre::Vector3& dest, Ogre::SceneNode* snode)
+    : obj_destination(dest), obj_snode(snode)
+  {
+      move_destination = obj_destination;
+      x_delta = 0.0f;
+      y_delta = 0.0f;
+      is_active = false;
+  }
 
-    void update_movedest(const Ogre::Vector3& dest_pos, const double time_duration)
-    {
-        move_destination = dest_pos;
-        move_duration = time_duration;
+  virtual void update_movedest(const Ogre::Vector3& dest_pos, const double time_duration)
+  {
+      move_destination = dest_pos;
+      move_duration = time_duration;
 
-        auto pos_delta = dest_pos - attack_snode->getPosition();
-        x_delta = pos_delta.x / time_duration;
-        y_delta = pos_delta.y / time_duration;
- 
-        is_active = true;
+      auto pos_delta = dest_pos - obj_snode->getPosition();
+      x_delta = pos_delta.x / time_duration;
+      y_delta = pos_delta.y / time_duration;
+
+      is_active = true;
 
         /*
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -58,36 +58,46 @@ struct TowerAttackAnimation
         float dest_dist = std::sqrt((full_dest.x - dest_fullpos.x) * (full_dest.x - dest_fullpos.x) + 
                                    (full_dest.y - dest_fullpos.y) * (full_dest.y - dest_fullpos.y));
         */
-    }
 
-    //time_elapsed is in ms
-    void update_position(const float time_elapsed)
-    {
-        if(is_active)
-        {
-            auto attack_pos = attack_snode->getPosition();
-            attack_pos.x += time_elapsed * x_delta;
-            attack_pos.y += time_elapsed * y_delta;
-            attack_snode->setPosition(attack_pos);
+  }
+ 
 
-            move_duration -= time_elapsed;
-            //std::cout << origin_id << " -- time delta: " << move_duration << std::endl;
-            is_active = (move_duration >= 0);
-            if(!is_active)
-              std::cout << "Update Position Turning off -- over time limit!" << std::endl; 
-        }
-    }
+  //time_elapsed is in ms
+  virtual void update_position(const float time_elapsed)
+  {
+      if(is_active)
+      {
+          auto current_pos = obj_snode->getPosition();
+          current_pos.x += time_elapsed * x_delta;
+          current_pos.y += time_elapsed * y_delta;
+          obj_snode->setPosition(current_pos);
+
+          move_duration -= time_elapsed;
+          //std::cout << origin_id << " -- time delta: " << move_duration << std::endl;
+          is_active = (move_duration >= 0);
+          if(!is_active)
+            std::cout << "Update Position Turning off -- over time limit!" << std::endl; 
+      }
+  }
+
+  Ogre::Vector3 obj_destination;
+  Ogre::Vector3 move_destination;
+  float x_delta;
+  float y_delta;
+  float move_duration;
+  bool is_active;
+
+  Ogre::SceneNode* obj_snode;
+};
+
+struct TowerAttackAnimation : MoveableObject
+{
+    TowerAttackAnimation(const std::string id, const Ogre::Vector3& dest, Ogre::SceneNode* snode)
+      : MoveableObject(dest, snode), origin_id(id)
+    {}
 
     //the tower id from whence the attack was spawned
     const std::string origin_id;
-    Ogre::Vector3 attack_destination;
-    Ogre::Vector3 move_destination;
-    float x_delta;
-    float y_delta;
-    float move_duration;
-    bool is_active;
-
-    Ogre::SceneNode* attack_snode;
 };
 
 template <class BackendType>
@@ -221,6 +231,7 @@ private:
     std::map<std::string, Ogre::AnimationState*> mob_animations;
 
     std::map<std::string, TowerAttackAnimation> tower_attacks;
+    std::map<std::string, MoveableObject> live_mobs;
 };
 
 
@@ -303,9 +314,35 @@ void OgreDisplay<BackendType>::start_display()
         this->place_mob(render_evt->model_id, render_evt->m_name, map_box, m_map_offsets);
     };
 
+    auto mobmove_evt_fcn = [this](std::unique_ptr<RenderEvents::move_mob> render_evt)
+    {
+        const double time_duration = render_evt->duration;
+        auto mob_name = render_evt->name;
+        auto mob_it = live_mobs.find(mob_name);
+        if(mob_it != live_mobs.end())
+        {
+          Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
+          auto map_dimensions = map_box.getSize();
+          auto parent_snode = scene_mgmt->getEntity(mob_name)->getParentSceneNode();
+          Ogre::Vector3 movement {render_evt->delta[0], render_evt->delta[1], parent_snode->getPosition().z};
+          //the position for the mob node to be at after the time_duration elapses
+          movement = map_dimensions * movement - map_box.getHalfSize();
+          mob_it->second.update_movedest(movement, time_duration);
+        }
+    };
+
+    auto mobremove_evt_fcn = [this](std::unique_ptr<RenderEvents::remove_mob> render_evt)
+    {
+        auto mob_name = render_evt->name;
+        auto mob_it = live_mobs.find(mob_name);
+        if(mob_it != live_mobs.end())
+        {
+          live_mobs.erase(mob_it);
+        }
+        Ogre::SceneNode* m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
+        OgreUtil::nuke_scenenode(m_scenenode);
+    };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
     //10 FPS is the bare minimum
     constexpr int max_ms_perframe = 100;
@@ -330,12 +367,15 @@ void OgreDisplay<BackendType>::start_display()
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
-        game_events->apply_mobbuild_events(mbuild_evt_fcn);
         game_events->apply_towerbuild_events(tbuild_evt_fcn);
         game_events->apply_attackbuild_events(atkbuild_evt_fcn);
         game_events->apply_attackmove_events(atkmove_evt_fcn);
         game_events->apply_attackremove_events(atkremove_evt_fcn);
-         
+ 
+        game_events->apply_mobbuild_events(mbuild_evt_fcn);
+        game_events->apply_mobmove_events(mobmove_evt_fcn);
+        game_events->apply_mobremove_events(mobremove_evt_fcn);
+
         /////////////////////////////////////////////////////////////////////////////////////////////
      
         auto end_time = std::chrono::high_resolution_clock::now(); 
@@ -561,6 +601,9 @@ void OgreDisplay<BackendType>::place_mob(const CharacterModels::ModelIDs id, con
   mob_snode->scale(mob_scale, mob_scale, mob_scale);
   mob_snode->showBoundingBox(true);
 
+  MoveableObject mob_anim(target_location, mob_snode);
+  live_mobs.insert(std::make_pair(mob_name, mob_anim));
+
   //NOTE: if we have things specific to the animation, where should we do those?
   //TODO: figure out how generic we need this to be. Every character will have some state machine
   //that determines how it acts / how it appears (i.e. idle, active, stunned, dead, etc)
@@ -734,13 +777,23 @@ template <class BackendType>
 bool OgreDisplay<BackendType>::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
     //spin the towers
-    for (auto tower_it : tower_animations)
+    for (auto tower_it : tower_animations) {
         tower_it.second->addTime(evt.timeSinceLastFrame);
+    }
+ 
+    for (auto mob_it : mob_animations) {
+        mob_it.second->addTime(evt.timeSinceLastFrame);
+    }
     
     //NOTE: evt is in seconds, so need to convert to ms
     for (auto attack_it : tower_attacks)
     {
         attack_it.second.update_position(1000.0f * evt.timeSinceLastFrame);
+    }
+
+    for (auto mob_it : live_mobs)
+    {
+        mob_it.second.update_position(1000.0f * evt.timeSinceLastFrame);
     }
 
     return true;

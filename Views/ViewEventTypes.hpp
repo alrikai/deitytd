@@ -96,6 +96,26 @@ namespace RenderEvents
         std::vector<float> m_map_offsets;
     };
 
+    struct move_mob
+    {
+        move_mob(const std::string& mob_name, const std::vector<float>& movement, float time_duration)
+            : name(mob_name), delta(movement), duration(time_duration) 
+        {}
+
+        const std::string name;
+        const std::vector<float> delta;
+        const float duration;
+    };
+
+    struct remove_mob
+    {
+        remove_mob(const std::string& mob_name)
+            : name(mob_name)
+        {}
+
+        const std::string name;
+    };
+
 } //namespace RenderEvents
 
 
@@ -115,8 +135,15 @@ public:
     using RemoveAttackQueueType = EventQueue<RenderEvents::remove_attack>;
 
     using MakeMobQueueType = EventQueue<RenderEvents::create_mob>; 
+    using MoveMobQueueType = EventQueue<RenderEvents::move_mob>;
+    using RemoveMobQueueType = EventQueue<RenderEvents::remove_mob>;
 
-    enum class EventTypes { MakeTower, DestroyTower, MakeAttack, MoveAttack, DestroyAttack, MakeMob };
+    enum class EventTypes 
+    { 
+      MakeTower,              DestroyTower, 
+      MakeAttack, MoveAttack, DestroyAttack, 
+      MakeMob,    MoveMob,    DestroyMob 
+    };
 
     ViewEvents()
     {
@@ -126,6 +153,8 @@ public:
         removeattack_evtqueue = std::unique_ptr<RemoveAttackQueueType>(new RemoveAttackQueueType());
         
         makemob_evtqueue = std::unique_ptr<MakeMobQueueType>(new MakeMobQueueType());
+        movemob_evtqueue = std::unique_ptr<MoveMobQueueType>(new MoveMobQueueType());
+        removemob_evtqueue = std::unique_ptr<RemoveMobQueueType>(new RemoveMobQueueType());
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -133,6 +162,9 @@ public:
     {
         maketower_evtqueue->push(std::move(evt)); 
     }
+
+//---------------------------------------------------------------------------------------------------------
+
     void add_makeatk_event(std::unique_ptr<RenderEvents::create_attack> evt)
     {
         makeattack_evtqueue->push(std::move(evt));
@@ -146,17 +178,30 @@ public:
         removeattack_evtqueue->push(std::move(evt));
     }
 
+//---------------------------------------------------------------------------------------------------------
 
     void add_makemob_event(std::unique_ptr<RenderEvents::create_mob> evt)
     {
         makemob_evtqueue->push(std::move(evt)); 
     }
+    void add_movemob_event(std::unique_ptr<RenderEvents::move_mob> evt)
+    {
+        movemob_evtqueue->push(std::move(evt));
+    }
+    void add_removemob_event(std::unique_ptr<RenderEvents::remove_mob> evt)
+    {
+        removemob_evtqueue->push(std::move(evt));
+    }
+
+//---------------------------------------------------------------------------------------------------------
 
     template <typename ViewFcn>
     void apply_towerbuild_events(ViewFcn& vfcn)
     {
         execute_event_type<MakeTowerQueueType, ViewFcn>(maketower_evtqueue.get(), vfcn);
     }
+
+//---------------------------------------------------------------------------------------------------------
 
     template <typename ViewFcn>
     void apply_attackbuild_events(ViewFcn& vfcn)
@@ -176,6 +221,7 @@ public:
         execute_event_type<RemoveAttackQueueType, ViewFcn>(removeattack_evtqueue.get(), vfcn);
     }           
 
+//---------------------------------------------------------------------------------------------------------
 
     template <typename ViewFcn>
     void apply_mobbuild_events(ViewFcn& vfcn)
@@ -183,6 +229,18 @@ public:
         execute_event_type<MakeMobQueueType, ViewFcn>(makemob_evtqueue.get(), vfcn);
     }
 
+    template <typename ViewFcn>
+    void apply_mobmove_events(ViewFcn& vfcn)
+    {
+        execute_event_type<MoveMobQueueType, ViewFcn>(movemob_evtqueue.get(), vfcn);
+    }        
+
+    template <typename ViewFcn>
+    void apply_mobremove_events(ViewFcn& vfcn)
+    {
+        execute_event_type<RemoveMobQueueType, ViewFcn>(removemob_evtqueue.get(), vfcn);
+    }           
+//---------------------------------------------------------------------------------------------------------
 /*
  * The question is, what do we do with the frontend executing the events?
  * We will have N different events, and the frontend has to do various things
@@ -212,6 +270,8 @@ private:
 
 
     std::unique_ptr<MakeMobQueueType> makemob_evtqueue;
+    std::unique_ptr<MoveMobQueueType> movemob_evtqueue;
+    std::unique_ptr<RemoveMobQueueType> removemob_evtqueue;
 };
 
 #endif

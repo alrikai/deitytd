@@ -44,12 +44,24 @@ public:
         setmap_dims();
     }
 
-    MapTile* get_tile(const int t_col, const int t_row)
+    const MapTile* get_tile(const int t_col, const int t_row) const
     {
         return &map[t_row][t_col];
     }
 
-		MapTile* get_tile(const IndexCoordinate& coord)
+		const MapTile* get_tile(const IndexCoordinate& coord) const
+    {
+        return &map[coord.row][coord.col];
+    }
+
+
+
+    MapTile* get_tile(const int t_col, const int t_row) 
+    {
+        return &map[t_row][t_col];
+    }
+
+		MapTile* get_tile(const IndexCoordinate& coord) 
     {
         return &map[coord.row][coord.col];
     }

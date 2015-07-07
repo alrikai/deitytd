@@ -9,6 +9,7 @@
 #include "util/Types.hpp"
 #include "util/TDEventTypes.hpp"
 #include "Views/ViewEventTypes.hpp"
+#include "Pathfinder.hpp"
 
 #include <memory>
 #include <thread>
@@ -60,12 +61,11 @@ public:
         std::vector<float> map_offsets {mob_col, mob_row, 0};
 
         //TODO: use the mob_id to dispatch the appropriate monster creation (will need some factory for this)
-        auto mob_ = std::shared_ptr<Monster>(make_monster<Monster>(mob_row, mob_col));
+        auto mob_ = std::shared_ptr<Monster>(make_monster<Monster>(mob_id, mob_name, mob_row, mob_col));
         //TODO: anything else we need to do here?
         //
-        std::list<std::shared_ptr<Monster>> tile_contents {std::make_shared<Monster>(mtile->tile_center.row, mtile->tile_center.col)};
-        mtile->resident_mobs = std::move(tile_contents);
-        live_mobs.emplace_back(mob_);
+        mtile->resident_mobs.push_back(mob_);
+        live_mobs.push_back(mob_);
     
         //NOTE: should we have the mobs duplicated like this? --> probably not, makes no sense to maintain 2 lists of 
         //mobs for TowerLogic and the tiles. If anything, we should have 1 list, and have the other reference said list
@@ -81,10 +81,13 @@ public:
     bool modify_tower(essence* modifier, const float x_coord, const float y_coord);
     bool print_tower(const float x_coord, const float y_coord);
     bool tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord);
+    //is run at the start of the round (i.e. in the transition from IDLE --> INROUND), assuming the obstructions
+    //don't change during the round
+    bool find_paths(const GameMap::IndexCoordinate spawn_idx, const GameMap::IndexCoordinate dest_idx);
 
     void cycle_update(const uint64_t onset_timestamp);
-
-    ViewEvents* get_frontend_eventqueue() const 
+    
+    inline ViewEvents* get_frontend_eventqueue() const 
     {
         return td_frontend_events.get();
     }
@@ -101,6 +104,8 @@ private:
     GameMap map;
     tower_generator tower_gen;
     std::map<std::string, TowerModel> tower_models;
+    
+    Pathfinder<GameMap> path_finder;
 
     std::unique_ptr<Tower> t_list [TLIST_HEIGHT][TLIST_WIDTH];
     std::unique_ptr<ViewEvents> td_frontend_events;

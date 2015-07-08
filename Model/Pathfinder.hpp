@@ -65,8 +65,8 @@ public:
         const int neighbor_row = row_idx + idx_offsets.row;
         const int neighbor_col = col_idx + idx_offsets.col;
 
-        if(neighbor_row > 0 && neighbor_row < GRID_HEIGHT) {
-          if(neighbor_col > 0 && neighbor_col < GRID_WIDTH) {
+        if(neighbor_row >= 0 && neighbor_row < GRID_HEIGHT) {
+          if(neighbor_col >= 0 && neighbor_col < GRID_WIDTH) {
             if(!gmap.is_obstructed(neighbor_col, neighbor_row)) {
               auto neighbor_tile = gmap.get_tile(neighbor_col, neighbor_row);
               const int flat_neighbor_idx = neighbor_row * GRID_WIDTH + neighbor_col;
@@ -102,15 +102,18 @@ public:
   std::list<const map_tile_t*> get_path(const map_tile_t* source_tile)
   {
     std::list<const map_tile_t*> path;
-    path.push_back(source_tile);
+    //NOTE: adding the source tile is redundant, as the mob is already there. Would just introduce a 1 cycle delay in movement
+    //path.push_front(source_tile);
 
     auto path_node = path_tiles[source_tile->idx_location.row * GRID_WIDTH + source_tile->idx_location.col];
     while(path_node && path_node != dest) {
-      path.push_back(path_node);
+      //path.push_back(path_node);
+      path.push_front(path_node);
       //get the index of the node
       const int path_nodeidx = path_node->idx_location.row * GRID_WIDTH + path_node->idx_location.col;
       path_node = path_tiles[path_nodeidx];
     }
+
     return path;
   }
 

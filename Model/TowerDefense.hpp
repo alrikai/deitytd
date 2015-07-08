@@ -154,7 +154,10 @@ void TowerDefense<ViewType, ModelType>::gameloop()
             td_backend->make_mob(mob_model_id, mob_id, spawn_point);
            
             const bool has_valid_path = td_backend->find_paths(spawn_point, dest_point);
-
+            //TODO: need to notify the user that their maze is more like a wall
+            if(!has_valid_path) {
+              std::cout << "ERROR -- No valid path from [ " << spawn_point.row << ", " << spawn_point.col << "] to [" << dest_point.row << ", " << dest_point.col << std::endl;
+            }
             /*
             double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(timer_count).count(); 
             if(time_elapsed >= TIME_BETWEEN_ROUND) {

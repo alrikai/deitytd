@@ -8,6 +8,7 @@
 #include <tuple>
 #include <memory>
 #include <list>
+#include <iostream>
 
 /*
  * The monster class -- just a placeholder for now
@@ -21,7 +22,7 @@ public:
     {
       //placeholder model -- TODO: make some sort of factory arrangement for making the different mobs
       id = CharacterModels::ModelIDs::ogre_S;
-      speed = 0.05f;
+      speed = 0.1f;
     }
 
     //returned as [row, col]
@@ -47,9 +48,13 @@ public:
       auto dest_tile = path.front();
       path.pop_front();
       dest_position = Coordinate<float>(dest_tile->tile_center.col, dest_tile->tile_center.row);
+      std::cout << "NOTE: mob has " << path.size() << " #steps" << std::endl;
     }
 
-    Coordinate<float> move_update(const uint64_t time)
+
+    //returns the next position of the mob, and whether the mob it at its destination or not
+    //(TRUE: is at destination, FALSE: not yet at destination)
+    std::tuple<Coordinate<float>, bool> move_update(const uint64_t time)
     {
         timestamp = time;        
 
@@ -57,6 +62,7 @@ public:
         float ny_factor = (dest_position.row - current_position.row);
         float target_dist = std::sqrt(nx_factor*nx_factor + ny_factor*ny_factor);
 
+        bool hit_destination = false;
         if(target_dist <= speed)
         {
           //the distance to travel in the next step
@@ -73,10 +79,9 @@ public:
             //TODO: move distance_left units along the new trajectory
             //TODO: how best to handle this part? it's possible that the mob moves very fast, and we cover multiple destinations in one cycle... need to loop?
             //
-          }
-          else {
-            //this means we hit the final destination. Need the game logic to remove the mob, reduce player health etc.
-            //TODO: implement whatever state changes are needed...
+          } else {
+            std::cout << "NOTE: mob " << monster_name << " at destination" << std::endl;
+            hit_destination = true;
           }
         }
         else
@@ -85,10 +90,15 @@ public:
             current_position.col += nx_factor * dist_mag;
             current_position.row += ny_factor * dist_mag;
         }
-        return current_position;
+        return std::make_tuple(current_position, hit_destination);
     }
 
 private:
+
+    //the character model ID
+    CharacterModels::ModelIDs id;
+    std::string monster_name;
+    
     //normalized positions wrt the map
     Coordinate<float> current_position;
     Coordinate<float> dest_position;
@@ -109,9 +119,6 @@ private:
 
     //TODO: need some armor type and amount
 
-		//the character model ID
-    CharacterModels::ModelIDs id;
-    std::string monster_name;
 };
 
 template <typename MonsterT, class ... MonsterArgs>

@@ -314,6 +314,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
 						}
 						else
 						{
+              //TODO: we need tp update the Gamemap's tiles when the mob crosses over the tile boundaries
 							std::cout << "NOTE: target location had no targets -- what do we do?" << std::endl;
 						}
 
@@ -376,17 +377,32 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     }
 
     //update the monster positions, update the frontend (these are the mobs that weren't killed in the above attack logic loop)
-    for (auto mob_it : live_mobs) {
+    auto mob_it = live_mobs.begin();
+    while (mob_it != live_mobs.end()) {
        //dont move the attacks every round, just to save on work (still looks smooth enough)
         if(onset_timestamp % 5 == 0)
         {
         //get the amount the attack should move. Will probably need some time-element   
-        auto mob_movement = mob_it->move_update(onset_timestamp);
-        const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};
-        auto mob_id = mob_it->get_name();
-        auto m_evt = std::unique_ptr<RenderEvents::move_mob>(new RenderEvents::move_mob(mob_id, movement, 150.0f));
-        td_frontend_events->add_movemob_event(std::move(m_evt));
-        }       
+        auto mob_movement_info = (*mob_it)->move_update(onset_timestamp);
+        //check if the mob is at the destination; if so, remove it and enact the requisite game state changes
+        if(std::get<1>(mob_movement_info)) {
+          //spawn a mob removal event
+          std::unique_ptr<RenderEvents::remove_mob> m_evt = std::unique_ptr<RenderEvents::remove_mob>
+                        (new RenderEvents::remove_mob((*mob_it)->get_name()));
+          td_frontend_events->add_removemob_event(std::move(m_evt));    
+          mob_it = live_mobs.erase(mob_it);
+        } else {
+          auto mob_movement = std::get<0>(mob_movement_info);
+          const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};
+          auto mob_id = (*mob_it)->get_name();
+          auto m_evt = std::unique_ptr<RenderEvents::move_mob>(new RenderEvents::move_mob(mob_id, movement, 150.0f));
+          td_frontend_events->add_movemob_event(std::move(m_evt));
+          mob_it++;
+        }
+
+        } else {
+          break;
+        }
     }
 
     //update the attack positions, spawn relevant events for the frontend

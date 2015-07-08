@@ -309,6 +309,8 @@ void OgreDisplay<BackendType>::start_display()
     {
         Ogre::Vector3 m_map_offsets {render_evt->m_map_offsets[0], render_evt->m_map_offsets[1], render_evt->m_map_offsets[2]};
 
+        std::cout << "@FRONT -- making " << render_evt->m_name << std::endl;
+
         //NOTE: this is the last piece of the puzzle. Should be the GameMap (GameBGMap), but I formally would get it from a scene query.
         Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
         this->place_mob(render_evt->model_id, render_evt->m_name, map_box, m_map_offsets);
@@ -334,13 +336,19 @@ void OgreDisplay<BackendType>::start_display()
     auto mobremove_evt_fcn = [this](std::unique_ptr<RenderEvents::remove_mob> render_evt)
     {
         auto mob_name = render_evt->name;
+    
+        std::cout << "@FRONT -- removing " << mob_name << std::endl;
+
         auto mob_it = live_mobs.find(mob_name);
         if(mob_it != live_mobs.end())
         {
           live_mobs.erase(mob_it);
         }
-        Ogre::SceneNode* m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
-        OgreUtil::nuke_scenenode(m_scenenode);
+
+        //TODO: check if we are deleteing the correct scenenode. When we execute this, we end up
+        //hanging forever at renderOneFrame down below, so presumably something is getting nuked that shouldnt be
+        //Ogre::SceneNode* m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
+        //OgreUtil::nuke_scenenode(m_scenenode);
     };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 

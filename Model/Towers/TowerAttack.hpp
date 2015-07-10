@@ -85,7 +85,7 @@ public:
 
         //distance to move based on last move time
         //float ms = (time - timestamp) * params.move_speed;
-        float ms = 0.1;
+        float ms = 0.15;
         timestamp = time;        
 
         float nx_factor = (params.target_position.col - current_position.col);

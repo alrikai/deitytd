@@ -216,10 +216,16 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
             std::cout << "Suitable tile @ [" << target_tile->idx_location.row << ", " << target_tile->idx_location.col << "] -- has " 
                       << target_tile->resident_mobs.size() << " #resident mobs @ " << t_dist << " units away" << std::endl; 
 
-            //TODO: for now we just take an arbitrary mob within the tile
-            auto target_mob = target_tile->resident_mobs.front();
-            tower->set_target(target_mob.get());
-            return true;
+            //TODO: for now we just take an arbitrary mob within the tile -- we loop over the mobs in the tile until we find a valid one
+            //(i.e. it's possible for the mob pointer to have been invalidated prior to this.. I think?)
+            auto target_mob_it = target_tile->resident_mobs.begin();
+            while(target_mob_it != target_tile->resident_mobs.end()){
+              if (auto target_mob = target_mob_it->lock()) {
+                tower->set_target(target_mob.get());
+                return true;
+              }
+              target_mob_it++;
+            }
         }
 
         //add the 8 neighbors of the current tile (if in range)
@@ -304,19 +310,24 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
         {
             //std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
 
-					  //call the logic for the tower attack hitting the mob -- if there's multiple mobs in a tile, how do we choose which one it hits?
+            //call the logic for the tower attack hitting the mob -- if there's multiple mobs in a tile, how do we choose which one it hits?
             auto hit_tile = map.get_tile(map.get_bounding_tile((*attack_it)->get_position()));
-						auto resident_mobs = hit_tile->resident_mobs;
+            auto resident_mobs = hit_tile->resident_mobs;
             if(hit_tile->resident_mobs.size() > 0)
-						{
+            {
               //if only 1 mob, then that's the target. What do we do if there's more than 1?
-							//
-						}
-						else
-						{
+              //
+              std::cout << "hit tile had " << hit_tile->resident_mobs.size() << " #mobs" << std::endl;
+            }
+            else
+            {
               //TODO: we need tp update the Gamemap's tiles when the mob crosses over the tile boundaries
-							std::cout << "NOTE: target location had no targets -- what do we do?" << std::endl;
-						}
+              std::cout << "NOTE: target location [" << hit_tile->tile_center.row << ", " << hit_tile->tile_center.col << "] had no targets" << std::endl;
+              for (auto mob_it : live_mobs) {
+                auto mob_pos = mob_it->get_position();
+                std::cout << "mob " << mob_it->get_name() << " at [" << mob_pos.row << ", " << mob_pos.col << "]" << std::endl;
+              }
+            }
 
             //we would trigger the attack on-hit animation here...
             //... but instead, signal the frontend to remove the attack

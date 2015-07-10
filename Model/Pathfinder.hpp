@@ -102,8 +102,8 @@ public:
   std::list<const map_tile_t*> get_path(const map_tile_t* source_tile)
   {
     std::list<const map_tile_t*> path;
-    //NOTE: adding the source tile is redundant, as the mob is already there. Would just introduce a 1 cycle delay in movement
-    //path.push_front(source_tile);
+    //NOTE: add the current tile so that the mob knows its starting point 
+    path.push_front(source_tile);
 
     auto path_node = path_tiles[source_tile->idx_location.row * GRID_WIDTH + source_tile->idx_location.col];
     while(path_node && path_node != dest) {

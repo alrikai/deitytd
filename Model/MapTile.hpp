@@ -24,7 +24,7 @@ struct MapTile
 
     Coordinate<double> tile_center;
 
-    std::list<std::shared_ptr<Monster>> resident_mobs;
+    mutable std::list<std::weak_ptr<Monster>> resident_mobs;
     bool occupied;
 };
 

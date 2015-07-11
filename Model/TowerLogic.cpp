@@ -221,7 +221,7 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
             auto target_mob_it = target_tile->resident_mobs.begin();
             while(target_mob_it != target_tile->resident_mobs.end()){
               if (auto target_mob = target_mob_it->lock()) {
-                tower->set_target(target_mob.get());
+                tower->set_target(target_mob);
                 return true;
               }
               target_mob_it++;
@@ -258,7 +258,7 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
     }
 
     //nothing was in range, tower has no target
-    tower->set_target(nullptr);
+    tower->reset_target();
     return false;
 }
 
@@ -322,10 +322,10 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
             else
             {
               //TODO: we need tp update the Gamemap's tiles when the mob crosses over the tile boundaries
-              std::cout << "NOTE: target location [" << hit_tile->tile_center.row << ", " << hit_tile->tile_center.col << "] had no targets" << std::endl;
+              std::cout << "NOTE: target location [" << hit_tile->tile_center.col << ", " << hit_tile->tile_center.row << "] had no targets" << std::endl;
               for (auto mob_it : live_mobs) {
                 auto mob_pos = mob_it->get_position();
-                std::cout << "mob " << mob_it->get_name() << " at [" << mob_pos.row << ", " << mob_pos.col << "]" << std::endl;
+                std::cout << "mob " << mob_it->get_name() << " at [" << mob_pos.col << ", " << mob_pos.row << "]" << std::endl;
               }
             }
 
@@ -419,16 +419,14 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     //update the attack positions, spawn relevant events for the frontend
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
     {
-      //dont move the attacks every round, just to save on work (still looks smooth enough)
-        if(onset_timestamp % 5 == 0)
-        {
-        //get the amount the attack should move. Will probably need some time-element   
+        //dont need to update the frontent on every cycle (still looks smooth enough)
+      if(onset_timestamp % 5 == 0)
+      {
+
+        //get the amount the attack should move  
         auto atk_movement = (*attack_it)->move_update(onset_timestamp);
         const std::vector<float> movement {atk_movement.col, atk_movement.row, 0.0f};
 
-        //use this as a placeholder
-        //const std::vector<float> movement {GameMap::TowerTileWidth, GameMap::TowerTileHeight, 0.0f};
-        
         auto attack_id = (*attack_it)->get_id();
         auto origin_id = (*attack_it)->get_origin_id();
 

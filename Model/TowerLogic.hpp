@@ -61,7 +61,7 @@ public:
         std::vector<float> map_offsets {mob_col, mob_row, 0};
 
         //TODO: use the mob_id to dispatch the appropriate monster creation (will need some factory for this)
-        auto mob_ = std::shared_ptr<Monster>(make_monster<Monster>(mob_id, mob_name, mob_row, mob_col));
+        auto mob_ = std::shared_ptr<Monster>(make_monster<Monster>(mob_id, mob_name, mob_col, mob_row));
         //TODO: anything else we need to do here?
         //
         mtile->resident_mobs.push_back(mob_);
@@ -112,7 +112,7 @@ private:
     
     //the set of monsters still among the living
     std::list<std::shared_ptr<Monster>> live_mobs;
-    std::list<std::unique_ptr<TowerAttack>> active_attacks; 
+    std::list<std::unique_ptr<TowerAttackBase>> active_attacks; 
 };
 
 #endif

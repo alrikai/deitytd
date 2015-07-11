@@ -67,24 +67,27 @@ bool Tower::add_modifier(tower_generator tower_gen, essence* modifier)
     return true;
 }
 
-std::unique_ptr<TowerAttack> Tower::generate_attack(const std::string& attack_id, const uint64_t timestamp)
+std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attack_id, const uint64_t timestamp)
 {
-    //return std::unique_ptr<TowerAttack>(new TowerAttack( attack_id, tower_id));
-   
     //set the attack parameters  
     TowerAttackParams params (base_attributes, attack_id, tower_id);
-
-    //attack movement type -- homing updates the attack movement wrt a target,
-    //while non-homing has an initial destination and moves towards it
-    params.has_homing = false;
-    //distance the attack can move per round (in terms of map tiles?)
-    params.move_speed = 8; //GameMap::TowerTileHeight;
+    //distance the attack can move per round (normalized)
+    params.move_speed = 0.15; 
   
     //the game time at the point of creation
     params.origin_timestamp = timestamp;
     //starting location
     params.origin_position = position;
-    return std::unique_ptr<TowerAttack>(new TowerAttack(std::move(params)));
+    
+    //attack movement type -- homing updates the attack movement wrt a target,
+    //while non-homing has an initial destination and moves towards it
+    bool has_homing = true;
+    //TODO: make a proper factory for generating the appropriate TowerAttacks
+    if(has_homing) {
+      return std::unique_ptr<TowerAttackBase>(new TowerAttack<HomingAttackMovement>(std::move(params), HomingAttackMovement(current_target)));
+    } else {
+      return std::unique_ptr<TowerAttackBase>(new TowerAttack<FixedAttackMovement>(std::move(params), FixedAttackMovement()));
+    }
 }
 
 namespace TowerGenerator

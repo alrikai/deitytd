@@ -18,17 +18,16 @@ class Monster
 {
 public:
     
-    Monster(const CharacterModels::ModelIDs mob_id, const std::string& mob_name, float starting_row, float starting_col)
+    Monster(const CharacterModels::ModelIDs mob_id, const std::string& mob_name, float starting_col, float starting_row)
         : id(mob_id), monster_name(mob_name), current_position(starting_col, starting_row)
     {
       //placeholder model -- TODO: make some sort of factory arrangement for making the different mobs
       id = CharacterModels::ModelIDs::ogre_S;
-      speed = 0.075f;
+      speed = 0.05f;
       current_tile = nullptr;
       destination_tile = nullptr;
     }
 
-    //returned as [row, col]
     inline Coordinate<float> get_position() const
     {
         return current_position;

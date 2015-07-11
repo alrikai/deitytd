@@ -48,7 +48,7 @@ public:
     
     //this is baisically a factory function for generating a given towers' attacks.
     //Tower subclasses can override to do whatever extra steps they need
-    virtual std::unique_ptr<TowerAttack> generate_attack(const std::string& attack_id, const uint64_t timestamp);
+    virtual std::unique_ptr<TowerAttackBase> generate_attack(const std::string& attack_id, const uint64_t timestamp);
 
     virtual void set_model(std::shared_ptr<TowerModel> t_model)
     {
@@ -72,15 +72,21 @@ public:
         return target_dist < base_attributes.attack_range;
     }
 
-    inline Monster* get_target() const
+    inline std::shared_ptr<Monster> get_target() const
     {
         return current_target;
     }
 
-    inline void set_target (Monster* mob)
+    inline void set_target (std::shared_ptr<Monster>& mob)
     {
         current_target = mob;
     }
+
+    inline void reset_target ()
+    {
+        current_target.reset();
+    }
+
 
     inline std::string get_id() const
     {
@@ -129,7 +135,7 @@ protected:
     Coordinate<float> position;
 
     //cache the last found target (as having to do lookups every iteration takes too long)
-    Monster* current_target;
+    std::shared_ptr<Monster> current_target;
 };
 
 namespace TowerGenerator

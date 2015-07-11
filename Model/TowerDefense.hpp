@@ -15,7 +15,8 @@
 #include <thread>
 #include <atomic>
 
-
+//NOTE: Ogre by convention has all its coordinates specified as (col, row). Thus, we'll also adopt
+//that convention
 
 //this should be the main interface of the TD backend. Pretty uninspired name at the moment...
 template <template <class>  class ViewType, class ModelType = TowerLogic>
@@ -34,7 +35,7 @@ public:
         td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
         td_backend = std::unique_ptr<ModelType>(new ModelType);
 
-        spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, 0);  
+        spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, GameMap::MAP_HEIGHT-1);  
         dest_point = GameMap::IndexCoordinate (0, 0); 
         timestamp = 0;
 
@@ -156,7 +157,7 @@ void TowerDefense<ViewType, ModelType>::gameloop()
             const bool has_valid_path = td_backend->find_paths(spawn_point, dest_point);
             //TODO: need to notify the user that their maze is more like a wall
             if(!has_valid_path) {
-              std::cout << "ERROR -- No valid path from [ " << spawn_point.row << ", " << spawn_point.col << "] to [" << dest_point.row << ", " << dest_point.col << std::endl;
+              std::cout << "ERROR -- No valid path from [ " << spawn_point.col << ", " << spawn_point.row << "] to [" << dest_point.col << ", " << dest_point.row << std::endl;
             }
             /*
             double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(timer_count).count(); 

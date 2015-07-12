@@ -18,15 +18,18 @@
 //NOTE: Ogre by convention has all its coordinates specified as (col, row). Thus, we'll also adopt
 //that convention
 
+
 //this should be the main interface of the TD backend. Pretty uninspired name at the moment...
 template <template <class>  class ViewType, class ModelType = TowerLogic>
 class TowerDefense
 {
-public:
 
-  //the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and
-  //idle (between rounds, so towers building, upgrading, etc).
-  enum class TD_STATE { INROUND, IDLE };
+  struct TDState;
+public:
+//the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and
+//idle (between rounds, so towers building, upgrading, etc).
+enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
+
 
     //it's possible that we'll move to normalized coordinates?
     explicit TowerDefense(ViewType<ModelType>* view)
@@ -39,6 +42,8 @@ public:
         dest_point = GameMap::IndexCoordinate (0, 0); 
         timestamp = 0;
 
+        //make the game state (default to paused, since the game logic shouldn't be started yet)
+        game_state = std::unique_ptr<TDState> (new PausedState(this)); 
         std::string td_rootpath = TDHelpers::get_TD_path(); 
         std::cout << "TD rootpath: " << td_rootpath << std::endl;
     }
@@ -76,7 +81,7 @@ private:
     void gloop_processing();
     void gloop_postprocessing();
 
-    TD_STATE game_state;
+    std::unique_ptr<TDState> game_state;
 
     //the frontend
     std::unique_ptr<ViewType<ModelType>> td_view;
@@ -94,6 +99,149 @@ private:
     GameMap::IndexCoordinate spawn_point;
     GameMap::IndexCoordinate dest_point;
     uint64_t timestamp;
+
+
+//-----------------------------------------------------------------------------------------------
+//Nested state machine types
+
+struct TDState
+{
+  TDState(TowerDefense* towerd)
+    : td(towerd)
+  {}
+
+  virtual ~TDState() 
+  {}
+   
+  using time_pt = std::chrono::time_point<std::chrono::high_resolution_clock>;
+  virtual void enter_state(GAME_STATE previous_state) = 0;
+  virtual GAME_STATE cycle_update(time_pt current_timestamp) = 0;
+
+
+protected:
+  TowerDefense* td;
+
+};
+
+
+
+struct IdleState : TDState
+{
+  static constexpr GAME_STATE state = GAME_STATE::IDLE;
+  IdleState(TowerDefense* towerd)
+    : TDState(towerd)
+  {}
+
+  void enter_state(GAME_STATE previous_state) override
+  {
+    if(previous_state == state) {
+      return;
+    }
+
+    //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
+    const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
+    //nomenclature (at the moment) -- model_id + wave id
+    const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
+    TDState::td->td_backend->make_mob(mob_model_id, mob_id, TDState::td->spawn_point);
+   
+    const bool has_valid_path = TDState::td->td_backend->find_paths(TDState::td->spawn_point, TDState::td->dest_point);
+    //TODO: need to notify the user that their maze is more like a wall
+    if(!has_valid_path) {
+      std::cout << "ERROR -- No valid path from [ " << TDState::td->spawn_point.col << ", " << TDState::td->spawn_point.row 
+                << "] to [" << TDState::td->dest_point.col << ", " << TDState::td->dest_point.row << std::endl;
+    }
+    
+    initial_timestamp = std::chrono::high_resolution_clock::now();
+    std::cout << "Entering IDLE state" << std::endl;
+  }
+
+  GAME_STATE cycle_update(typename TDState::time_pt current_timestamp) override
+  {
+    //see how long we have been in IDLE -- if it's > the between round times, transition to ACTIVE
+    double idle_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_timestamp - initial_timestamp).count(); 
+    
+    return GAME_STATE::ACTIVE;
+/*
+    if (idle_time > TIME_BETWEEN_ROUND) {
+
+      //TODO: ... do whatever other things needed before transitioning states
+      std::cout << idle_time/1000 << " #sec elapsed -- transitioning to ACTIVE" << std::endl;
+      return GAME_STATE::ACTIVE;
+    }
+
+    return state;
+*/    
+  }
+
+private:
+  typename TDState::time_pt initial_timestamp;
+};
+
+struct ActiveState : TDState
+{
+  static constexpr GAME_STATE state = GAME_STATE::ACTIVE;
+  ActiveState(TowerDefense* towerd)
+    : TDState(towerd)
+  {}
+
+  void enter_state(GAME_STATE previous_state) override
+  {
+    if(previous_state == state) {
+      return;
+    }
+  }
+
+  GAME_STATE cycle_update(typename TDState::time_pt current_timestamp) override
+  {
+    //in-round, cycle through the 3 stages:
+    //1. pre-processing stage
+    //2. processing stage
+    //3. post-processing stage
+    TDState::td->gloop_preprocessing();
+    TDState::td->gloop_processing();
+    TDState::td->gloop_postprocessing();
+
+    //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
+    auto end_iter_time = std::chrono::high_resolution_clock::now();
+    double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - current_timestamp).count(); 
+    if(time_elapsed > TIME_PER_ROUND)
+          std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
+    else
+        std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+
+    //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
+    //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 
+    //associated with them). The issue would arise in the frontend, where we would move based on the conversion of the backend timestamp 
+    //value to ms. However, if we have all of our backend->frontend events as absolute positions (e.g. attack destination, mob destination,
+    //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
+    TDState::td->timestamp++;
+
+    return state;
+  }
+};
+
+struct PausedState : TDState
+{
+  static constexpr GAME_STATE state = GAME_STATE::PAUSED;
+  PausedState(TowerDefense* towerd)
+    : TDState(towerd)
+  {}
+
+  void enter_state(GAME_STATE previous_state) override
+  {
+    if(previous_state == state) {
+      return;
+    }
+  }
+
+  GAME_STATE cycle_update(typename TDState::time_pt current_timestamp) override
+  {
+    return state;
+  }
+};
+
+
+
 };
 
 
@@ -114,88 +262,34 @@ void TowerDefense<ViewType, ModelType>::init_game()
 template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gameloop()
 {
-  
-  //TODO: we will need to come up with some state machine structure that models the game state -- i.e. 
-  //if we are between rounds, or in a round (need to decide how this will be first however)...
-
-  
-
+  //start the loop off in idle
+  game_state = std::unique_ptr<TDState> (new IdleState(this)); 
+  game_state->enter_state(GAME_STATE::PAUSED);
+  GAME_STATE current_state = GAME_STATE::IDLE;
   //TODO: have a timer to keep track of how long it has been in the current state, and transition accordingly
   //at the game state transitions, we need to do certain things (i.e. at the transition from IDLE --> INROUND, 
   //we need to spawn the mobs, calculate the pathfinding, etc)
   
-  //std::chrono::system_clock::time_point timer_count;
-  game_state = TD_STATE::IDLE;
-
     //the main gameloop. checks the frontend and backend, mediates communication between the two
     //applies updates, etc
     while(continue_gameloop.load())
     {
         auto start_iter_time = std::chrono::high_resolution_clock::now();
-
-        //TODO: this is a very simple approach to the game state management. We will need an intelligent way to:
-        //- interface with the frontend (i.e. we would want a timer countdown, etc)
-        //- elegantly handle the state transition logic (should use the GoF state pattern)
-        //- not get too cluttered with the state 
-        //
-        //...
-        //for now, we'll just have the IDLE here as a placeholder (won't be called), and will mock up most of 
-        //the stuff that it needs so that we can test
-        switch(game_state)
-        {
-          case TD_STATE::IDLE:
-          {
-            //timer_count += start_iter_time;
-
-
-            //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
-            const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
-            //nomenclature (at the moment) -- model_id + wave id
-            const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
-            td_backend->make_mob(mob_model_id, mob_id, spawn_point);
-           
-            const bool has_valid_path = td_backend->find_paths(spawn_point, dest_point);
-            //TODO: need to notify the user that their maze is more like a wall
-            if(!has_valid_path) {
-              std::cout << "ERROR -- No valid path from [ " << spawn_point.col << ", " << spawn_point.row << "] to [" << dest_point.col << ", " << dest_point.row << std::endl;
-            }
-            /*
-            double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(timer_count).count(); 
-            if(time_elapsed >= TIME_BETWEEN_ROUND) {
-              std::cout << "... would ordinarily transition states here..." << std::endl;
-            }
-            */
-
-            //TODO: just using the above to do some initialization
-            game_state = TD_STATE::INROUND;
-            break;
+        auto next_state = game_state->cycle_update(start_iter_time);
+        
+        //TODO: need to have a better state transitioning system
+        if(next_state != current_state) {
+          if(next_state == GAME_STATE::IDLE) {
+            game_state = std::unique_ptr<TDState> (new IdleState(this)); 
           }
-          case TD_STATE::INROUND: 
-          { 
-            //in-round, cycle through the 3 stages:
-            //1. pre-processing stage
-            //2. processing stage
-            //3. post-processing stage
-            gloop_preprocessing();
-            gloop_processing();
-            gloop_postprocessing();
 
-            //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
-            auto end_iter_time = std::chrono::high_resolution_clock::now();
-            double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - start_iter_time).count(); 
-            if(time_elapsed > TIME_PER_ROUND)
-                  std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
-            else
-                std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
-
-            //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
-            //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 
-            //associated with them). The issue would arise in the frontend, where we would move based on the conversion of the backend timestamp 
-            //value to ms. However, if we have all of our backend->frontend events as absolute positions (e.g. attack destination, mob destination,
-            //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
-            timestamp++;
+          if(next_state == GAME_STATE::ACTIVE) {
+            game_state = std::unique_ptr<TDState> (new ActiveState(this)); 
           }
-        };
+
+          game_state->enter_state(current_state);
+          current_state = next_state; 
+        }
     }
     std::cout << "Exiting GameLoop" << std::endl;
 

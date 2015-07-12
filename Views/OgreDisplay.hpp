@@ -347,8 +347,8 @@ void OgreDisplay<BackendType>::start_display()
 
         //TODO: check if we are deleteing the correct scenenode. When we execute this, we end up
         //hanging forever at renderOneFrame down below, so presumably something is getting nuked that shouldnt be
-        //Ogre::SceneNode* m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
-        //OgreUtil::nuke_scenenode(m_scenenode);
+        auto m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
+        OgreUtil::nuke_scenenode(m_scenenode);
     };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -612,6 +612,7 @@ void OgreDisplay<BackendType>::place_mob(const CharacterModels::ModelIDs id, con
   MoveableObject mob_anim(target_location, mob_snode);
   live_mobs.insert(std::make_pair(mob_name, mob_anim));
 
+  /*
   //NOTE: if we have things specific to the animation, where should we do those?
   //TODO: figure out how generic we need this to be. Every character will have some state machine
   //that determines how it acts / how it appears (i.e. idle, active, stunned, dead, etc)
@@ -626,6 +627,7 @@ void OgreDisplay<BackendType>::place_mob(const CharacterModels::ModelIDs id, con
   mob_animations.emplace(std::make_pair(bot_animation_id, base_animation));
   const std::string top_animation_id {mob_name + "_animation_T"};
   mob_animations.emplace(std::make_pair(top_animation_id, top_animation));
+  */
 }
 
 template <class BackendType>

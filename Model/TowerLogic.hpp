@@ -86,6 +86,17 @@ public:
     bool find_paths(const GameMap::IndexCoordinate spawn_idx, const GameMap::IndexCoordinate dest_idx);
 
     void cycle_update(const uint64_t onset_timestamp);
+
+    //for the end of the round -- clean all the state (i.e. live mobs, status effects, map tile mobs, etc)
+    void reset_state()
+    {
+      
+      if(live_mobs.size() > 0) {
+        std::cout << "mobs still around?" << std::endl;
+      }
+      live_mobs.clear();
+      active_attacks.clear();
+    }
     
     inline ViewEvents* get_frontend_eventqueue() const 
     {

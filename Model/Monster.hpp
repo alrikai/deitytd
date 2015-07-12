@@ -43,6 +43,16 @@ public:
       return id; 
     }
 
+    //NOTE: this would be useful if we have some tower ability to teleport mobs around, or if we have map effects like wormholes.
+    void set_position (Coordinate<float> position) {
+      current_position = position;
+
+      //TODO: remake the tower path... needs to have the pathfinder to do so however
+      if(current_position.row >= 0.f && current_position.row < 1.0f && current_position.col >= 0.f && current_position.col < 1.0f) {
+        
+      }
+    }
+
     void set_path(std::list<const MapTile*> mob_path)
     {
       path = std::move(mob_path);
@@ -84,31 +94,15 @@ public:
 
             //TODO: move distance_left units along the new trajectory -- how best to handle this part? 
             //it's possible that the mob moves very fast, and we cover multiple destinations in one cycle... need to loop?
-            
-            //notify the tiles that the mob is migrating (both the tile it's leaving and the tile it's entering)
-            auto mob_wpit = std::find_if(current_tile->resident_mobs.begin(), current_tile->resident_mobs.end(), 
-                [this](const std::weak_ptr<Monster> &m)
-                {
-                  if (auto other_mob = m.lock()) {
-                    auto other_name = other_mob->get_name();
-                    return other_name == this->get_name();
-                  }
-                  return false;
-                });
-            //move add the mob to the new tile and remove it from the old one
-            if(mob_wpit != destination_tile->resident_mobs.end()) {
-              if (auto mobp = mob_wpit->lock()) {
-                destination_tile->resident_mobs.push_back(mobp); 
-              }
-              current_tile->resident_mobs.erase(mob_wpit);
-            } else {
-              std::cout << "ERROR: mob " << monster_name << " doesn't exist in current tile..." << std::endl;
-            }
+            migrate_mob();
+
+            //update the tile info
             current_tile = destination_tile;
             destination_tile = dest_tile;
           } else {
             std::cout << "NOTE: mob " << monster_name << " at destination" << std::endl;
             hit_destination = true;
+            migrate_mob();
           }
         }
         else
@@ -121,6 +115,31 @@ public:
     }
 
 private:
+
+    //move the monster to a new tile, remove from the old tile
+    inline void migrate_mob()
+    {
+      //notify the tiles that the mob is migrating (both the tile it's leaving and the tile it's entering)
+      auto mob_wpit = std::find_if(current_tile->resident_mobs.begin(), current_tile->resident_mobs.end(), 
+          [this](const std::weak_ptr<Monster> &m)
+          {
+            if (auto other_mob = m.lock()) {
+              auto other_name = other_mob->get_name();
+              return other_name == this->get_name();
+            }
+            return false;
+          });
+      //move add the mob to the new tile and remove it from the old one
+      if(mob_wpit != destination_tile->resident_mobs.end()) {
+        if (auto mobp = mob_wpit->lock()) {
+          destination_tile->resident_mobs.push_back(mobp); 
+        }
+        current_tile->resident_mobs.erase(mob_wpit);
+      } else {
+        std::cout << "ERROR: mob " << monster_name << " doesn't exist in current tile..." << std::endl;
+      }
+    }
+
     //the character model ID
     CharacterModels::ModelIDs id;
     std::string monster_name;
@@ -139,12 +158,12 @@ private:
     const MapTile* destination_tile;
     const MapTile* current_tile;
 
-		/*
-		 * TODO: determine which stats are needed for the monster type
-		 *
-		 */
-		float health;
-		float speed;
+    /*
+     * TODO: determine which stats are needed for the monster type
+     *
+     */
+    float health;
+    float speed;
     //TODO: need some armor type and amount
 };
 

@@ -138,9 +138,16 @@ bool TowerLogic::get_targets(Tower* tower, const int t_col, const int t_row)
     {
         auto mob_pos = prev_target->get_position();
         auto t_dist = L2dist(mob_pos.row - tile_center.row, mob_pos.col - tile_center.col);            
+
+        //TODO: this is part of a hack currently in place to manage the monster lifetimes (we move the monster out of bounds when its dead to get the tower
+        //to release its reference count on the monster. Hopefully I'll come up with a better system soon)
+        bool mob_inbounds = mob_pos.row >= 0.0f && mob_pos.row <= 1.0f && mob_pos.col >= 0.0f && mob_pos.col <= 1.0f;
+
         //if old target is still in range, nothing else to do
-        if(tower->in_range(t_dist)) { 
+        if(tower->in_range(t_dist) && mob_inbounds) { 
             return true;
+        } else {
+          tower->reset_target();
         }
     }
 
@@ -390,9 +397,10 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     //update the monster positions, update the frontend (these are the mobs that weren't killed in the above attack logic loop)
     auto mob_it = live_mobs.begin();
     while (mob_it != live_mobs.end()) {
-       //dont move the attacks every round, just to save on work (still looks smooth enough)
+/*
+      //dont move the attacks every round, just to save on work (still looks smooth enough)
         if(onset_timestamp % 5 == 0)
-        {
+        {*/
         //get the amount the attack should move. Will probably need some time-element   
         auto mob_movement_info = (*mob_it)->move_update(onset_timestamp);
         //check if the mob is at the destination; if so, remove it and enact the requisite game state changes
@@ -401,6 +409,11 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
           std::unique_ptr<RenderEvents::remove_mob> m_evt = std::unique_ptr<RenderEvents::remove_mob>
                         (new RenderEvents::remove_mob((*mob_it)->get_name()));
           td_frontend_events->add_removemob_event(std::move(m_evt));    
+          //also notify the mob's containing tile (TODO: make this part happen automatically?)
+          map.remove_mob((*mob_it)->get_position(), (*mob_it)->get_name());
+          //TODO: also have to remove the mob from all of the Tower objects holding it. Need to set up some event notification system 
+          (*mob_it)->set_position(Coordinate<float>(1.1f, 1.1f));
+
           mob_it = live_mobs.erase(mob_it);
         } else {
           auto mob_movement = std::get<0>(mob_movement_info);
@@ -410,10 +423,10 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
           td_frontend_events->add_movemob_event(std::move(m_evt));
           mob_it++;
         }
-
+/*
         } else {
           break;
-        }
+        }*/
     }
 
     //update the attack positions, spawn relevant events for the frontend

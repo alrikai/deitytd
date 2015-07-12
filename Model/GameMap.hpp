@@ -152,6 +152,50 @@ public:
         return Coordinate<double>(tile_width * block_center_col, tile_height * block_center_row);
     }
 
+    template <typename MobID>
+    void remove_mob(Coordinate<float> tile_coord, const MobID& mob_id)
+    {
+      auto tile_idx = get_bounding_tile(tile_coord);
+      auto target_tile = get_tile(tile_idx);
+
+      auto mob_it = std::find_if(target_tile->resident_mobs.begin(), target_tile->resident_mobs.end(), 
+        [mob_id](const std::weak_ptr<Monster> &m)
+        {
+          //TODO: we might want to use different comparison schemes for identifying a mob (comparing strings is slower than say, ints)
+          //will want to move this kind of thing into the Monster class itself
+          if (auto target_mob = m.lock()) {
+            auto target_name = target_mob->get_name();
+            return target_name == mob_id;
+          }
+          return false;
+        });
+
+      if(mob_it != target_tile->resident_mobs.end()) {
+        if (auto target_mob = mob_it->lock()) {
+        std::cout << "removing mob " << target_mob->get_name() << " from tile (" << tile_idx.col << ", " << tile_idx.row << ")" << std::endl;
+        }
+        target_tile->resident_mobs.erase(mob_it);
+
+        std::cout << "Target tile @(" << tile_idx.col << ", " << tile_idx.row << ")" << " has " << target_tile->resident_mobs.size() << " #mobs left" << std::endl;
+      } else {
+        std::cout << "Mob isn't in tile" << std::endl;
+      }
+
+      /*
+      std::remove_if(target_tile->resident_mobs.begin(), target_tile->resident_mobs.end(), 
+        [mob_id](const std::weak_ptr<Monster> &m)
+        {
+          //TODO: we might want to use different comparison schemes for identifying a mob (comparing strings is slower than say, ints)
+          //will want to move this kind of thing into the Monster class itself
+          if (auto target_mob = m.lock()) {
+            auto target_name = target_mob->get_name();
+            return target_name == mob_id;
+          }
+          return false;
+        });
+      */
+    }
+
     //would likely have other helper functions -- 
     //TODO: think of some other helper functions 
     // ...

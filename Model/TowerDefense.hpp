@@ -72,7 +72,8 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
 private:
     //aim for 30Hz 
     static constexpr double TIME_PER_ROUND = 1000.0/30.0;
-    static constexpr double TIME_BETWEEN_ROUND = 1000.0*30.0;
+    //15 seconds to build 
+    static constexpr double TIME_BETWEEN_ROUND = 1000.0*15.0;
 
 
     void gameloop();
@@ -137,22 +138,8 @@ struct IdleState : TDState
     if(previous_state == state) {
       return;
     }
-
-    //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
-    const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
-    //nomenclature (at the moment) -- model_id + wave id
-    const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
-    TDState::td->td_backend->make_mob(mob_model_id, mob_id, TDState::td->spawn_point);
-   
-    const bool has_valid_path = TDState::td->td_backend->find_paths(TDState::td->spawn_point, TDState::td->dest_point);
-    //TODO: need to notify the user that their maze is more like a wall
-    if(!has_valid_path) {
-      std::cout << "ERROR -- No valid path from [ " << TDState::td->spawn_point.col << ", " << TDState::td->spawn_point.row 
-                << "] to [" << TDState::td->dest_point.col << ", " << TDState::td->dest_point.row << std::endl;
-    }
-    
+ 
     initial_timestamp = std::chrono::high_resolution_clock::now();
-    std::cout << "Entering IDLE state" << std::endl;
   }
 
   GAME_STATE cycle_update(typename TDState::time_pt current_timestamp) override
@@ -160,17 +147,15 @@ struct IdleState : TDState
     //see how long we have been in IDLE -- if it's > the between round times, transition to ACTIVE
     double idle_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_timestamp - initial_timestamp).count(); 
     
-    return GAME_STATE::ACTIVE;
-/*
-    if (idle_time > TIME_BETWEEN_ROUND) {
+    TDState::td->gloop_preprocessing();
 
+    if (idle_time > TIME_BETWEEN_ROUND) {
       //TODO: ... do whatever other things needed before transitioning states
       std::cout << idle_time/1000 << " #sec elapsed -- transitioning to ACTIVE" << std::endl;
       return GAME_STATE::ACTIVE;
     }
 
     return state;
-*/    
   }
 
 private:
@@ -188,6 +173,26 @@ struct ActiveState : TDState
   {
     if(previous_state == state) {
       return;
+    }
+
+    //this would be the start of the (new) round. Right now (for testing) we put in a mob -- eventually we'll need to make this 
+    //more extensive (and should refactor most of the logic out to somewhere else)
+    if(previous_state == GAME_STATE::IDLE) {
+
+      //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
+      const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
+      //nomenclature (at the moment) -- model_id + wave id
+      const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
+      TDState::td->td_backend->make_mob(mob_model_id, mob_id, TDState::td->spawn_point);
+ 
+      const bool has_valid_path = TDState::td->td_backend->find_paths(TDState::td->spawn_point, TDState::td->dest_point);
+      //TODO: need to notify the user that their maze is more like a wall
+      if(!has_valid_path) {
+        std::cout << "ERROR -- No valid path from [ " << TDState::td->spawn_point.col << ", " << TDState::td->spawn_point.row 
+                  << "] to [" << TDState::td->dest_point.col << ", " << TDState::td->dest_point.row << std::endl;
+      }
+      
+      std::cout << "Entering IDLE state" << std::endl;     
     }
   }
 

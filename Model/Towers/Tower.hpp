@@ -77,6 +77,11 @@ public:
         return current_target;
     }
 
+    inline std::string get_target_id() const
+    {
+        return current_target->get_name();
+    }   
+
     inline void set_target (std::shared_ptr<Monster>& mob)
     {
         current_target = mob;

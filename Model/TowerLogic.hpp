@@ -109,6 +109,10 @@ public:
 
 private:
 
+    void cycle_update_attacks(const uint64_t onset_timestamp);
+    void cycle_update_towers(const uint64_t onset_timestamp);
+    void cycle_update_mobs(const uint64_t onset_timestamp);
+
     //handles tower auto-targeting: attacks closest (L2 distance) mob
     bool get_targets(Tower* tower, const int t_col, const int t_row);
 

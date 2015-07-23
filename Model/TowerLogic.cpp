@@ -292,8 +292,45 @@ bool TowerLogic::find_paths(const GameMap::IndexCoordinate spawn_idx, const Game
   return has_valid_path;
 }
 
-//NOTE: we might want to return a list of generated tower attacks from here?
-void TowerLogic::cycle_update(const uint64_t onset_timestamp)
+
+//TODO: try prototyping how the logic for applying the game mechanics will be...
+void compute_attackhit(const std::list<std::weak_ptr<Monster>>& tile_mobs, std::unique_ptr<TowerAttackBase> attack)
+{
+  //TODO: get the mob pointer to attack
+  //TODO: calculate the damage to deal and state changes to apply
+  //TODO: ... ???
+  //TODO: apply state changes to mob and origin tower of attack
+  //TODO: mark attack for removal, if mob is dead, mark for removal
+  //TODO: ... ???
+  //TODO: profit?
+
+    auto origin_tower = attack->get_origin_tower();
+    auto target_mob_id = origin_tower->get_target_id();
+
+    auto mob_it = std::find_if(tile_mobs.begin(), tile_mobs.end(), 
+          [target_mob_id](const std::weak_ptr<Monster> &m)
+          {
+            if (auto tile_mob = m.lock()) {
+              auto tilemob_name = tile_mob->get_name();
+              return tilemob_name == target_mob_id;
+            }
+            return false;
+          });
+
+    if(mob_it != tile_mobs.end()) {
+      if (auto target_mob = mob_it->lock()) {
+
+          //@HERE: we have the tower attack, the origin tower, and the target mob.
+          std::cout << "got mob " << target_mob->get_name() << std::endl;
+
+      }
+    } else {
+      //NOTE: this shouldn't be possible, but I should check anyways for sanity's sake
+      std::cout << "ERROR: we collided with a non-existant mob?" << std::endl;
+    }   
+}
+
+void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp)
 {
     //cycle through the attacks and remove the finished ones
     auto attack_it = active_attacks.begin();
@@ -318,6 +355,8 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
             //std::cout << "Attack " << (*attack_it)->get_id() << " hit target!" << std::endl;
 
             //call the logic for the tower attack hitting the mob -- if there's multiple mobs in a tile, how do we choose which one it hits?
+            //if it has a pre-defined target, then the attack should hit that target.
+            //if it hits a tile with mob(s), but where it's target is not among them... then we have a stranger case (not sure what to do then)
             auto hit_tile = map.get_tile(map.get_bounding_tile((*attack_it)->get_position()));
             auto resident_mobs = hit_tile->resident_mobs;
             if(hit_tile->resident_mobs.size() > 0)
@@ -325,6 +364,26 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
               //if only 1 mob, then that's the target. What do we do if there's more than 1?
               //
               std::cout << "hit tile had " << hit_tile->resident_mobs.size() << " #mobs" << std::endl;
+              
+              //NOTE: we assume here that the attack object isn't needed after it hits its target
+              //TODO: introduce a mechanism for attacks to spawn new attacks (i.e. if we have a piercing attack, or one that does a fan-of-knives type on-hit effect)
+ 
+              //we would trigger the attack on-hit animation here...
+              //... but instead, signal the frontend to remove the attack
+              std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
+                        (new RenderEvents::remove_attack((*attack_it)->get_id()));
+              td_frontend_events->add_removeatk_event(std::move(t_evt));     
+            
+              compute_attackhit(resident_mobs, std::move(*attack_it));
+
+              //remove the attack internally
+              attack_it = active_attacks.erase(attack_it);
+              continue;        
+
+              //TODO: once we have the mob to attack, we need to perform the on-hit logic. This means calculating the damage dealt to 
+              //the mob by the attack, and updating any side-effects (i.e. on-hit effects, status updates for tower/mob/player, etc)
+              //...
+              //
             }
             else
             {
@@ -334,22 +393,25 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
                 auto mob_pos = mob_it->get_position();
                 std::cout << "mob " << mob_it->get_name() << " at [" << mob_pos.col << ", " << mob_pos.row << "]" << std::endl;
               }
+
+              std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
+                        (new RenderEvents::remove_attack((*attack_it)->get_id()));
+              td_frontend_events->add_removeatk_event(std::move(t_evt));     
+              //remove the attack internally
+              attack_it = active_attacks.erase(attack_it);
+              continue;        
+
             }
 
-            //we would trigger the attack on-hit animation here...
-            //... but instead, signal the frontend to remove the attack
-            std::unique_ptr<RenderEvents::remove_attack> t_evt = std::unique_ptr<RenderEvents::remove_attack>
-                        (new RenderEvents::remove_attack((*attack_it)->get_id()));
-            td_frontend_events->add_removeatk_event(std::move(t_evt));     
-            
-            //remove the attack internally
-            attack_it = active_attacks.erase(attack_it);
-            continue;        
         }
 
         attack_it++;
     }
+}
 
+
+void TowerLogic::cycle_update_towers(const uint64_t onset_timestamp)
+{
     //perform the tower updates
     for (int t_row = 0; t_row < TLIST_HEIGHT; ++t_row)
     {
@@ -393,7 +455,10 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
             }
         }
     }
+}
 
+void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
+{
     //update the monster positions, update the frontend (these are the mobs that weren't killed in the above attack logic loop)
     auto mob_it = live_mobs.begin();
     while (mob_it != live_mobs.end()) {
@@ -428,6 +493,15 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
           break;
         }*/
     }
+}
+
+//NOTE: we might want to return a list of generated tower attacks from here?
+void TowerLogic::cycle_update(const uint64_t onset_timestamp)
+{
+
+    cycle_update_attacks(onset_timestamp);
+    cycle_update_towers(onset_timestamp);
+    cycle_update_mobs(onset_timestamp);
 
     //update the attack positions, spawn relevant events for the frontend
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
@@ -441,7 +515,7 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
         const std::vector<float> movement {atk_movement.col, atk_movement.row, 0.0f};
 
         auto attack_id = (*attack_it)->get_id();
-        auto origin_id = (*attack_it)->get_origin_id();
+        auto origin_id = (*attack_it)->get_origin_tower()->get_id();
 
         auto t_evt = std::unique_ptr<RenderEvents::move_attack>(new RenderEvents::move_attack(attack_id, origin_id, movement, 150.0f));
         td_frontend_events->add_moveatk_event(std::move(t_evt));

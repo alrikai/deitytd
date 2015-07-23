@@ -69,8 +69,10 @@ bool Tower::add_modifier(tower_generator tower_gen, essence* modifier)
 
 std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attack_id, const uint64_t timestamp)
 {
+    //NOTE: we assume that the tower has a target if it is generating attacks (NOTE: will not work if we allow say, an 'attack ground' option for splash towers)
+    const auto mob_id = get_target()->get_name();
     //set the attack parameters  
-    TowerAttackParams params (base_attributes, attack_id, tower_id);
+    TowerAttackParams params (base_attributes, this, attack_id, mob_id);
     //distance the attack can move per round (normalized)
     params.move_speed = 0.15; 
   

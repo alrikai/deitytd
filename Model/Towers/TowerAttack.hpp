@@ -22,16 +22,23 @@
 //since all of these are set initially by the caller, seems nicer to put them into a struct
 //rather than have a constructor with a dozen inputs
 
+class Tower;
 
 struct TowerAttackParams
 {
-    TowerAttackParams(tower_properties atk_props, const std::string& atk_id, const std::string& t_id)
-        : attack_attributes(atk_props), id(atk_id), origin_id(t_id)
-    {}
+    //TODO: Have the tower attack have a pointer to the tower that it originated from, s.t. it can update the tower status (e.g. on-hit effects)
+    //directly (otherwise we would need to queue all the status updates and apply them later, matching it based on the origin_id,
+    //which seems needlessly convoluted). 
+    TowerAttackParams(tower_properties atk_props, Tower* origin, const std::string& atk_id, const std::string& m_id)
+        : attack_attributes(atk_props), origin_tower(origin), id(atk_id), mob_id(m_id) 
+    {
+      
+    }
 
     tower_properties attack_attributes;
+    Tower* origin_tower;
     const std::string id;
-    const std::string origin_id;
+    const std::string mob_id;
 
     double move_speed;
 
@@ -59,9 +66,21 @@ public:
     virtual ~TowerAttackBase () 
     {}
 
+    inline Tower* get_origin_tower() const
+    {
+      return params.origin_tower;
+    }
+
+    /*
     inline std::string get_origin_id() const
     {
-        return params.origin_id;
+        return params.origin_tower->get_id();
+    }
+    */
+
+    inline std::string get_target_id() const
+    {
+        return params.mob_id;
     }
 
     inline std::string get_id() const

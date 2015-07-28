@@ -323,6 +323,28 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>>& tile_mobs, std::
           //@HERE: we have the tower attack, the origin tower, and the target mob.
           std::cout << "got mob " << target_mob->get_name() << std::endl;
 
+          //TODO: compute the samage and status effect changes
+          //TODO: apply said status effects
+          //... but for now, we'll just start with damage
+
+          //TODO: move this part off into another file. Should have a bunch of (generic)
+          //functions for computing the state changes as a result of an attakc
+          auto mob_stats = target_mob->get_attributes();
+          auto atk_attributes = attack->get_attack_attributes();
+          float atk_dmg = 0.f;
+          for (auto dmg_it = atk_attributes.damage.begin(); dmg_it != atk_attributes.damage.end(); ++dmg_it) {
+
+              const auto atkcoeff_type = std::make_pair(dmg_it->element_type, mob_stats.armor_class);
+              const auto dmg_factor_it = ElementInfo::damage_coeffs.find(atkcoeff_type);
+              if(dmg_factor_it != ElementInfo::damage_coeffs.end()) {
+
+                  //TODO: need some random distribution here for selecting where within the damage range this attack falls
+                atk_dmg += dmg_factor_it->second * dmg_it->damage_range.low; 
+              }
+              
+          }
+          std::cout << "attack " << attack->get_id() << " did " << atk_dmg << " damage" << std::endl;
+
       }
     } else {
       //NOTE: this shouldn't be possible, but I should check anyways for sanity's sake

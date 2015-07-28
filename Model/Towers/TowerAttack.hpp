@@ -78,6 +78,11 @@ public:
     }
     */
 
+    inline tower_properties get_attack_attributes() const
+    {
+      return params.attack_attributes;
+    }
+
     inline std::string get_target_id() const
     {
         return params.mob_id;
@@ -108,6 +113,8 @@ public:
     {
         return has_hit_target; 
     }
+
+
 
     virtual Coordinate<float> move_update(const uint64_t time) = 0;
     /*

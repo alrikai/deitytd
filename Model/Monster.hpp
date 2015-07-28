@@ -4,12 +4,25 @@
 #include "MapTile.hpp"
 #include "ModelUtils.hpp"
 #include "util/Types.hpp"
+#include "util/Elements.hpp"
 
 #include <tuple>
 #include <memory>
 #include <list>
 #include <iostream>
 
+struct MonsterStats
+{
+    /*
+     * TODO: determine which stats are needed for the monster type
+     *
+     */
+    float health;
+    float speed;
+    //currently using the same elements as the attacks; consider if we want a seperate armor type system
+    Elements armor_class;
+    float armor_amount;
+};
 
 /*
  * The monster class -- just a placeholder for now
@@ -19,13 +32,26 @@ class Monster
 public:
     
     Monster(const CharacterModels::ModelIDs mob_id, const std::string& mob_name, float starting_col, float starting_row)
-        : id(mob_id), monster_name(mob_name), current_position(starting_col, starting_row)
+        : current_position(starting_col, starting_row), id(mob_id), monster_name(mob_name)
     {
-      //placeholder model -- TODO: make some sort of factory arrangement for making the different mobs
-      id = CharacterModels::ModelIDs::ogre_S;
-      speed = 0.05f;
       current_tile = nullptr;
       destination_tile = nullptr;
+       
+      //placeholder model -- TODO: make some sort of factory arrangement for making the different mobs
+      id = CharacterModels::ModelIDs::ogre_S;
+      
+      //TODO: have some better arrangement for different mob stats. This will be a pretty large undertaking; 
+      //maybe have the different mob stats stored in XML files and loaded at runtime, to make balance tweaks 
+      //easier (i.e. no recompile) and the whole arrangement more extensible? 
+      attributes.health = 100.0f;
+      attributes.speed = 0.05f;
+      attributes.armor_class = Elements::FIRE;
+      attributes.armor_amount = 1.0f;
+    }
+
+    inline MonsterStats get_attributes() const 
+    {
+        return attributes;
     }
 
     inline Coordinate<float> get_position() const
@@ -79,10 +105,10 @@ public:
 
         bool hit_destination = false;
         //check if we reached the current destination
-        if(target_dist <= speed)
+        if(target_dist <= attributes.speed)
         {
           //the distance to travel in the next step
-          const auto distance_left = speed - target_dist; 
+          const auto distance_left = attributes.speed - target_dist; 
           current_position = dest_position;
 
           //get the next destination
@@ -107,7 +133,7 @@ public:
         }
         else
         {
-            float dist_mag = speed / target_dist;
+            float dist_mag = attributes.speed / target_dist;
             current_position.col += nx_factor * dist_mag;
             current_position.row += ny_factor * dist_mag;
         }
@@ -140,9 +166,6 @@ private:
       }
     }
 
-    //the character model ID
-    CharacterModels::ModelIDs id;
-    std::string monster_name;
     
     //normalized positions wrt the map
     Coordinate<float> current_position;
@@ -158,13 +181,10 @@ private:
     const MapTile* destination_tile;
     const MapTile* current_tile;
 
-    /*
-     * TODO: determine which stats are needed for the monster type
-     *
-     */
-    float health;
-    float speed;
-    //TODO: need some armor type and amount
+    //the character model ID
+    CharacterModels::ModelIDs id;
+    std::string monster_name;
+    MonsterStats attributes;
 };
 
 

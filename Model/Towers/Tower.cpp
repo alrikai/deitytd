@@ -4,8 +4,8 @@
 std::ostream& operator <<(std::ostream& out_stream, const tower_properties& props)
 {
     for (auto it : props.damage)
-        out_stream << ElementInfo::get_element_name(it.first) << " Damage: ["
-        << it.second.low << ", " << it.second.high << "] \n";
+        out_stream << ElementInfo::get_element_name(it.element_type) << " Damage: ["
+        << it.damage_range.low << ", " << it.damage_range.high << "] \n";
 
     out_stream << "Speed: " << props.attack_speed << " Range: " << props.attack_range;
     return out_stream;
@@ -103,9 +103,13 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& 
 {
     //make some base stats based on the tower tier
     tower_properties base_attributes;
+
+    base_attributes.damage[static_cast<int>(Elements::CHAOS)].damage_range = tower_properties::dmg_dist(2 * tier, 5 * tier);
+/*
     auto dmg_it = base_attributes.damage.find(Elements::CHAOS);
     if(dmg_it != base_attributes.damage.end())
         dmg_it->second = tower_properties::dmg_dist(2 * tier, 5 * tier);
+*/
     base_attributes.attack_speed = 1 * tier;
     base_attributes.attack_range = 3 * tier;
 

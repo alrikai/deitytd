@@ -5,4 +5,4 @@ add_library(TDTowers SHARED ${TowerSrc})
 
 SET(SRCS main.cpp)
 ADD_EXECUTABLE(EssenceTest ${SRCS})
-target_link_libraries(EssenceTest TDTowers)
+target_link_libraries(EssenceTest TDTowers TDUtils)

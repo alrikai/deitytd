@@ -445,28 +445,13 @@ void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
           mob_it = live_mobs.erase(mob_it);
           continue;
         }
-/*
-      //dont move the attacks every round, just to save on work (still looks smooth enough)
-        if(onset_timestamp % 5 == 0)
-        {*/
+
         //get the amount the attack should move. Will probably need some time-element   
         auto mob_movement_info = (*mob_it)->move_update(onset_timestamp);
         //check if the mob is at the destination; if so, remove it and enact the requisite game state changes
         if(std::get<1>(mob_movement_info)) {
           remove_mob_fcn(*mob_it);
           mob_it = live_mobs.erase(mob_it);
-/*
-          //spawn a mob removal event
-          std::unique_ptr<RenderEvents::remove_mob> m_evt = std::unique_ptr<RenderEvents::remove_mob>
-                        (new RenderEvents::remove_mob((*mob_it)->get_name()));
-          td_frontend_events->add_removemob_event(std::move(m_evt));    
-          //also notify the mob's containing tile (TODO: make this part happen automatically?)
-          map.remove_mob((*mob_it)->get_position(), (*mob_it)->get_name());
-          //TODO: also have to remove the mob from all of the Tower objects holding it. Need to set up some event notification system 
-          (*mob_it)->set_position(Coordinate<float>(1.1f, 1.1f));
-          mob_it = live_mobs.erase(mob_it);
-
-*/
         } else {
           auto mob_movement = std::get<0>(mob_movement_info);
           const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};
@@ -475,10 +460,6 @@ void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
           td_frontend_events->add_movemob_event(std::move(m_evt));
           mob_it++;
         }
-/*
-        } else {
-          break;
-        }*/
     }
 }
 

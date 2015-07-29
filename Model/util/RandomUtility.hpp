@@ -27,7 +27,7 @@ namespace Randomize
             dist.param(new_params);
         }
 
-        int roll_tower_tier()
+        inline int roll_tower_tier()
         {
             return dist(get_engine());
         }
@@ -42,8 +42,8 @@ namespace Randomize
         UniformRoller()
         {}
         
-        //returns values between [0, 1)
-        double get_roll(const double weight)
+        //returns values between [0, weight)  
+        inline double get_roll(const double weight)
         {
             return std::generate_canonical<double, std::numeric_limits<double>::digits>(get_engine()) * weight;
         }

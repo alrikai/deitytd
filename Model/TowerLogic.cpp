@@ -422,9 +422,29 @@ void TowerLogic::cycle_update_towers(const uint64_t onset_timestamp)
 
 void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
 {
+    auto remove_mob_fcn = [this](std::shared_ptr<Monster> mob)
+    {
+        //spawn a mob removal event
+        std::unique_ptr<RenderEvents::remove_mob> m_evt = std::unique_ptr<RenderEvents::remove_mob>
+                        (new RenderEvents::remove_mob(mob->get_name()));
+        this->td_frontend_events->add_removemob_event(std::move(m_evt));    
+        //also notify the mob's containing tile (TODO: make this part happen automatically?)
+        this->map.remove_mob(mob->get_position(), mob->get_name());
+        //TODO: also have to remove the mob from all of the Tower objects holding it. Need to set up some event notification system 
+        mob->set_position(Coordinate<float>(1.1f, 1.1f));
+    };
+
     //update the monster positions, update the frontend (these are the mobs that weren't killed in the above attack logic loop)
     auto mob_it = live_mobs.begin();
     while (mob_it != live_mobs.end()) {
+
+        //check if the mob is dead; if so, remove it
+        if(!(*mob_it)->is_alive()) {
+          std::cout << "NOTE: mob " << (*mob_it)->get_name() << " is dead" << std::endl;
+          remove_mob_fcn(*mob_it);
+          mob_it = live_mobs.erase(mob_it);
+          continue;
+        }
 /*
       //dont move the attacks every round, just to save on work (still looks smooth enough)
         if(onset_timestamp % 5 == 0)
@@ -433,6 +453,9 @@ void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
         auto mob_movement_info = (*mob_it)->move_update(onset_timestamp);
         //check if the mob is at the destination; if so, remove it and enact the requisite game state changes
         if(std::get<1>(mob_movement_info)) {
+          remove_mob_fcn(*mob_it);
+          mob_it = live_mobs.erase(mob_it);
+/*
           //spawn a mob removal event
           std::unique_ptr<RenderEvents::remove_mob> m_evt = std::unique_ptr<RenderEvents::remove_mob>
                         (new RenderEvents::remove_mob((*mob_it)->get_name()));
@@ -441,8 +464,9 @@ void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
           map.remove_mob((*mob_it)->get_position(), (*mob_it)->get_name());
           //TODO: also have to remove the mob from all of the Tower objects holding it. Need to set up some event notification system 
           (*mob_it)->set_position(Coordinate<float>(1.1f, 1.1f));
-
           mob_it = live_mobs.erase(mob_it);
+
+*/
         } else {
           auto mob_movement = std::get<0>(mob_movement_info);
           const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};

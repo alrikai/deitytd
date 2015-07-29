@@ -59,6 +59,18 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>>& tile_mobs, std::
           }
           std::cout << "attack " << attack->get_id() << " did " << atk_dmg << " damage" << std::endl;
 
+          const bool mob_alive = target_mob->recieve_damage(atk_dmg);
+          
+          //TODO: generate the status updates
+
+          //TODO: trigger the on-hit events
+
+          //TODO: if the mob died, then handle the funeral proceedings (on-death events)
+          if(!mob_alive)
+          {
+              //tell the tower that it killed something... not sure what other info it needs (maybe the mob id? or no?)
+              origin_tower->killed_mob();          
+          }
       }
     } else {
       //NOTE: this shouldn't be possible, but I should check anyways for sanity's sake

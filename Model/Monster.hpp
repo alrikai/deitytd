@@ -69,6 +69,19 @@ public:
       return id; 
     }
 
+    inline bool is_alive() const
+    {
+      return attributes.health > 0;
+    }
+
+    inline bool recieve_damage(const float atk_dmg)
+    {
+       attributes.health -= atk_dmg;
+
+       std::cout << "mob " << get_name() << " has " << attributes.health << " health" << std::endl;
+       return is_alive(); 
+    }
+
     //NOTE: this would be useful if we have some tower ability to teleport mobs around, or if we have map effects like wormholes.
     void set_position (Coordinate<float> position) {
       current_position = position;

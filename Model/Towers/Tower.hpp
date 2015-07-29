@@ -40,6 +40,7 @@ public:
     {
         modifiers.resize(tier_roll);
         mod_count = 0;
+        num_kills = 0;
 
         tier = static_cast<Tier>(tier_roll);
     }
@@ -64,6 +65,12 @@ public:
     {
         for (auto modifier : modifier_list)  
             base_attributes += modifier;
+    }
+
+    //NOTE: we would also trigger any on-kill effects here (if the tower has them)
+    virtual void killed_mob()
+    {
+        num_kills += 1;
     }
 
     inline bool in_range(const float target_dist) const
@@ -91,7 +98,6 @@ public:
     {
         current_target.reset();
     }
-
 
     inline std::string get_id() const
     {
@@ -141,6 +147,7 @@ protected:
 
     //cache the last found target (as having to do lookups every iteration takes too long)
     std::shared_ptr<Monster> current_target;
+    uint32_t num_kills;
 };
 
 namespace TowerGenerator

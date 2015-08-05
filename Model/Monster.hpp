@@ -11,6 +11,8 @@
 #include <list>
 #include <iostream>
 
+class StatusEffect;
+
 struct MonsterStats
 {
     /*
@@ -198,6 +200,8 @@ private:
     CharacterModels::ModelIDs id;
     std::string monster_name;
     MonsterStats attributes;
+
+    friend class StatusEffect;
 };
 
 

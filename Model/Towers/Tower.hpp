@@ -8,6 +8,7 @@
 
 #include "Essences.hpp"
 #include "EssenceSynthesis.hpp"
+#include "StatusEffectIDs.hpp"
 
 #include <memory>
 #include <iostream>
@@ -29,6 +30,7 @@ std::vector<std::pair<T,T>> TowerInformation<T>::TowerTierCoefficients { {20,5},
 // forward declaration of mobs. Keep a ptr to the 'current' target //
 /////////////////////////////////////////////////////////////////////
 class Monster;
+class StatusEffect;
 
 class Tower
 {
@@ -41,8 +43,14 @@ public:
         modifiers.resize(tier_roll);
         mod_count = 0;
         num_kills = 0;
-
         tier = static_cast<Tier>(tier_roll);
+
+		//TODO: put this... somewhere else, I guess. giving these as defaults for testing, but we'll want some
+		//semi-randomized scheme for assigning these effects to towers (or if we have 'uniques', some file that
+		//specifies what towers get what effects.
+        status_effects.push_back(STATUS_EFFECTS_IDS::ARMOR_REDUCE);
+        status_effects.push_back(STATUS_EFFECTS_IDS::FLAT_ATTACK_BOOST);
+
     }
 
     virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
@@ -148,6 +156,17 @@ protected:
     //cache the last found target (as having to do lookups every iteration takes too long)
     std::shared_ptr<Monster> current_target;
     uint32_t num_kills;
+
+    //when the tower attacks, it should spawn zero or more status effects, that apply to the tower and/or the monster.
+    //The tower is the one that should know what statuses to spawn; the towerattack will just carry them along, as when
+    //the attack collides, the status effects will be applied and modify the tower/monster/game state.
+    //
+    //NOTE: will need to change around how I'm doing this part, as I have a circular dependancy wrt the Tower and 
+    //the status effect. Can't use an incomplete type if I store it in a vector. 
+    //COULD just store the enum types, but then I would have to store each statuses' data as well.
+    //--> need to put more thought into the design...
+    friend class StatusEffect;
+	std::vector<STATUS_EFFECTS_IDS> status_effects; 
 };
 
 namespace TowerGenerator

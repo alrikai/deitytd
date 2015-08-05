@@ -1,4 +1,7 @@
 #include "Tower.hpp"
+#include "StatusEffects.hpp"
+
+class TowerStatusEffect;
 
 //why the hell do I have this here?
 std::ostream& operator <<(std::ostream& out_stream, const tower_properties& props)
@@ -81,6 +84,28 @@ std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attac
     //starting location
     params.origin_position = position;
     
+    //TODO: make the status effect generation parameter object(s) elsewhere (i.e. at tower creation)
+	//TODO: have the status effect parameter generation be more... intelligent (either load from find or randomize 
+	//the effects based on the tower tier. Actually the randomization part will be quite involved)
+    //... the specific statuses' parameters (same thing for the status metadata).
+	//NOTE: the status effect parameters will be general for the tower, but the status metadata will be PER 
+	//status (since they'll have different lifespans and precedence levels)
+    StatusParameters status_params;
+	status_params.armor_reduce_amount = 1;
+    status_params.flat_attack_amount = 10;
+
+	//TODO: generate the tower effects here as well
+	//...
+	//
+	for (int i = 0; i < status_effects.size(); ++i) {
+	    StatusData status_metadata;
+	    status_metadata.duration = 5;
+	    status_metadata.precedence = 1;
+		
+		auto generated_status_effect = status_effects::generate_status (status_effects[i], status_metadata, status_params);
+        std::cout << "Tower status generated " << typeid(generated_status_effect).name() << std::endl; 
+	}
+
     //attack movement type -- homing updates the attack movement wrt a target,
     //while non-homing has an initial destination and moves towards it
     bool has_homing = true;

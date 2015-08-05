@@ -800,39 +800,40 @@ namespace affine_fcns
                 std::vector<data_t> default_color {0.25, 0.25, 1.0};
                 return generate_variant<variant, V0, data_t>(1.0, default_color);
             };
-            flame_maker.register_variant(V0<data_t>::name, fobj);
+            flame_maker.register_product(V0<data_t>::name, fobj);
 
-            flame_maker.register_variant(V1<data_t>::name, [](){return generate_variant<variant, V1, data_t>(1.0);});            
-            flame_maker.register_variant(V2<data_t>::name, [](){return generate_variant<variant, V2, data_t>(1.0);});            
-            flame_maker.register_variant(V3<data_t>::name, [](){return generate_variant<variant, V3, data_t>(1.0);});            
-            flame_maker.register_variant(V4<data_t>::name, [](){return generate_variant<variant, V4, data_t>(1.0);});            
-            flame_maker.register_variant(V5<data_t>::name, [](){return generate_variant<variant, V5, data_t>(1.0);});            
-            flame_maker.register_variant(V6<data_t>::name, [](){return generate_variant<variant, V6, data_t>(1.0);});            
-            flame_maker.register_variant(V7<data_t>::name, [](){return generate_variant<variant, V7, data_t>(1.0);});            
-            flame_maker.register_variant(V8<data_t>::name, [](){return generate_variant<variant, V8, data_t>(1.0);});            
-            flame_maker.register_variant(V9<data_t>::name, [](){return generate_variant<variant, V9, data_t>(1.0);});            
+            flame_maker.register_product(V1<data_t>::name, [](){return generate_variant<variant, V1, data_t>(1.0);});            
+            flame_maker.register_product(V2<data_t>::name, [](){return generate_variant<variant, V2, data_t>(1.0);});            
+            flame_maker.register_product(V3<data_t>::name, [](){return generate_variant<variant, V3, data_t>(1.0);});            
+            flame_maker.register_product(V4<data_t>::name, [](){return generate_variant<variant, V4, data_t>(1.0);});            
+            flame_maker.register_product(V5<data_t>::name, [](){return generate_variant<variant, V5, data_t>(1.0);});            
+            flame_maker.register_product(V6<data_t>::name, [](){return generate_variant<variant, V6, data_t>(1.0);});            
+            flame_maker.register_product(V7<data_t>::name, [](){return generate_variant<variant, V7, data_t>(1.0);});            
+            flame_maker.register_product(V8<data_t>::name, [](){return generate_variant<variant, V8, data_t>(1.0);});            
+            flame_maker.register_product(V9<data_t>::name, [](){return generate_variant<variant, V9, data_t>(1.0);});            
 
-            flame_maker.register_variant(V10<data_t>::name, [](){return generate_variant<variant, V10, data_t>(1.0);});            
-            flame_maker.register_variant(V11<data_t>::name, [](){return generate_variant<variant, V11, data_t>(1.0);});            
-            flame_maker.register_variant(V12<data_t>::name, [](){return generate_variant<variant, V12, data_t>(1.0);});            
-            flame_maker.register_variant(V13<data_t>::name, [](){return generate_variant<variant, V13, data_t>(1.0);});            
-            flame_maker.register_variant(V14<data_t>::name, [](){return generate_variant<variant, V14, data_t>(1.0);});            
-            flame_maker.register_variant(V15<data_t>::name, [](){return generate_variant<variant, V15, data_t>(1.0);});            
-            flame_maker.register_variant(V16<data_t>::name, [](){return generate_variant<variant, V16, data_t>(1.0);});            
-            flame_maker.register_variant(V17<data_t>::name, [](){return generate_variant<variant, V17, data_t>(1.0);});            
-            flame_maker.register_variant(V18<data_t>::name, [](){return generate_variant<variant, V18, data_t>(1.0);});            
-            flame_maker.register_variant(V19<data_t>::name, [](){return generate_variant<variant, V19, data_t>(1.0);});            
+            flame_maker.register_product(V10<data_t>::name, [](){return generate_variant<variant, V10, data_t>(1.0);});            
+            flame_maker.register_product(V11<data_t>::name, [](){return generate_variant<variant, V11, data_t>(1.0);});            
+            flame_maker.register_product(V12<data_t>::name, [](){return generate_variant<variant, V12, data_t>(1.0);});            
+            flame_maker.register_product(V13<data_t>::name, [](){return generate_variant<variant, V13, data_t>(1.0);});            
+            flame_maker.register_product(V14<data_t>::name, [](){return generate_variant<variant, V14, data_t>(1.0);});            
+            flame_maker.register_product(V15<data_t>::name, [](){return generate_variant<variant, V15, data_t>(1.0);});            
+            flame_maker.register_product(V16<data_t>::name, [](){return generate_variant<variant, V16, data_t>(1.0);});            
+            flame_maker.register_product(V17<data_t>::name, [](){return generate_variant<variant, V17, data_t>(1.0);});            
+            flame_maker.register_product(V18<data_t>::name, [](){return generate_variant<variant, V18, data_t>(1.0);});            
+            flame_maker.register_product(V19<data_t>::name, [](){return generate_variant<variant, V19, data_t>(1.0);});            
 
-            flame_maker.register_variant(V20<data_t>::name, [](){return generate_variant<variant, V20, data_t>(1.0);});            
-            flame_maker.register_variant(V21<data_t>::name, [](){return generate_variant<variant, V21, data_t>(1.0);});            
-            flame_maker.register_variant(V22<data_t>::name, [](){return generate_variant<variant, V22, data_t>(1.0);});            
-            flame_maker.register_variant(V23<data_t>::name, [](){return generate_variant<variant, V23, data_t>(1.0);});            
-            flame_maker.register_variant(V24<data_t>::name, [](){return generate_variant<variant, V24, data_t>(1.0);});            
-            flame_maker.register_variant(V25<data_t>::name, [](){return generate_variant<variant, V25, data_t>(1.0);});            
+            flame_maker.register_product(V20<data_t>::name, [](){return generate_variant<variant, V20, data_t>(1.0);});            
+            flame_maker.register_product(V21<data_t>::name, [](){return generate_variant<variant, V21, data_t>(1.0);});            
+            flame_maker.register_product(V22<data_t>::name, [](){return generate_variant<variant, V22, data_t>(1.0);});            
+            flame_maker.register_product(V23<data_t>::name, [](){return generate_variant<variant, V23, data_t>(1.0);});            
+            flame_maker.register_product(V24<data_t>::name, [](){return generate_variant<variant, V24, data_t>(1.0);});            
+            flame_maker.register_product(V25<data_t>::name, [](){return generate_variant<variant, V25, data_t>(1.0);});            
         }
 
         const static std::vector<std::string> variant_names;
-        flame_factory<affine_fcns::variant<data_t>, std::string, std::function<affine_fcns::variant<data_t>* ()>> flame_maker;
+        typedef Factory<affine_fcns::variant<data_t>, std::string, std::function<affine_fcns::variant<data_t>* ()>> flame_factory;
+        flame_factory flame_maker;
     };
     template <typename data_t>
     const std::vector<std::string> variant_list<data_t>::variant_names  

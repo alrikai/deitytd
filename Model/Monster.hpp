@@ -5,26 +5,13 @@
 #include "ModelUtils.hpp"
 #include "util/Types.hpp"
 #include "util/Elements.hpp"
+#include "StatusEffects.hpp"
 
 #include <tuple>
 #include <memory>
 #include <list>
 #include <iostream>
 
-class StatusEffect;
-
-struct MonsterStats
-{
-    /*
-     * TODO: determine which stats are needed for the monster type
-     *
-     */
-    float health;
-    float speed;
-    //currently using the same elements as the attacks; consider if we want a seperate armor type system
-    Elements armor_class;
-    float armor_amount;
-};
 
 /*
  * The monster class -- just a placeholder for now
@@ -200,8 +187,6 @@ private:
     CharacterModels::ModelIDs id;
     std::string monster_name;
     MonsterStats attributes;
-
-    friend class StatusEffect;
 };
 
 

@@ -214,6 +214,18 @@ inline tower_properties operator+ (tower_properties lhs_modifier, const tower_pr
     return lhs_modifier;
 }
 
+struct MonsterStats
+{
+    /*
+     * TODO: determine which stats are needed for the monster type
+     *
+     */
+    float health;
+    float speed;
+    //currently using the same elements as the attacks; consider if we want a seperate armor type system
+    Elements armor_class;
+    float armor_amount;
+};
 
 #endif
 

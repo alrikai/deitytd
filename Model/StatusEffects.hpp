@@ -14,9 +14,11 @@
  *
  */
 
-#include "Towers/Tower.hpp"
-#include "Monster.hpp"
+//#include "Towers/Tower.hpp"
+//#include "Monster.hpp"
 
+#include "util/Elements.hpp"
+#include "factory.hpp"
 #include "StatusEffectIDs.hpp"
 
 
@@ -40,24 +42,28 @@ struct StatusData
 };
 
 
-class StatusEffect
+//status effects that have some finite lifespan (i.e. an effect that's applied on-hit and lasts N-seconds)
+class TimedStatusEffect
 {
 public:
-    StatusEffect(const StatusData& status_metadata) 
+    TimedStatusEffect(const StatusData& status_metadata) 
         : status_metadata (status_metadata)
     {}
 
-    StatusEffect (const int32_t duration, const int32_t precedence) 
+    TimedStatusEffect (const int32_t duration, const int32_t precedence) 
         : status_metadata (StatusData (duration, precedence))
     {
         
     }
 
-    virtual ~StatusEffect() 
+    virtual ~TimedStatusEffect() 
     {}
-
-    virtual void apply(Monster* mob, Tower* tower) = 0;
-
+    
+    virtual void apply(MonsterStats& mob_attributes)
+    {}
+    virtual void apply(tower_properties& tower_attributes)
+    {}
+    
     //called on every round during pre-processing; updates the lifecycle and returns 
     //if the status should be active or should be discarded this cycle
     virtual bool update_lifecycle()
@@ -77,23 +83,20 @@ private:
 
 //-------------------------------------------------------------------------------------------------------------------
 
-class ArmorReduceStatus : public StatusEffect
+
+class ArmorReduceStatus : public TimedStatusEffect
 {
 public:
     ArmorReduceStatus (const StatusData& status_metadata, const StatusParameters& status_param) 
-        : StatusEffect(status_metadata)
+        : TimedStatusEffect(status_metadata)
     {
       sunder_amt = status_param.armor_reduce_amount;
     }
 
-    //TODO: okay, this design is flawed. Was hoping to be able to change (any of) the parameters via the statuses,
-    //but forgot that friendship isn't inherited. So I would need to explicitly declare every subclass status
-    //as being friends of the Tower / Monster classes. siiiigh
-    //
     //NOTE: effect has no effect on towers
-    void apply(Monster* mob, Tower* tower) override
+    void apply(MonsterStats& mob_attributes) override
     {
-        mob->attributes.armor_amount -= sunder_amt;
+        mob_attributes.armor_amount -= sunder_amt;
     }  
 
 private:
@@ -105,21 +108,24 @@ private:
 
 //-------------------------------------------------------------------------------------------------------------------
 
+
 //flat +dmg effect
-class FlatAttackBoostStatus : public StatusEffect
+//NOTE: has no effect on monsters
+class FlatAttackBoostStatus : public TimedStatusEffect
 {
 public:
     FlatAttackBoostStatus (const StatusData& status_metadata, const StatusParameters& status_param) 
-        : StatusEffect(status_metadata)
+        : TimedStatusEffect(status_metadata)
     {
       atkboost_amt = status_param.flat_attack_amount;
     }
 
-    //NOTE: has no effect on monsters
-    void apply(Monster* mob, Tower* tower) override
+    void apply(tower_properties& tower_attributes) override
     {
-        tower->attack_attributes.damage.damage_range.low += atkboost_amt;
-        tower->attack_attributes.damage.damage_range.highi += atkboost_amt;
+        for (int element_idx = 0; element_idx < tower_properties::NUM_ELEMENTS; ++element_idx) {
+            tower_attributes.damage[element_idx].damage_range.low += atkboost_amt;
+            tower_attributes.damage[element_idx].damage_range.high += atkboost_amt;
+        }
     }  
 
 private:
@@ -131,32 +137,38 @@ private:
 namespace status_effects {
     namespace detail {
         //generalized constructor, of sorts
-        template <template status_t,typename ... status_args>
-        status_t* generate_status_object (status_args&& ... args)
+        template <typename status_t,typename ... status_args>
+        TimedStatusEffect* generate_status_object_ (status_args&& ... args)
         {
             return new status_t(std::forward<status_args>(args) ... );
         }
 
+        template <typename status_t>
+        TimedStatusEffect* generate_status_object (const StatusData& sdata, const StatusParameters& sparams)
+        {
+            return new status_t(sdata, sparams);
+        }
 
         struct status_generator
         {
-          using status_factory = Factory<StatusEffect*, STATUS_EFFECTS_IDS, std::function<StatusEffect* (const StatusData&, const StatusParameters&)>>;
-          status_factory status_effect_maker;
+            using status_factoryfcn_t = std::function<TimedStatusEffect* (const StatusData&, const StatusParameters&)>;
+            using status_factory_t = Factory<TimedStatusEffect, STATUS_EFFECTS_IDS, status_factoryfcn_t>;
+            status_factory_t status_effect_maker;
     
-          generator()
-          {
-            status_effect_maker.register_product(STATUS_EFFECTS_IDS::ARMOR_REDUCE, std::bind(generate_status_object<ArmorReduceStatus>, std::placeholders::_1, std::placeholders::_2)); 
-            status_effect_maker.register_product(STATUS_EFFECTS_IDS::FLAT_ATTACK_BOOST, std::bind(generate_status_object<FlatAttackBoostStatus>, std::placeholders::_1, std::placeholders::_2));
+            status_generator()
+            {
+                status_effect_maker.register_product(STATUS_EFFECTS_IDS::ARMOR_REDUCE, std::bind(generate_status_object<ArmorReduceStatus>, std::placeholders::_1, std::placeholders::_2)); 
+                status_effect_maker.register_product(STATUS_EFFECTS_IDS::FLAT_ATTACK_BOOST, std::bind(generate_status_object<FlatAttackBoostStatus>, std::placeholders::_1, std::placeholders::_2));
 
-            //TODO: register the rest of them... 
-          }
+                //TODO: register the rest of them... 
+            }
         };
     }
 
-    std::unique_ptr<StatusEffect> generate_status(const STATUS_EFFECTS_IDS status_id, const StatusData& status_metadata, const StatusParameters& status_params)
+    inline std::unique_ptr<TimedStatusEffect> generate_status(const STATUS_EFFECTS_IDS status_id, const StatusData& status_metadata, const StatusParameters& status_params)
     {
         static detail::status_generator status_effect_factory;
-        return std::unique_ptr<StatusEffect> (status_effect_factory.create_product(status_metadata, status_params));
+        return std::unique_ptr<TimedStatusEffect> (status_effect_factory.status_effect_maker.create_product(status_id, status_metadata, status_params));
     }
 
 }

@@ -98,9 +98,9 @@ std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attac
 	//...
 	//
 	for (int i = 0; i < status_effects.size(); ++i) {
-	    StatusData status_metadata;
-	    status_metadata.duration = 5;
-	    status_metadata.precedence = 1;
+        const int duration = 5;
+        const int precedence = 1;
+	    StatusData status_metadata (duration, precedence);
 		
 		auto generated_status_effect = status_effects::generate_status (status_effects[i], status_metadata, status_params);
         std::cout << "Tower status generated " << typeid(generated_status_effect).name() << std::endl; 

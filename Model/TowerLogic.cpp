@@ -325,9 +325,12 @@ void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp)
             if(hit_tile->resident_mobs.size() > 0)
             {
               //if only 1 mob, then that's the target. What do we do if there's more than 1?
-              //
               std::cout << "hit tile had " << hit_tile->resident_mobs.size() << " #mobs" << std::endl;
               
+              //apply the attack modifiers for this turn -- NOTE: we only need to APPLY them if the attack
+              //hits, but we need to decrement the lifespan of the statuses regardless
+              
+
               //NOTE: we assume here that the attack object isn't needed after it hits its target
               //TODO: introduce a mechanism for attacks to spawn new attacks (i.e. if we have a piercing attack, or one that does a fan-of-knives type on-hit effect)
  
@@ -365,8 +368,8 @@ void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp)
               continue;        
 
             }
-
         }
+
 
         attack_it++;
     }

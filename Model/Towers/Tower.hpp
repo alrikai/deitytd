@@ -45,12 +45,7 @@ public:
         num_kills = 0;
         tier = static_cast<Tier>(tier_roll);
 
-		//TODO: put this... somewhere else, I guess. giving these as defaults for testing, but we'll want some
-		//semi-randomized scheme for assigning these effects to towers (or if we have 'uniques', some file that
-		//specifies what towers get what effects.
-        status_effects.push_back(STATUS_EFFECTS_IDS::ARMOR_REDUCE);
-        status_effects.push_back(STATUS_EFFECTS_IDS::FLAT_ATTACK_BOOST);
-
+        generate_statuseffects();
     }
 
     virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
@@ -128,6 +123,8 @@ protected:
         return static_cast<typename std::underlying_type<EType>::type>(t);
     }
 
+    void generate_statuseffects();
+
     const static int MAX_UPGRADE_LEVEL = 3;
 
     //the baseline, fundamental (and immutable) attributes
@@ -166,7 +163,21 @@ protected:
     //COULD just store the enum types, but then I would have to store each statuses' data as well.
     //--> need to put more thought into the design...
     friend class StatusEffect;
-	std::vector<STATUS_EFFECTS_IDS> status_effects; 
+    
+    //the per-status effect metadata
+    struct statuseffect_metadata
+    {
+        statuseffect_metadata (STATUS_EFFECTS_IDS sid, const int duration, const int precedence) 
+            : id(sid), metadata(duration, precedence)
+        {}
+        
+        STATUS_EFFECTS_IDS id;
+        StatusData metadata;
+    };
+	std::vector<statuseffect_metadata> status_effects; 
+
+    //the tower-wide status parameters
+    StatusParameters status_params;
 };
 
 namespace TowerGenerator

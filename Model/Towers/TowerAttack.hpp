@@ -114,39 +114,7 @@ public:
         return has_hit_target; 
     }
 
-
-
     virtual Coordinate<float> move_update(const uint64_t time) = 0;
-    /*
-    {
-        //move speed dictates the maximum L2 distance the attack can move in a turn.
-        //We need to move the attack position along this trajectory, and see if the
-        //target is within the attack range
-
-        //distance to move based on last move time
-        //float ms = (time - timestamp) * params.move_speed;
-        float ms = 0.5;
-        timestamp = time;        
-
-        float nx_factor = (params.target_position.col - current_position.col);
-        float ny_factor = (params.target_position.row - current_position.row);
-        float target_dist = std::sqrt(nx_factor*nx_factor + ny_factor*ny_factor);
-
-        if(target_dist < ms)
-        {
-            //need to take care for over-shooting -- for now we can do something a bit less difficult...
-            current_position = params.target_position;
-            has_hit_target = true;
-        }
-        else
-        {
-            float dist_mag = ms / target_dist;
-            current_position.col += nx_factor * dist_mag;
-            current_position.row += ny_factor * dist_mag;
-        }
-        return current_position;
-    }
-    */
 
 protected:
     TowerAttackParams params;

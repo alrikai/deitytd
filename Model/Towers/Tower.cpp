@@ -1,5 +1,7 @@
 #include "Tower.hpp"
+
 #include "StatusEffects.hpp"
+#include "util/RandomUtility.hpp"
 
 class TowerStatusEffect;
 
@@ -70,6 +72,80 @@ bool Tower::add_modifier(tower_generator tower_gen, essence* modifier)
     return true;
 }
 
+/*
+ * this one still needs some work; I want to have the towers 'choose' their status effects
+ * i.e. the types that they'll have, how long they'll last, what magnitude they'll have, etc.
+ * This should have an element of randomness, weighted by the tower's tier, among other things
+ *
+ * Make a proof-of-concept for now, and refine/rebalance as we go, I guess
+ */
+void Tower::generate_statuseffects()
+{
+    //TODO: put this... somewhere else, I guess. giving these as defaults for testing, but we'll want some
+    //semi-randomized scheme for assigning these effects to towers (or if we have 'uniques', some file that
+    //specifies what towers get what effects.
+
+    int num_effects = static_cast<int> (tier);
+    Randomize::UniformRoller effect_dice;
+    //TODO: this is the #total possible effects... note that this should
+    //A. be defined elsewhere
+    //B. be a bit more intelligent; i.e. if the effects themselves are tiered, we don't want even distributions, etc.
+    static constexpr int num_total_effects = 2;
+
+    //TODO: how to handle repeats? i.e. if we get the same status twice, what do we do? 
+    //1. we could just NOT allow that to happen,
+    //2. we could have them stack
+    //3. we could have 1 override the other(s)
+    //4. some combination of the above... i.e. take the max of the duration(s) and the max of the magnitude(s)
+    //... I think having them stack would be the more interesting mechanic, although balance would be tricky
+    for (int se_idx = 0; se_idx < num_effects; ++se_idx) {
+        //TODO: for now, just randomly select from the possible statuses...
+        const int rolled_idx = static_cast<int>(effect_dice.get_roll(num_total_effects));
+        auto effect_id = static_cast<STATUS_EFFECTS_IDS>(rolled_idx); //STATUS_EFFECTS_IDS::ARMOR_REDUCE;
+        auto effect_precedence = status_helper::get_status_id_precedence(effect_id);
+        //status_helper::get_status_durationrange
+        auto effect_duration = 1;
+        
+        //@HERE: would need to check for duplicates in the status_effects vector. Since we won't (ever?)
+        //exceed ~10 effects in a tower, we'll just brute force the search
+       
+        //TODO: this method doesn't mesh very well with the centralized parameter approach; namely, since we are treating
+        //the status effects homogeneously here, there's not a good way to access their corresponding parameter in the 
+        //status_params structure. How to rectify this? --> could change the status_params to be an aggregation of each
+        //status effect's parameters, s.t. we make each status effect's parameters individually, then assign them into 
+        //the aggregate parameter afterwards. 
+        bool new_effect = true;
+        for (auto effect_it : status_effects) {
+            if (effect_id == effect_it.id) {
+                new_effect = false;
+                std::cout << "NOTE: stacking effect " << (int)effect_id << " from D: " << effect_it.metadata.life_ticks << std::endl;
+             
+                //TODO: this is more or less a placeholder for the 'real' merging (see the 1-up TODO comment)
+                effect_it.metadata.life_ticks += effect_duration;
+                
+                std::cout << "... to D: " << effect_it.metadata.life_ticks << std::endl;
+            }
+        }
+
+        if(new_effect) {
+            status_effects.push_back(statuseffect_metadata(effect_id, effect_duration, effect_precedence));
+        }
+    }
+    //status_effects.push_back(statuseffect_metadata(STATUS_EFFECTS_IDS::FLAT_ATTACK_BOOST, 1, 1);
+
+    //the next question; how to store the parameters for the status effects?
+    //TODO: will we ever have these change? i.e. if we have some meta-modifiers, like 1.5x all +dmg modifiers for N seconds....
+ 	//TODO: have the status effect parameter generation be more... intelligent (either load from find or randomize 
+	//the effects based on the tower tier. Actually the randomization part will be quite involved)
+    //... the specific statuses' parameters (same thing for the status metadata).
+	//NOTE: the status effect parameters will be general for the tower, but the status metadata will be PER 
+	//status (since they'll have different lifespans and precedence levels)
+    //
+	status_params.armor_reduce_amount = 1;
+    status_params.flat_attack_amount = 10;
+
+}
+
 std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attack_id, const uint64_t timestamp)
 {
     //NOTE: we assume that the tower has a target if it is generating attacks (NOTE: will not work if we allow say, an 'attack ground' option for splash towers)
@@ -83,28 +159,18 @@ std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attac
     params.origin_timestamp = timestamp;
     //starting location
     params.origin_position = position;
-    
-    //TODO: make the status effect generation parameter object(s) elsewhere (i.e. at tower creation)
-	//TODO: have the status effect parameter generation be more... intelligent (either load from find or randomize 
-	//the effects based on the tower tier. Actually the randomization part will be quite involved)
-    //... the specific statuses' parameters (same thing for the status metadata).
-	//NOTE: the status effect parameters will be general for the tower, but the status metadata will be PER 
-	//status (since they'll have different lifespans and precedence levels)
-    StatusParameters status_params;
-	status_params.armor_reduce_amount = 1;
-    status_params.flat_attack_amount = 10;
 
-	//TODO: generate the tower effects here as well
-	//...
-	//
-	for (int i = 0; i < status_effects.size(); ++i) {
-        const int duration = 5;
-        const int precedence = 1;
-	    StatusData status_metadata (duration, precedence);
-		
-		auto generated_status_effect = status_effects::generate_status (status_effects[i], status_metadata, status_params);
-        std::cout << "Tower status generated " << typeid(generated_status_effect).name() << std::endl; 
+    //reset the (per-cycle) attack atttributes
+    attack_attributes = base_attributes;
+
+   
+	//generate the tower effects for the attack
+    for (auto effect_it : status_effects) {
+		auto generated_status_effect = status_effects::generate_status (effect_it.id, effect_it.metadata, status_params);
+        generated_status_effect->apply(attack_attributes);
 	}
+    std::cout << "Tower (temporary) properties " << attack_attributes << std::endl; 
+
 
     //attack movement type -- homing updates the attack movement wrt a target,
     //while non-homing has an initial destination and moves towards it

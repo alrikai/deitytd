@@ -38,7 +38,8 @@ message("OpenCV include: " ${OpenCV_INCLUDE_DIRS})
 message("OpenCV link: " ${OpenCV_LIBS})
 
 #Boost
-FIND_PACKAGE(Boost 1.55.0 REQUIRED)
+#FIND_PACKAGE(Boost 1.55.0 REQUIRED)
+FIND_PACKAGE(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 message("Boost include: " ${Boost_INCLUDE_DIRS})
 message("Boost link: " ${Boost_LIBS})

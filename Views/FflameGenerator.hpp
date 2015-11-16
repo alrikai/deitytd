@@ -73,7 +73,7 @@ private:
         for (int i = 0; i < num_working_variants; ++i) 
         {
             auto selected_variant = affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
-            working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_variant(selected_variant));
+            working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_product(selected_variant));
         } 
     
         flamer = std::unique_ptr<affine_fcns::invoker<data_t>> (new affine_fcns::invoker<data_t>(std::move(working_variants)));
@@ -193,7 +193,7 @@ void fflame_generator<data_t, pixel_t>::generate_fflame(fflame_randutil::fast_ra
             auto selected_variant = affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
             //replace a random variant (that's not the linear variant)
             int mod_idx = total_variant_rng(flame_gen) % num_working_variants;
-            flamer->fcn.at(mod_idx).reset(variant_maker.flame_maker.create_variant(selected_variant)); 
+            flamer->fcn.at(mod_idx).reset(variant_maker.flame_maker.create_product(selected_variant)); 
             flamer->randomize_parameters(-2, 2);
 
             flame_prebarrier.reset(num_workers);

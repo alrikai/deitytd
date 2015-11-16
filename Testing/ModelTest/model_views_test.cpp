@@ -46,7 +46,6 @@ void add_testtower(TDType* td)
 
 int main()
 {
-
   	std::cout << "Path is: " << TDHelpers::get_basepath() << std::endl;
     using TDBackendType = TowerLogic;
     using TDType = TowerDefense<OgreDisplay, TDBackendType>;

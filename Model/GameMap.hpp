@@ -34,7 +34,9 @@ public:
     static constexpr double NormFactorHeight = 1.0/MAP_HEIGHT;
     static constexpr double NormFactorWidth = 1.0/MAP_WIDTH;
     //indexed as [row][column]
+    using MapTileT = MapTile;
     using MapElements = std::array<std::array<MapTile, MAP_WIDTH>, MAP_HEIGHT>;
+    
 
     GameMap() 
         : tile_height(NormFactorHeight), tile_width(NormFactorWidth)
@@ -42,9 +44,26 @@ public:
         setmap_dims();
     }
 
-    MapTile* get_tile(const int t_col, const int t_row)
+    const MapTile* get_tile(const int t_col, const int t_row) const
     {
         return &map[t_row][t_col];
+    }
+
+		const MapTile* get_tile(const IndexCoordinate& coord) const
+    {
+        return &map[coord.row][coord.col];
+    }
+
+
+
+    MapTile* get_tile(const int t_col, const int t_row) 
+    {
+        return &map[t_row][t_col];
+    }
+
+		MapTile* get_tile(const IndexCoordinate& coord) 
+    {
+        return &map[coord.row][coord.col];
     }
 
     //assume these are normalized coordinates 
@@ -60,6 +79,19 @@ public:
         return IndexCoordinate (tile_col, tile_row);
     }
 
+    //assume these are normalized coordinates 
+    IndexCoordinate get_bounding_tile(const Coordinate<float>& location) const 
+    {
+        //check boundary
+        if(location.row > 1.0f || location.col > 1.0f || location.row < 0.0f || location.col < 0.0f)
+            return IndexCoordinate(-1, -1);
+
+        //we want to get incides row e [0, MAP_HEIGHT), col e [0, MAP_WIDTH) from the normalized input row | col vals
+        const int tile_row = std::floor(location.row/tile_height);
+        const int tile_col = std::floor(location.col/tile_width);
+        return IndexCoordinate (tile_col, tile_row);
+    }
+
     TowerCoordinate get_tower_block(const float col_location, const float row_location) const
     {
         //check boundary
@@ -72,6 +104,11 @@ public:
         //NOTE: returned range is [inclusive, exclusive)
         return TowerCoordinate(std::make_tuple(tower_col, tower_col + GameMap::TowerTileWidth), 
                                std::make_tuple(tower_row, tower_row + GameMap::TowerTileHeight));
+    }
+
+    bool is_obstructed(const int col_location, const int row_location) const 
+    {
+      return map[row_location][col_location].occupied;
     }
 
     bool is_obstructed(const float col_location, const float row_location) const 
@@ -113,6 +150,50 @@ public:
         double block_center_row = std::get<0>(tcoord.row) + (std::get<1>(tcoord.row) - std::get<0>(tcoord.row))/2.0;
         double block_center_col = (std::get<0>(tcoord.col) + (std::get<1>(tcoord.col) - std::get<0>(tcoord.col))/2.0);
         return Coordinate<double>(tile_width * block_center_col, tile_height * block_center_row);
+    }
+
+    template <typename MobID>
+    void remove_mob(Coordinate<float> tile_coord, const MobID& mob_id)
+    {
+      auto tile_idx = get_bounding_tile(tile_coord);
+      auto target_tile = get_tile(tile_idx);
+
+      auto mob_it = std::find_if(target_tile->resident_mobs.begin(), target_tile->resident_mobs.end(), 
+        [mob_id](const std::weak_ptr<Monster> &m)
+        {
+          //TODO: we might want to use different comparison schemes for identifying a mob (comparing strings is slower than say, ints)
+          //will want to move this kind of thing into the Monster class itself
+          if (auto target_mob = m.lock()) {
+            auto target_name = target_mob->get_name();
+            return target_name == mob_id;
+          }
+          return false;
+        });
+
+      if(mob_it != target_tile->resident_mobs.end()) {
+        if (auto target_mob = mob_it->lock()) {
+        std::cout << "removing mob " << target_mob->get_name() << " from tile (" << tile_idx.col << ", " << tile_idx.row << ")" << std::endl;
+        }
+        target_tile->resident_mobs.erase(mob_it);
+
+        std::cout << "Target tile @(" << tile_idx.col << ", " << tile_idx.row << ")" << " has " << target_tile->resident_mobs.size() << " #mobs left" << std::endl;
+      } else {
+        std::cout << "Mob isn't in tile" << std::endl;
+      }
+
+      /*
+      std::remove_if(target_tile->resident_mobs.begin(), target_tile->resident_mobs.end(), 
+        [mob_id](const std::weak_ptr<Monster> &m)
+        {
+          //TODO: we might want to use different comparison schemes for identifying a mob (comparing strings is slower than say, ints)
+          //will want to move this kind of thing into the Monster class itself
+          if (auto target_mob = m.lock()) {
+            auto target_name = target_mob->get_name();
+            return target_name == mob_id;
+          }
+          return false;
+        });
+      */
     }
 
     //would likely have other helper functions -- 

@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
             //user input variant is correct, use it in the working variants
             if(variant_it != affine_fcns::variant_list<data_t>::variant_names.end())
             {
-                working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_variant(input_variant));
+                working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_product(input_variant));
                 selected_variants.emplace_back(input_variant);
             }
             else
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < num_working_variants; ++i) 
     {
         auto selected_variant = affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
-        working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_variant(selected_variant));
+        working_variants.at(i) = std::shared_ptr<affine_fcns::variant<data_t>>(variant_maker.flame_maker.create_product(selected_variant));
         current_variants.at(i) = selected_variant;
     } 
 
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
         auto selected_variant = affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
         //replace a random variant (that's not the linear variant)                                                                                                                                                                     
         int mod_idx = total_variant_rng(flame_gen) % num_working_variants;
-        flamer->fcn.at(mod_idx).reset(variant_maker.flame_maker.create_variant(selected_variant));
+        flamer->fcn.at(mod_idx).reset(variant_maker.flame_maker.create_product(selected_variant));
         flamer->randomize_parameters(-2, 2);
 
 

@@ -3,12 +3,11 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 SET (VIEWS_SRCS frontend_test.cpp)                                                            
 ADD_EXECUTABLE(TestView ${VIEWS_SRCS})
 TARGET_LINK_LIBRARIES(TestView 
-                      TDView 
-                      Controller 
+                      TDView Controller TDCommon
                       ${OPENCL_LIBRARIES} 
- 		      ${OpenCV_LIBS} 
- 		      ${OIS_LIBRARIES} 
-		      ${OGRE_LIBRARIES})
+					  ${OpenCV_LIBS} 
+				 	  ${OIS_LIBRARIES} 
+					  ${OGRE_LIBRARIES})
 
 #					  ${PCL_COMMON_LIBRARIES}
 #					  ${PCL_SURFACE_LIBRARIES}

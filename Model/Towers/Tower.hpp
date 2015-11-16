@@ -8,6 +8,7 @@
 
 #include "Essences.hpp"
 #include "EssenceSynthesis.hpp"
+#include "StatusEffectIDs.hpp"
 
 #include <memory>
 #include <iostream>
@@ -29,6 +30,7 @@ std::vector<std::pair<T,T>> TowerInformation<T>::TowerTierCoefficients { {20,5},
 // forward declaration of mobs. Keep a ptr to the 'current' target //
 /////////////////////////////////////////////////////////////////////
 class Monster;
+class StatusEffect;
 
 class Tower
 {
@@ -40,15 +42,17 @@ public:
     {
         modifiers.resize(tier_roll);
         mod_count = 0;
-
+        num_kills = 0;
         tier = static_cast<Tier>(tier_roll);
+
+        generate_statuseffects();
     }
 
     virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
     
     //this is baisically a factory function for generating a given towers' attacks.
     //Tower subclasses can override to do whatever extra steps they need
-    virtual std::unique_ptr<TowerAttack> generate_attack(const std::string& attack_id, const uint64_t timestamp);
+    virtual std::unique_ptr<TowerAttackBase> generate_attack(const std::string& attack_id, const uint64_t timestamp);
 
     virtual void set_model(std::shared_ptr<TowerModel> t_model)
     {
@@ -66,20 +70,36 @@ public:
             base_attributes += modifier;
     }
 
+    //NOTE: we would also trigger any on-kill effects here (if the tower has them)
+    virtual void killed_mob()
+    {
+        num_kills += 1;
+    }
+
     inline bool in_range(const float target_dist) const
     {
         //return target_dist < attack_attributes.attack_range;
         return target_dist < base_attributes.attack_range;
     }
 
-    inline Monster* get_target() const
+    inline std::shared_ptr<Monster> get_target() const
     {
         return current_target;
     }
 
-    inline void set_target (Monster* mob)
+    inline std::string get_target_id() const
+    {
+        return current_target->get_name();
+    }   
+
+    inline void set_target (std::shared_ptr<Monster>& mob)
     {
         current_target = mob;
+    }
+
+    inline void reset_target ()
+    {
+        current_target.reset();
     }
 
     inline std::string get_id() const
@@ -102,6 +122,8 @@ protected:
     {
         return static_cast<typename std::underlying_type<EType>::type>(t);
     }
+
+    void generate_statuseffects();
 
     const static int MAX_UPGRADE_LEVEL = 3;
 
@@ -129,7 +151,33 @@ protected:
     Coordinate<float> position;
 
     //cache the last found target (as having to do lookups every iteration takes too long)
-    Monster* current_target;
+    std::shared_ptr<Monster> current_target;
+    uint32_t num_kills;
+
+    //when the tower attacks, it should spawn zero or more status effects, that apply to the tower and/or the monster.
+    //The tower is the one that should know what statuses to spawn; the towerattack will just carry them along, as when
+    //the attack collides, the status effects will be applied and modify the tower/monster/game state.
+    //
+    //NOTE: will need to change around how I'm doing this part, as I have a circular dependancy wrt the Tower and 
+    //the status effect. Can't use an incomplete type if I store it in a vector. 
+    //COULD just store the enum types, but then I would have to store each statuses' data as well.
+    //--> need to put more thought into the design...
+    friend class StatusEffect;
+    
+    //the per-status effect metadata
+    struct statuseffect_metadata
+    {
+        statuseffect_metadata (STATUS_EFFECTS_IDS sid, const int duration, const int precedence) 
+            : id(sid), metadata(duration, precedence)
+        {}
+        
+        STATUS_EFFECTS_IDS id;
+        StatusData metadata;
+    };
+	std::vector<statuseffect_metadata> status_effects; 
+
+    //the tower-wide status parameters
+    StatusParameters status_params;
 };
 
 namespace TowerGenerator

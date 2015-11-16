@@ -17,8 +17,10 @@ void apollo::apply_modifier(tower_properties& properties)
 
 void ares::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::EARTH)->second += tower_properties::dmg_dist(5, 5);
-	properties.damage.find(Elements::CHAOS)->second += tower_properties::dmg_dist(5, 5);
+    properties.damage[static_cast<int>(Elements::CHAOS)].damage_range += tower_properties::dmg_dist(5, 5);
+    properties.damage[static_cast<int>(Elements::EARTH)].damage_range += tower_properties::dmg_dist(5, 5);
+	//properties.damage.find(Elements::EARTH)->second += tower_properties::dmg_dist(5, 5);
+	//properties.damage.find(Elements::CHAOS)->second += tower_properties::dmg_dist(5, 5);
 };
 
 void artemis::apply_modifier(tower_properties& properties)
@@ -28,7 +30,8 @@ void artemis::apply_modifier(tower_properties& properties)
 
 void athena::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::AIR)->second += tower_properties::dmg_dist(5, 5);
+    properties.damage[static_cast<int>(Elements::AIR)].damage_range += tower_properties::dmg_dist(5, 5);
+	//properties.damage.find(Elements::AIR)->second += tower_properties::dmg_dist(5, 5);
 	properties.attack_range += 5;
 };
 
@@ -45,12 +48,14 @@ void dionysus::apply_modifier(tower_properties& properties)
 
 void hades::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::EARTH)->second += tower_properties::dmg_dist(10, 10);
+    properties.damage[static_cast<int>(Elements::EARTH)].damage_range += tower_properties::dmg_dist(10, 10);
+	//properties.damage.find(Elements::EARTH)->second += tower_properties::dmg_dist(10, 10);
 };
 
 void hephaestus::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::FIRE)->second += tower_properties::dmg_dist(10, 10);
+    properties.damage[static_cast<int>(Elements::FIRE)].damage_range += tower_properties::dmg_dist(10, 10);
+	//properties.damage.find(Elements::FIRE)->second += tower_properties::dmg_dist(10, 10);
 };
 
 void hera::apply_modifier(tower_properties& properties)
@@ -72,11 +77,13 @@ void hestia::apply_modifier(tower_properties& properties)
 
 void poseidon::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::WATER)->second += tower_properties::dmg_dist(10, 10);
+    properties.damage[static_cast<int>(Elements::WATER)].damage_range += tower_properties::dmg_dist(10, 10);
+	//properties.damage.find(Elements::WATER)->second += tower_properties::dmg_dist(10, 10);
 };
 
 void zeus::apply_modifier(tower_properties& properties)
 {
-	properties.damage.find(Elements::CHAOS)->second += tower_properties::dmg_dist(10, 10);
+    properties.damage[static_cast<int>(Elements::CHAOS)].damage_range += tower_properties::dmg_dist(10, 10);
+	//properties.damage.find(Elements::CHAOS)->second += tower_properties::dmg_dist(10, 10);
 };
 

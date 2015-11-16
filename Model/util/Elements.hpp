@@ -25,9 +25,11 @@
 #include <memory>
 #include <iostream>
 #include <map>
+#include <array>
+
 //#include "RandomUtility.hpp"
 
-enum class Elements {CHAOS, WATER, AIR, FIRE, EARTH};
+enum class Elements {CHAOS=0, WATER, AIR, FIRE, EARTH};
 
 //can have the element affinity lookup tables here
 namespace ElementInfo
@@ -92,6 +94,10 @@ namespace ElementInfo
 template <typename T>
 struct range
 {
+    range()
+        : low(0), high(0)
+    {}
+
     range(T low_, T high_)
         : low(low_), high(high_)
     {}
@@ -128,8 +134,6 @@ inline range<T> operator+(range<T> lhs, const range<T>& rhs)
 }
 
 
-
-
 /*
 what sort of things should a tower have property-wise?    
 and how will we do the tiered, randomized "special" attributes/abilities?
@@ -137,16 +141,33 @@ i.e. these would be spells and/or other unique effects. We would want to have a 
      in order to have the towers feel unique/different from eachother
 
 */
+
+template <typename damage_distribution_t>
+struct tower_damage_t
+{
+    using T = damage_distribution_t;
+    Elements element_type;
+    damage_distribution_t damage_range;
+};
+
 struct tower_properties
 {
+    //the damage distribution (low and high damage ranges)
     using dmg_dist = range<float>;
-    using damage_type = std::map<Elements, dmg_dist>;
+    //NOTE: using a map here is rather silly. Should just use an array or something and have the damage types be implicit (or make another 
+    //type w/ 
+    static constexpr int NUM_ELEMENTS = 5;
+    using damage_type = std::array<tower_damage_t<dmg_dist>, NUM_ELEMENTS>; //std::map<Elements, dmg_dist>;
+    static constexpr std::array<Elements, NUM_ELEMENTS> the_elements 
+                     {{Elements::CHAOS, Elements::WATER, Elements::AIR,Elements::FIRE, Elements::EARTH}};
 
-    tower_properties()
-        : damage{{Elements::CHAOS,dmg_dist(0,0)},{Elements::WATER,dmg_dist(0,0)},
-                 {Elements::AIR,dmg_dist(0,0)},  {Elements::FIRE,dmg_dist(0,0)},
-                 {Elements::EARTH,dmg_dist(0,0)}}
+    tower_properties() 
     {
+        for (int element_idx = 0; element_idx < NUM_ELEMENTS; ++element_idx) {
+            //NOTE: is this valid?
+          damage [element_idx].element_type = the_elements[element_idx];
+          damage [element_idx].damage_range = dmg_dist(0, 0); 
+        }
         attack_speed = 0;
         attack_range = 0;
     }
@@ -157,11 +178,11 @@ struct tower_properties
         auto rhs_it = rhs_modifier.damage.begin();
         while(this_it != damage.end())
         {
-  	        this_it->second += rhs_it->second;
+  	        this_it->damage_range += rhs_it->damage_range;
             this_it++;
             rhs_it++;
         }
-		attack_speed += rhs_modifier.attack_speed;
+		    attack_speed += rhs_modifier.attack_speed;
         attack_range += rhs_modifier.attack_range;
 
         crit_chance += rhs_modifier.crit_chance;
@@ -193,6 +214,18 @@ inline tower_properties operator+ (tower_properties lhs_modifier, const tower_pr
     return lhs_modifier;
 }
 
+struct MonsterStats
+{
+    /*
+     * TODO: determine which stats are needed for the monster type
+     *
+     */
+    float health;
+    float speed;
+    //currently using the same elements as the attacks; consider if we want a seperate armor type system
+    Elements armor_class;
+    float armor_amount;
+};
 
 #endif
 

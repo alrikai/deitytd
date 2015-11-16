@@ -1,36 +1,35 @@
 material FractalTower
 {
     technique
-	{
-	    pass
-		{
+    {
+        pass
+        {
             depth_write on
-		    
+	    
             texture_unit 
-			{
-                lighting on
-                texture /home/alrik/TowerDefense/data/TDraw_image_1.png 2d
-			}
-		}
+	    {
+	        lighting on
+	        texture /home/alrik/Projects/towerdefense/data/TDraw_image_1.png 2d		
+            }
 	}
-
+    }
 }
 
 material DefaultTower 
 {
     technique
+    {
+        pass
 	{
-	    pass
-		{
             depth_write on
 		    
             texture_unit 
-			{
+	    {
                 lighting on
-			    texture /usr/local/share/OGRE/Media/materials/textures/waveNM.png 2d
-			}
-		}
+		texture /usr/local/share/OGRE/Media/materials/textures/waveNM.png 2d
+	    }
 	}
+    }
 }
 
 material pointmaterial

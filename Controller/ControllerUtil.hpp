@@ -10,6 +10,7 @@ namespace ControllerUtil
     enum class INPUT_TYPE {NONE, A, S, W, D, LArrow, RArrow, UpArrow, DArrow, Esc, PUp, PDown, 
                            ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,
                            LClick, RClick, MDrag};
+    
     struct InputEvent
     {
         explicit InputEvent()

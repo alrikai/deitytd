@@ -5,6 +5,7 @@
 
 #include <OGRE/Ogre.h>
 #include <opencv2/opencv.hpp>
+#include <OgreRectangle2D.h>
 
 #include <string>
 #include <memory>

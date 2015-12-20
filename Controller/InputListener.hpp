@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <unordered_map>
-
+#include <functional>
 
 class InputListener : public OIS::KeyListener, public OIS::MouseListener, public Ogre::FrameListener, public Ogre::WindowEventListener
 {
@@ -22,6 +22,10 @@ public:
         mouse_dragging = false;
         drag_pos_y = 0;
         drag_pos_x = 0;
+
+        //default (empty) handlers
+        gui_key_evthandler = [](OIS::KeyEvent key_arg, bool key_up){};
+        gui_mouse_evthandler = [](OIS::MouseEvent, OIS::MouseButtonID mouse_id, int mouse_flag){};
     }
 
     //frame listeners 
@@ -45,7 +49,17 @@ public:
 
     void window_resized(Ogre::RenderTarget* ogre_window);
 
-    bool add_input_listener(std::string id, ControllerUtil::ControllerBufferType* buffer); 
+    inline bool add_input_listener(std::string id, ControllerUtil::ControllerBufferType* buffer)
+    {
+        return input_listeners.insert(std::make_pair(id, buffer)).second;;
+    }
+
+    inline void register_gui_handler(std::function<void(OIS::KeyEvent, bool)>&& gui_keyhandler, std::function<void(OIS::MouseEvent, OIS::MouseButtonID, int)>&& gui_mousehandler)
+    {
+        gui_key_evthandler = std::move(gui_keyhandler);
+        gui_mouse_evthandler = std::move(gui_mousehandler);
+    }
+
 private:
     std::unordered_map<std::string, ControllerUtil::ControllerBufferType*> input_listeners;
 
@@ -58,6 +72,9 @@ private:
     int drag_pos_x;
     int drag_pos_y;
 
+    //initialize it to be empty -- will be registered later after the GUI is set up
+    std::function<void(OIS::KeyEvent key_arg, bool)> gui_key_evthandler;
+    std::function<void(OIS::MouseEvent mouse_arg, OIS::MouseButtonID mouse_id, int)> gui_mouse_evthandler;
 
     //eventually we might want to support having multiple keys pressed (e.g. alt + tab or something)
 //    std::vector<OIS::KeyEvent> current_keys;

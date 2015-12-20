@@ -14,6 +14,10 @@
 #include <opencv2/opencv.hpp>
 #include <OGRE/Ogre.h>
 
+#include <CEGUI/CEGUI.h>
+#include <CEGUI/RendererModules/Ogre/Renderer.h>
+#include <OIS/OIS.h>
+
 #include <iostream>
 #include <memory>
 #include <chrono>
@@ -100,6 +104,22 @@ struct TowerAttackAnimation : MoveableObject
     const std::string origin_id;
 };
 
+
+//TODO: consolidate this and the OgreDisplay so we only have 1 framelistener on the View side of things
+class UIFrameListener : public Ogre::FrameListener, public Ogre::WindowEventListener
+{
+public:
+    
+    UIFrameListener (Ogre::RenderWindow* rwin, Ogre::Camera* cam, CEGUI::Renderer* renderer)
+         
+    {}
+
+private:    
+    CEGUI::Renderer* gui_renderer;
+
+};
+
+
 template <class BackendType>
 class OgreDisplay : public Ogre::FrameListener, public Ogre::WindowEventListener
 {
@@ -141,6 +161,8 @@ public:
 
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
+
+
         Ogre::Root::getSingletonPtr()->addFrameListener(this);
     }
 
@@ -152,8 +174,62 @@ public:
                                          Ogre::Vector3 map_coord_offsets);
     void register_input_controller(Controller* controller)
     {
-        const std::string id {"ThisShouldBeSomethingMeaningful"};
+        const std::string id {"OgreDisplayView"};
         controller->register_input_listener(id, input_events.get());
+
+        //Q: how involved do we want the inputs to be? i.e. I could register GUI handlers for key down
+        //and key up events -- at the moment I'm just doing key down, but that doesn't seem sufficient 
+        //in the long run. 
+        
+        std::cout << "keyboard GUI event handler" << std::endl;
+        
+        //this is where we set up the GUI event handlers
+        std::function<void(OIS::KeyEvent, bool)> gui_keyhandler = [](OIS::KeyEvent key_arg, bool key_pressed)
+        {
+            CEGUI::GUIContext& context = CEGUI::System::getSingleton().getDefaultGUIContext();
+            if(key_pressed) {
+                context.injectKeyDown((CEGUI::Key::Scan)key_arg.key);
+                context.injectChar((CEGUI::Key::Scan)key_arg.text);
+            } else {
+                context.injectKeyUp((CEGUI::Key::Scan)key_arg.key);
+            }
+        };
+
+        auto cvt_mouseevts = [](OIS::MouseButtonID button_id) {
+            switch (button_id)
+            {
+                case OIS::MB_Left:
+                    return CEGUI::LeftButton;
+                case OIS::MB_Right:
+                    return CEGUI::RightButton;
+                case OIS::MB_Middle:
+                    return CEGUI::MiddleButton;
+                default:
+                    return CEGUI::LeftButton;
+            }
+        };
+
+        //mouse_state:
+        //  0: clicked, 1: released, 2: neither (i.e. just movement)
+        std::function<void(OIS::MouseEvent, OIS::MouseButtonID, bool)> gui_mousehandler = [cvt_mouseevts](OIS::MouseEvent mouse_evt, OIS::MouseButtonID mouse_id, int mouse_state)
+        {
+            std::cout << "mouse GUI event handler" << std::endl;
+            auto& context = CEGUI::System::getSingleton().getDefaultGUIContext();
+            //context.injectMouseMove(mouse_evt.state.X.rel, mouse_evt.state.Y.rel);
+            context.injectMousePosition(mouse_evt.state.X.abs, mouse_evt.state.Y.abs);
+
+            // Scroll wheel.
+            if (mouse_evt.state.Z.rel) {
+                context.injectMouseWheelChange(mouse_evt.state.Z.rel / 120.0f);
+            }
+
+            if(mouse_state == 0) {
+               context.injectMouseButtonDown (cvt_mouseevts(mouse_id));
+            } else if (mouse_state == 1){
+               context.injectMouseButtonUp (cvt_mouseevts(mouse_id));
+            }
+        }; 
+        controller->register_gui_listener(std::move(gui_keyhandler), std::move(gui_mousehandler));
     }
 
     //for enqueueing frontend --> backend events
@@ -186,6 +262,7 @@ public:
 
 private:        
     bool ogre_setup();
+    void gui_setup();
     void setup_camera(); 
     void setup_background();
     void handle_user_input();
@@ -209,6 +286,15 @@ private:
     Ogre::Viewport* view_port;
     Ogre::Light* main_light;
     Ogre::Light* spot_light;
+
+    //----------------------------------------
+    CEGUI::OgreRenderer* gui_renderer;
+    CEGUI::System* gui_sys;
+    CEGUI::Window* gui_window;
+
+    CEGUI::RenderTarget *gui_rendertarget;
+    CEGUI::GUIContext *gui_context;
+    //----------------------------------------
 
     std::unique_ptr<GameBackground> background;
     std::unique_ptr<ControllerUtil::ControllerBufferType> input_events;
@@ -420,12 +506,67 @@ bool OgreDisplay<BackendType>::ogre_setup()
         if(!root->showConfigDialog())
             return false;
 
-    render_window = root->initialise(true, "Minimal OGRE");
+    render_window = root->initialise(true, "DietyTD");
     scene_mgmt = root->createSceneManager("OctreeSceneManager");
     root_node = scene_mgmt->getRootSceneNode();
+	
+	gui_setup();
+
     return true;
 }
 
+
+template <class BackendType>
+void OgreDisplay<BackendType>::gui_setup()
+{
+    //this call sets up all the CEGUI system objects with Ogre3D defaults. Namely, 
+    //This will create and initialise the following objects for you:
+    //- CEGUI::OgreRenderer
+    //- CEGUI::OgreResourceProvider
+    //- CEGUI::OgreImageCodec
+    //- CEGUI::System
+    //Can get the created objects later via singletons, e.g. CEGUI::System::getSingletonPtr()
+    gui_renderer = &CEGUI::OgreRenderer::bootstrapSystem(*render_window);
+    gui_sys = CEGUI::System::getSingletonPtr();
+
+    //names set in resources.cfg
+    CEGUI::ImageManager::setImagesetDefaultResourceGroup("Imagesets");
+    CEGUI::Font::setDefaultResourceGroup("Fonts");
+    CEGUI::Scheme::setDefaultResourceGroup("Schemes");
+    CEGUI::WidgetLookManager::setDefaultResourceGroup("LookNFeel");
+    CEGUI::WindowManager::setDefaultResourceGroup("Layouts");
+
+    CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
+    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("TaharezLook/MouseArrow");
+
+    /*
+    //NOTE: there are other (default) parameters here that we can set
+    gui_sys = &CEGUI::System::create(*gui_renderer);
+    
+    //can be: {Standard, Errors, Informative, Insane}
+    CEGUI::Logger::getSingleton().setLoggingLevel(CEGUI::Standard);
+
+    CEGUI::WindowManager &gui_wmgr = CEGUI::WindowManager::getSingleton();
+    gui_window = wmgr.createWindow("DefaultWindow");
+  
+    gui_renderer = new CEGUI::OgreWindowTarget(*gui_renderer, *root->getRenderSystem(), *gui_window);
+    gui_context = &CEGUI::System::getSingleton().createGUIContext(*target);
+    gui_context->setRootWindow(gui_window);
+    */
+
+	/*
+    CEGUI::SchemeManager::getSingleton().loadScheme("TaharezLookSkin.scheme");
+    gui_sys->setDefaultMouseCursor("TaharezLook", "MouseArrow");
+    CEGUI::MouseCursor::getSingleton().setImage("TaharezLook", "MouseMoveCursor");
+    gui_sys->setDefaultFont("BlueHighway-12");
+    */
+    
+    gui_window = CEGUI::WindowManager::getSingleton().createWindow("DefaultWindow", "Sheet");  
+    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_window);
+
+    //gui_sys->setGUISheet(gui_window);
+    
+}
 
 template <class BackendType>
 void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y_coord, const float click_distance, const Ogre::AxisAlignedBox& map_box)
@@ -805,6 +946,8 @@ bool OgreDisplay<BackendType>::frameRenderingQueued(const Ogre::FrameEvent& evt)
     {
         mob_it.second.update_position(1000.0f * evt.timeSinceLastFrame);
     }
+
+    CEGUI::System::getSingleton().injectTimePulse(evt.timeSinceLastFrame);
 
     return true;
 }

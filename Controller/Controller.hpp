@@ -30,6 +30,11 @@ public:
     //Do we need to supply timestamps for everything?
 
     bool register_input_listener(std::string id, ControllerBufferType* buffer); 
+    //this is sort of a hackish system, but it seems a lot of GUI libraries want unfiltered access to the keypresses?
+    inline void register_gui_listener(std::function<void(OIS::KeyEvent, bool)>&& gui_keyhandler, std::function<void(OIS::MouseEvent, OIS::MouseButtonID, int)>&& gui_mousehandler)
+    {
+        listener->register_gui_handler(std::move(gui_keyhandler), std::move(gui_mousehandler));
+    }
 private:
     void init();
 
@@ -41,7 +46,6 @@ private:
     OIS::InputManager* ois_manager;
     OIS::Mouse* ois_mouse;
     OIS::Keyboard* ois_keyboard;
-
 };
 
 #endif

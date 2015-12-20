@@ -7,7 +7,8 @@ TARGET_LINK_LIBRARIES(TestModelBackend
     TowersBackend TDTowers TDCommon TDUtils 
     ${OPENCL_LIBRARIES} 
     ${OpenCV_LIBS} 
-    ${OGRE_LIBRARIES})
+    ${OGRE_LIBRARIES}
+	${CEGUI_LIBRARIES})
 #    ${PCL_COMMON_LIBRARIES}
 #    ${PCL_SURFACE_LIBRARIES}
 #    ${PCL_FEATURES_LIBRARIES})			 
@@ -18,8 +19,7 @@ TARGET_LINK_LIBRARIES(TestModel
 	TDView TDTowers TDUtils Controller TowersBackend TDCommon
     ${OPENCL_LIBRARIES} 
 	${OpenCV_LIBS} 
-	${OIS_LIBRARIES} 
-	${OGRE_LIBRARIES})
+    ${OGREVIEW_LIBS})
 
 #${PCL_COMMON_LIBRARIES}
 #${PCL_SURFACE_LIBRARIES}

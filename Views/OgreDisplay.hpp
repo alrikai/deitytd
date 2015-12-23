@@ -143,7 +143,6 @@ public:
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
 
-
         Ogre::Root::getSingletonPtr()->addFrameListener(this);
     }
 
@@ -198,7 +197,9 @@ private:
     void setup_background();
     void handle_user_input();
 
+    void get_mapcoords(const std::vector<float>& world_position, float& x_coord, float& y_coord, const Ogre::AxisAlignedBox& map_box);
     void generate_tower(const float x_coord, const float y_coord, const float click_distance, const Ogre::AxisAlignedBox& mapobj);
+    void generate_information_request(std::vector<float>&& world_position);
 
     const static std::string resource_cfg_filename; 
     const static std::string plugins_cfg_filename;
@@ -364,6 +365,19 @@ void OgreDisplay<BackendType>::start_display()
         auto m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
         OgreUtil::nuke_scenenode(m_scenenode);
     };
+
+            
+    auto unitinfo_evt_fcn = [this](std::unique_ptr<RenderEvents::unit_information> info_evt)
+    {
+        //TODO: just testing the GUI component of it for now
+        //RenderEvents::unit_information info;
+        //info.base_stats = "Nothing Renderable\nWhat indeed\nis this unit's stats?";
+        //info.current_stats = "Something Renderable\nBut it's still a mystery\n";
+        //info.information = "Cat in a\nHat?";
+        auto info = info_evt.get();
+        gui->display_information(info->base_stats, info->current_stats, info->information);
+    };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //10 FPS is the bare minimum
@@ -401,6 +415,9 @@ void OgreDisplay<BackendType>::start_display()
         game_events->apply_mobmove_events(mobmove_evt_fcn);
         game_events->apply_mobremove_events(mobremove_evt_fcn);
 
+        //give request for user selection information
+        game_events->apply_unitinfo_events(unitinfo_evt_fcn);        
+        
         /////////////////////////////////////////////////////////////////////////////////////////////
      
         auto end_time = std::chrono::high_resolution_clock::now(); 
@@ -465,6 +482,39 @@ void OgreDisplay<BackendType>::update_gameinfo()
     //listener that updates when the backend sends new info?
     GameStateInformation placeholder_info;
     gui->update_gamestate_info(placeholder_info);
+}
+
+
+template <class BackendType>
+void OgreDisplay<BackendType>::get_mapcoords(const std::vector<float>& world_position, float& xnorm_coord, float& ynorm_coord, const Ogre::AxisAlignedBox& map_box)
+{
+    Ogre::Vector3 map_coord_mapping = map_box.getSize(); 
+    xnorm_coord = 0;
+    ynorm_coord = 0;
+
+    auto world_click_x = world_position[0];
+    auto world_click_y = world_position[1];
+
+    if(world_click_x < 0)
+        xnorm_coord = 0.5f - std::abs(world_click_x / map_coord_mapping.x);
+    else
+        xnorm_coord = 0.5f + std::abs(world_click_x / map_coord_mapping.x);
+
+    if(world_click_y < 0)
+        ynorm_coord = 0.5f - std::abs(world_click_y / map_coord_mapping.y);
+    else
+        ynorm_coord = 0.5f + std::abs(world_click_y / map_coord_mapping.y);
+}
+
+template <class BackendType>
+void OgreDisplay<BackendType>::generate_information_request(std::vector<float>&& world_position)
+{
+    float xnorm_coord, ynorm_coord;
+    get_mapcoords(world_position, xnorm_coord, ynorm_coord, this->background->get_map_aab());
+
+    using tower_evt_t = UserTowerEvents::print_tower_event<BackendType>;
+    std::unique_ptr<UserTowerEvents::tower_event<BackendType>> td_evt = std::unique_ptr<tower_evt_t> (new tower_evt_t(ynorm_coord, xnorm_coord));
+    td_event_queue->push(std::move(td_evt));            
 }
 
 template <class BackendType>
@@ -783,10 +833,23 @@ void OgreDisplay<BackendType>::handle_user_input()
             {
                 std::cout << "Mouse Lclick @[" << ui_evt.x_pos << ", " << ui_evt.y_pos << "]" << std::endl;
                 
+                //TODO: need to completely overhaul the raycasting and user selection code. More re-computation than is necessary here
+
                 //NOTE: current_selection is set to nullptr if nothing was selected. Might want to disallow selecting the game map and certain other objects
                 current_selection = view_detail::user_select(scene_mgmt, view_port, ui_evt.x_pos/width, ui_evt.y_pos/height);
-                if(current_selection)
-                    std::cout << "Selected " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+                if(current_selection) {
+                    //gets the position clicked in the world -- can get the map coordinates from this
+                    bool is_valid = false;
+                    float x_world_coord, y_world_coord, z_world_coord;
+                    std::tie(is_valid, x_world_coord, y_world_coord, z_world_coord) = view_detail::get_worldclick_coords(scene_mgmt, view_port, ui_evt.x_pos, ui_evt.y_pos);
+                    if(is_valid) {
+                        std::cout << "Selected " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+                        std::vector<float> worldclick_position {x_world_coord, y_world_coord, z_world_coord};
+                        generate_information_request(std::move(worldclick_position));
+                        //TODO: we should spawn an information request to the backend for the selection and update the GUI accordingly
+                        //request_selection = true;
+                    }
+                }
                 break;
             }
             case ControllerUtil::INPUT_TYPE::RClick:

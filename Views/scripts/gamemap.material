@@ -19,3 +19,23 @@ material GameMap
         }
     }
 }
+
+
+material GameMapG
+{
+    technique
+    {
+        pass
+        {
+            lighting off
+            scene_blend alpha_blend
+            depth_write off
+
+            texture_unit
+            {
+                texture TDmap_8x8.png 
+                alpha_op_ex source1 src_manual src_texture 0.5      
+            }
+        }
+    }
+}

@@ -94,12 +94,30 @@ bool TowerLogic::modify_tower(essence* modifier, const float x_coord, const floa
 
 bool TowerLogic::print_tower(const float x_coord, const float y_coord)
 {
-    if(!map.is_obstructed(x_coord, y_coord))
+    std::cout << "@PRINT TOWER -- coords (X,Y): " << x_coord << ", " << y_coord << std::endl;
+    if(!map.is_obstructed(x_coord, y_coord)) {
         return false;
+    }
 
     auto t_tile = map.get_bounding_tile(x_coord, y_coord);
-    //this would eventually be displayed to the GUI rather than printed to the command line...
-    std::cout << *(t_list[t_tile.row][t_tile.col]) << std::endl;
+    const int tile_row = t_tile.row / GameMap::TowerTileHeight;
+    const int tile_col = t_tile.col / GameMap::TowerTileWidth;
+
+    //TODO: this would eventually be displayed to the GUI rather than printed to the command line...
+    std::cout << *(t_list[tile_row][tile_col]) << std::endl;
+
+    //make the unit information event
+    std::unique_ptr<RenderEvents::unit_information> i_evt = std::unique_ptr<RenderEvents::unit_information>
+                        (new RenderEvents::unit_information());
+
+    i_evt->information = t_list[tile_row][tile_col]->get_stats();
+
+    //TODO: get this from the tower...
+    //i_evt->base_stats = "cat\nin\na\nhat";
+    //i_evt->current_stats = "hat\non\na\ncat";
+    //i_evt->information = "dog\nin\na\nhat?";
+
+    td_frontend_events->add_unitinfo_event(std::move(i_evt));
     return true;
 }
 

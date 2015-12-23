@@ -3,14 +3,18 @@
 #include "StatusEffects.hpp"
 #include "util/RandomUtility.hpp"
 
+#include <iomanip>
+#include <sstream>
+
 class TowerStatusEffect;
 
 //why the hell do I have this here?
 std::ostream& operator <<(std::ostream& out_stream, const tower_properties& props)
 {
-    for (auto it : props.damage)
+    for (auto it : props.damage) {
         out_stream << ElementInfo::get_element_name(it.element_type) << " Damage: ["
         << it.damage_range.low << ", " << it.damage_range.high << "] \n";
+    }
 
     out_stream << "Speed: " << props.attack_speed << " Range: " << props.attack_range;
     return out_stream;
@@ -21,6 +25,42 @@ std::ostream& operator <<(std::ostream& out_stream, const Tower& t)
     out_stream << "Fundamental Tower -- " << t.base_attributes << std::endl;
     out_stream << "Synthesized Tower -- " << t.attack_attributes << std::endl;
 	return out_stream;
+}
+
+namespace {
+    template <typename T>
+    std::string to_string_wprecision(const T val, const uint32_t ndec = 2)
+    {
+        std::ostringstream strout;
+        strout << std::setprecision(ndec) << val;
+        strout << std::fixed;
+        return strout.str();
+    }
+}
+
+//TODO: need to consolidate this and the ostream printing, especially since I'm using floating point #'s for everything
+//so I need to use string streams for the string conversions T_T
+std::string Tower::get_stats () const
+{
+    std::string stats_info {"Base Stats:\n"}; 
+
+    for (auto it : base_attributes.damage) {
+        stats_info += ElementInfo::get_element_name(it.element_type);
+        stats_info += " Damage: [";
+        stats_info += to_string_wprecision(it.damage_range.low) + ", " + to_string_wprecision(it.damage_range.high) + "]\n";
+    }
+    stats_info += "Speed: " + to_string_wprecision(base_attributes.attack_speed) + "\n"; 
+    stats_info += "Range: " + to_string_wprecision(base_attributes.attack_range) + "\n";
+
+    stats_info += "\n\nCurrent Stats:\n";
+    for (auto it : attack_attributes.damage) {
+        stats_info += ElementInfo::get_element_name(it.element_type);
+        stats_info += " Damage: [";
+        stats_info += to_string_wprecision(it.damage_range.low) + ", " + to_string_wprecision(it.damage_range.high) + "]\n";
+    }
+    stats_info += "Speed: " + to_string_wprecision(attack_attributes.attack_speed) + "\n"; 
+    stats_info += "Range: " + to_string_wprecision(attack_attributes.attack_range) + "\n";
+    return stats_info;
 }
 
 bool Tower::add_modifier(tower_generator tower_gen, essence* modifier)

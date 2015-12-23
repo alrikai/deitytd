@@ -28,8 +28,7 @@ GameGUI::~GameGUI()
 void GameGUI::set_lives(int amount)
 {
 	static const std::string lives_string {"Lives: "};
-	auto new_string = amount > 0 ? lives_string + std::to_string(amount) : 
-		              "You're Dead!";
+	auto new_string = amount > 0 ? lives_string + std::to_string(amount) : "You're Dead!";
    	gui_window->getChild("numlives_edit")->setText(new_string);
 }
 
@@ -107,5 +106,16 @@ void GameGUI::initialize()
 
     CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_window);
 }
+
+
+
+void GameGUI::display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info)
+{
+    //TODO: should colorize the current stats, maybre re-arrange the fields a bit?
+	gui_window->getChild("staticinfo_text")->getChild("stats_info")->setText(base_stats);
+	gui_window->getChild("staticinfo_text")->getChild("stats_info")->insertText(current_stats, base_stats.size()+1);
+	gui_window->getChild("staticinfo_text")->getChild("description_info")->setText(unit_info);
+}
+
 
 

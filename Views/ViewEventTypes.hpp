@@ -116,6 +116,28 @@ namespace RenderEvents
         const std::string name;
     };
 
+
+    //request for information of the selected unit (e.g. mob or tower)
+    //TODO: how to do this efficiently? 
+    struct unit_information
+    {
+        //information about the selected unit
+        std::string unit_name;
+        std::vector<float> m_map_offsets;
+ 
+        //this seems rather limiting, as it'll either be 'tower or not'. At the moment I can only
+        //envision getting information about mobs and towers, and even then, maybe not mobs?
+        bool is_tower;
+
+        //-------------------------------------
+
+        std::string base_stats;
+        std::string current_stats;
+
+        std::string information;
+        //TODO: how to make the portrait?
+    };
+
 } //namespace RenderEvents
 
 
@@ -138,11 +160,14 @@ public:
     using MoveMobQueueType = EventQueue<RenderEvents::move_mob>;
     using RemoveMobQueueType = EventQueue<RenderEvents::remove_mob>;
 
+    using UnitInfoQueueType = EventQueue<RenderEvents::unit_information>;
+
     enum class EventTypes 
     { 
       MakeTower,              DestroyTower, 
       MakeAttack, MoveAttack, DestroyAttack, 
-      MakeMob,    MoveMob,    DestroyMob 
+      MakeMob,    MoveMob,    DestroyMob,
+      UnitInfo
     };
 
     ViewEvents()
@@ -155,6 +180,8 @@ public:
         makemob_evtqueue = std::unique_ptr<MakeMobQueueType>(new MakeMobQueueType());
         movemob_evtqueue = std::unique_ptr<MoveMobQueueType>(new MoveMobQueueType());
         removemob_evtqueue = std::unique_ptr<RemoveMobQueueType>(new RemoveMobQueueType());
+
+        unitinfo_evtqueue = std::unique_ptr<UnitInfoQueueType>(new UnitInfoQueueType());
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -193,6 +220,11 @@ public:
         removemob_evtqueue->push(std::move(evt));
     }
 
+
+    void add_unitinfo_event(std::unique_ptr<RenderEvents::unit_information> evt)
+    {
+        unitinfo_evtqueue->push(std::move(evt));
+    }
 //---------------------------------------------------------------------------------------------------------
 
     template <typename ViewFcn>
@@ -240,6 +272,14 @@ public:
     {
         execute_event_type<RemoveMobQueueType, ViewFcn>(removemob_evtqueue.get(), vfcn);
     }           
+
+
+    template <typename ViewFcn>
+    void apply_unitinfo_events(ViewFcn& vfcn)
+    {
+        execute_event_type<UnitInfoQueueType, ViewFcn>(unitinfo_evtqueue.get(), vfcn);
+    }           
+
 //---------------------------------------------------------------------------------------------------------
 /*
  * The question is, what do we do with the frontend executing the events?
@@ -272,6 +312,9 @@ private:
     std::unique_ptr<MakeMobQueueType> makemob_evtqueue;
     std::unique_ptr<MoveMobQueueType> movemob_evtqueue;
     std::unique_ptr<RemoveMobQueueType> removemob_evtqueue;
+
+
+    std::unique_ptr<UnitInfoQueueType> unitinfo_evtqueue;
 };
 
 #endif

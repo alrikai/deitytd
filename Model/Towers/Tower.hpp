@@ -112,6 +112,8 @@ public:
         return position;
     }
 
+    std::string get_stats () const;
+
 	friend std::ostream& operator <<(std::ostream& out_stream, const Tower& t);   
 
 protected:

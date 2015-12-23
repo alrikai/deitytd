@@ -61,6 +61,9 @@ namespace view_detail
 {
 
 void load_resources(const std::string& resource_cfg_filename);
+
+std::tuple<bool, float, float, float> get_worldclick_coords(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y);
+
 //should refactor these -- have one just look for movables, have another that looks for the gamemap and the ray distance
 std::tuple<bool, float, Ogre::MovableObject*> check_point(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y);
 Ogre::MovableObject* user_select(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y);

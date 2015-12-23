@@ -35,7 +35,7 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
-        td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
+        //td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
         td_backend = std::unique_ptr<ModelType>(new ModelType);
 
         spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, GameMap::MAP_HEIGHT-1);  
@@ -315,8 +315,9 @@ void TowerDefense<ViewType, ModelType>::gloop_preprocessing()
 
         //call the event functor -- since it's a pointer, I opted to use a regular 
         //function rather than operator overloading (the syntax looks bad)
-        if(got_data && td_evt)
+        if(got_data && td_evt) {
             td_evt->apply(td_backend.get());
+        }
     }
 
     //TODO: also check for -- 

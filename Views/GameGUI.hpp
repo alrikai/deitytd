@@ -80,7 +80,7 @@ public:
         //  0: clicked, 1: released, 2: neither (i.e. just movement)
         std::function<void(OIS::MouseEvent, OIS::MouseButtonID, bool)> gui_mousehandler = [cvt_mouseevts](OIS::MouseEvent mouse_evt, OIS::MouseButtonID mouse_id, int mouse_state)
         {
-            std::cout << "mouse GUI event handler" << std::endl;
+            //std::cout << "mouse GUI event handler" << std::endl;
             auto& context = CEGUI::System::getSingleton().getDefaultGUIContext();
             //context.injectMouseMove(mouse_evt.state.X.rel, mouse_evt.state.Y.rel);
             context.injectMousePosition(mouse_evt.state.X.abs, mouse_evt.state.Y.abs);
@@ -105,6 +105,9 @@ public:
         set_gold(info.gold_amount);
         set_essence(info.essence_amount);
 	}
+
+
+    void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
 private:	
 	void initialize();

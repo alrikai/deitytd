@@ -86,6 +86,8 @@ void GameGUI::initialize()
 	gui_window->getChild("staticinfo_text")->getChild("stats_info")->setText("N/A");
 	gui_window->getChild("staticinfo_text")->getChild("description_info")->setText("N/A");
 
+    //gui_window->getChild("staticinfo_text")->getChild("portrait_info")->setProperty("Image", 
+
 	//TODO: move these to somewhere else, such that when we start the level there will be some set of 
 	//default values for these that will be used for the initialization of these values 
     set_lives(20);

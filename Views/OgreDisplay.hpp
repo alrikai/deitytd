@@ -369,6 +369,8 @@ void OgreDisplay<BackendType>::start_display()
             
     auto unitinfo_evt_fcn = [this](std::unique_ptr<RenderEvents::unit_information> info_evt)
     {
+        //TODO: reeeeeally need to re-work how the GUI display will be arranged
+        info_evt->base_stats = current_selection->getName();
         gui->display_information(info_evt->base_stats, info_evt->current_stats, info_evt->information);
     };
 
@@ -597,7 +599,8 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     //NOTE: position is (x, y, z)
     tower_snode->setPosition(target_location.x, target_location.y, target_location.z);
     tower_snode->scale(tower_scale, tower_scale, tower_scale);
-    tower_snode->showBoundingBox(true);
+    
+    tower_snode->showBoundingBox(!true);
 
     /*
     std::vector<std::string> particle_types

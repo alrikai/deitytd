@@ -369,13 +369,7 @@ void OgreDisplay<BackendType>::start_display()
             
     auto unitinfo_evt_fcn = [this](std::unique_ptr<RenderEvents::unit_information> info_evt)
     {
-        //TODO: just testing the GUI component of it for now
-        //RenderEvents::unit_information info;
-        //info.base_stats = "Nothing Renderable\nWhat indeed\nis this unit's stats?";
-        //info.current_stats = "Something Renderable\nBut it's still a mystery\n";
-        //info.information = "Cat in a\nHat?";
-        auto info = info_evt.get();
-        gui->display_information(info->base_stats, info->current_stats, info->information);
+        gui->display_information(info_evt->base_stats, info_evt->current_stats, info_evt->information);
     };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

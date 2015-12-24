@@ -87,6 +87,11 @@ public:
 
     void cycle_update(const uint64_t onset_timestamp);
 
+    inline int get_num_live_mobs() const
+    {
+        return live_mobs.size();
+    }
+
     //for the end of the round -- clean all the state (i.e. live mobs, status effects, map tile mobs, etc)
     void reset_state()
     {

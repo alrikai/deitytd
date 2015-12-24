@@ -221,7 +221,14 @@ struct ActiveState : TDState
     //etc). then this shouldn't produce a noticable skew, and it would be self-correcting (i.e. if we send position updates every 150ms)
     TDState::td->timestamp++;
 
-    return state;
+    //if no more mobs alive, transition states
+    if(TDState::td->td_backend->get_num_live_mobs() == 0) {
+        std::cout << "No more mobs, transitioning to IDLE" << std::endl;
+        TDState::td->td_backend->reset_state();
+        return GAME_STATE::IDLE;
+    } else {
+        return state;
+    }
   }
 };
 
@@ -267,13 +274,14 @@ void TowerDefense<ViewType, ModelType>::init_game()
 template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gameloop()
 {
-  //start the loop off in idle
-  game_state = std::unique_ptr<TDState> (new IdleState(this)); 
-  game_state->enter_state(GAME_STATE::PAUSED);
-  GAME_STATE current_state = GAME_STATE::IDLE;
-  //TODO: have a timer to keep track of how long it has been in the current state, and transition accordingly
-  //at the game state transitions, we need to do certain things (i.e. at the transition from IDLE --> INROUND, 
-  //we need to spawn the mobs, calculate the pathfinding, etc)
+    //start the loop off in idle
+    game_state = std::unique_ptr<TDState> (new IdleState(this)); 
+    game_state->enter_state(GAME_STATE::PAUSED);
+    GAME_STATE current_state = GAME_STATE::IDLE;
+
+    //TODO: have a timer to keep track of how long it has been in the current state, and transition accordingly
+    //at the game state transitions, we need to do certain things (i.e. at the transition from IDLE --> INROUND, 
+    //we need to spawn the mobs, calculate the pathfinding, etc)
   
     //the main gameloop. checks the frontend and backend, mediates communication between the two
     //applies updates, etc
@@ -295,6 +303,8 @@ void TowerDefense<ViewType, ModelType>::gameloop()
           game_state->enter_state(current_state);
           current_state = next_state; 
         }
+
+        //std::cout << "Game state: " << current_state << std::endl;
     }
     std::cout << "Exiting GameLoop" << std::endl;
 

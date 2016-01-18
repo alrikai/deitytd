@@ -1,3 +1,11 @@
+/* backend_test.cpp -- part of the DietyTD tests 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #include "Model/TowerDefense.hpp"
 #include "Model/util/Types.hpp"
 #include "../fractal_util.hpp"

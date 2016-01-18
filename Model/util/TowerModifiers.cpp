@@ -1,3 +1,13 @@
+/* TowerModifiers.cpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #include "TowerModifiers.hpp"
 
 std::ostream& operator<< (std::ostream& stream, const flat_damage::parameter_cfg& cfg)

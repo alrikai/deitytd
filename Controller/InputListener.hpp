@@ -1,3 +1,13 @@
+/* InputListener.hpp -- part of the DietyTD Controller subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #ifndef TD_CONTROLLER_INPUT_LISTENER_HPP__ 
 #define TD_CONTROLLER_INPUT_LISTENER_HPP__
 

@@ -1,3 +1,13 @@
+/* main.cpp -- part of the DietyTD testing for the tower combinations (this will move shortly...) 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #include <map>
 #include <unordered_map>
 #include <string>

@@ -1,5 +1,15 @@
-#ifndef PCL_MESH_HPP__
-#define PCL_MESH_HPP__
+/* pcl_mesh.hpp -- part of the DietyTD tests 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
+#ifndef PCL_MESH_HPP
+#define PCL_MESH_HPP
 
 #include "fractal3d.hpp"
 

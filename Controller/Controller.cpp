@@ -1,3 +1,12 @@
+/* Controller.cpp -- part of the DietyTD Controller subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
 #include "Controller.hpp"
 
 Controller::Controller(Ogre::Root* root, Ogre::RenderWindow* ogre_window)

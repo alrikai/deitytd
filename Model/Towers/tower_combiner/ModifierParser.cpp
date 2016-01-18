@@ -1,3 +1,14 @@
+/* ModifierParser.cpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
+
 #include "ModifierParser.hpp"
 
 void parse_modifier_parameters(const YAML::Node& mod_attributes, flat_damage::parameter_cfg& modifier_cfg)

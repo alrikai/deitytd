@@ -1,6 +1,16 @@
+/* GameBackground.cpp -- part of the DietyTD Views subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #include "GameBackground.hpp"
 
-const std::string GameBackground::map_material {"GameMap"};  //{"Examples/GrassFloor"};
+const std::string GameBackground::map_material {"GameMapG"};  //{"Examples/GrassFloor"};
 const std::string GameBackground::skybox_material {"TD/StarSky"};     //{"Examples/CloudySky"};  //SpaceSkyBox"};
 const std::string GameBackground::map_name {"GameBGMap"};
 
@@ -102,6 +112,7 @@ void GameBackground::make_background()
     bg_node->attachObject(bg_rect);
     
     //start making the backgrounds
+    std::cout << "commencing background generation...." << std::endl;
     bg_generator->start_generation();
 }
 
@@ -134,7 +145,7 @@ void GameBackground::draw_background()
 {
     bool got_frame = false;
     auto texture_buffer = bg_framequeue->pop(got_frame);
-    //dont do anything if nothing new. Normally we'd be doing the interpolation in this case
+    //TODO: interpolate between adjacent background frames in this case
     if(!(got_frame && texture_buffer))
         return;
 
@@ -146,9 +157,7 @@ void GameBackground::draw_background()
     bg_texturestate->setTextureName("fflame_bgtexture");
 }
 
-//
 //mock up the lines for the map grid. Assume uniform spacing
-//
 void GameBackground::draw_tiles(const int num_cols, const int num_rows)
 {
     //NOTE: assume this has the world gamemap plane
@@ -215,14 +224,7 @@ void GameBackground::draw_tiles(const int num_cols, const int num_rows)
         col_line_nodes.at(col) = map_node->createChildSceneNode();
         col_line_nodes.at(col)->attachObject(map_grid_collines.at(col));
     }
-
-    //end of the background setup
-
-
 }
-
-
-
 
 namespace view_detail
 {
@@ -248,6 +250,45 @@ void load_resources(const std::string& resource_cfg_filename)
     }
 }
 
+
+//returns: bool --> is valid, x coord, y coord, z coord
+std::tuple<bool, float, float, float> get_worldclick_coords(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y)
+{
+    auto x_coord = x/view_port->getActualWidth();
+    auto y_coord = y/view_port->getActualHeight();
+    auto cam = view_port->getCamera();
+    Ogre::Ray ray = cam->getCameraToViewportRay(x_coord,y_coord);
+
+    float map_dist = 0.0f;
+
+    auto r_query = scene_mgmt->createRayQuery(ray);
+    r_query->setSortByDistance(true);
+    auto& q_hits = r_query->execute();
+    if(!q_hits.empty())
+    {
+        for (auto q_it = q_hits.begin(); q_it != q_hits.end(); ++q_it)
+        {
+            if(q_it->movable)
+            {
+                Ogre::MovableObject* obj = q_it->movable;
+                if(obj->getName() == GameBackground::map_name)
+                {
+                    map_dist = q_it->distance;
+                    break; 
+                }
+            }
+        }
+
+        //get the map coordinates now
+        Ogre::Ray ray = cam->getCameraToViewportRay(x_coord, y_coord);
+        auto world_click = ray.getPoint(map_dist);
+
+        return std::make_tuple(true, world_click.x, world_click.y, world_click.z);
+    }
+    return std::make_tuple(false, 0.0f, 0.0f, 0.0f);
+}
+
+
 Ogre::MovableObject* user_select(Ogre::SceneManager* scene_mgmt, Ogre::Viewport* view_port, const float x, const float y)
 {
     auto cam = view_port->getCamera();
@@ -257,13 +298,29 @@ Ogre::MovableObject* user_select(Ogre::SceneManager* scene_mgmt, Ogre::Viewport*
     auto r_query = scene_mgmt->createRayQuery(ray);
     r_query->setSortByDistance(true);
     auto& q_hits = r_query->execute();
-    if(!q_hits.empty())
-        for (auto q_it = q_hits.begin(); q_it != q_hits.end(); ++q_it)
+    if(!q_hits.empty()) {
+        for (auto q_it = q_hits.begin(); q_it != q_hits.end(); ++q_it) {
             if(q_it->movable)
             {
-                selection = q_it->movable;
-                break;
+                //NOTE: the difficulty here is that the ray will intersect with many things in the scene. For now, we can assume we'll just
+                //want to click on towers (and eventually, monsters). We will (never) want to click on the GUI overlay in this manner (those
+                //inputs will be injected elsewhere), and we don't want to click on the game map (AFAIK). So, filter the results here to 
+                //first return towers, then return monsters. --> TODO: determine if there's a better way to select the appropriate objects 
+                //other than string comparisons?
+                const auto obj_name = q_it->movable->getName();
+                static const std::string target_substr {"tower_"};
+
+                if(obj_name.size() <= target_substr.size()) {
+                    continue;
+                }
+
+                if(obj_name.substr(0, target_substr.size()) == target_substr) {
+                    selection = q_it->movable;
+                    break;
+                }
             }
+        }
+    }
     return selection;
 }
 

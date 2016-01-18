@@ -1,3 +1,11 @@
+/* factory.hpp -- part of the DietyTD Common implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 #ifndef TD_FACTORY_HPP
 #define TD_FACTORY_HPP
 
@@ -9,7 +17,11 @@ template <class ProductType,
 class Factory
 {
 public:
-	ProductType* create_product(const KeyType& id)
+	using key_t = KeyType;
+	using product_t = ProductType;
+	using product_generator_t = ProductCreator;	
+	
+	ProductType* create_product(const KeyType& id) const
     {
         auto product_iter = creator_map.find(id);
         //if the product is in the map, call the associated ProductCreator function
@@ -19,7 +31,7 @@ public:
     }
 
     template <typename ... product_args>
-	ProductType* create_product(const KeyType& id, product_args&& ... args)
+	ProductType* create_product(const KeyType& id, product_args&& ... args) const
     {
         auto product_iter = creator_map.find(id);
         //if the product is in the map, call the associated ProductCreator function

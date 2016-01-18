@@ -1,3 +1,13 @@
+/* GaameMap.hpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #ifndef TD_GAME_MAP_HPP
 #define TD_GAME_MAP_HPP
 
@@ -28,8 +38,8 @@ public:
     static constexpr int MAP_WIDTH = 128;     //20;
 
     //number of map tiles each tower occupies
-    static constexpr int TowerTileHeight = 8;
-    static constexpr int TowerTileWidth = 8;
+    static constexpr int TowerTileHeight = 8*2;
+    static constexpr int TowerTileWidth = 8*2;
 
     static constexpr double NormFactorHeight = 1.0/MAP_HEIGHT;
     static constexpr double NormFactorWidth = 1.0/MAP_WIDTH;

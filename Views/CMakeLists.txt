@@ -3,19 +3,19 @@ cmake_minimum_required(VERSION 2.8)
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 add_subdirectory(FractalFlames)
 
-SET(ViewSRCS GameBackground.cpp ViewUtil.cpp)
+SET(ViewSRCS GameBackground.cpp ViewUtil.cpp GameGUI.cpp)
 include_directories(FractalFlames) 
 include_directories(
 	${OIS_INCLUDE_DIRS}
 	${OGRE_INCLUDE_DIRS}
 	${OGRE_SAMPLES_INCLUDEPATH}
-	${OGRE_Overlay_INCLUDE_DIRS})
+	${OGRE_Overlay_INCLUDE_DIRS}
+	${CEGUI_INCLUDE_DIR})
+
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
 add_library(TDView SHARED ${ViewSRCS})
 target_link_libraries(TDView 
 	TowersBackend
 	${OpenCV_LIBS}
-	${OGRE_LIBRARIES} 
-	${OIS_LIBRARIES} 
-	${OGRE_Overlay_LIBRARIES})
+	${OGREVIEW_LIBS})

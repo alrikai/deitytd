@@ -1,3 +1,13 @@
+/* TowerLogic.hpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #ifndef TD_TOWER_LOGIC_HPP
 #define TD_TOWER_LOGIC_HPP
 
@@ -19,7 +29,8 @@
 class TowerLogic
 {
 public:
-    TowerLogic() 
+    TowerLogic(const std::string& combo_dictfpath, const std::string& attribute_cfgfpath) 
+        : tower_gen(combo_dictfpath, attribute_cfgfpath)
     {
          //anything else to initialize goes here...
          td_frontend_events = std::unique_ptr<ViewEvents>(new ViewEvents());    
@@ -78,7 +89,7 @@ public:
 
     //methods called in response to frontend events, dispatched from the gameloop
     bool make_tower(const int tier, const float x_coord, const float y_coord);
-    bool modify_tower(essence* modifier, const float x_coord, const float y_coord);
+    bool modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord);
     bool print_tower(const float x_coord, const float y_coord);
     bool tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord);
     //is run at the start of the round (i.e. in the transition from IDLE --> INROUND), assuming the obstructions
@@ -86,6 +97,11 @@ public:
     bool find_paths(const GameMap::IndexCoordinate spawn_idx, const GameMap::IndexCoordinate dest_idx);
 
     void cycle_update(const uint64_t onset_timestamp);
+
+    inline int get_num_live_mobs() const
+    {
+        return live_mobs.size();
+    }
 
     //for the end of the round -- clean all the state (i.e. live mobs, status effects, map tile mobs, etc)
     void reset_state()
@@ -117,7 +133,8 @@ private:
     bool get_targets(Tower* tower, const int t_col, const int t_row);
 
     GameMap map;
-    tower_generator tower_gen;
+    //tower_generator tower_gen;
+   TowerCombiner tower_gen;
     std::map<std::string, TowerModel> tower_models;
     
     Pathfinder<GameMap> path_finder;

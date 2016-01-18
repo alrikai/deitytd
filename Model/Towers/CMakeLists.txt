@@ -1,8 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-set (TowerSrc Essences.cpp EssenceSynthesis.cpp Tower.cpp)
-add_library(TDTowers SHARED ${TowerSrc})
+add_subdirectory(tower_combiner)
 
-SET(SRCS main.cpp)
-ADD_EXECUTABLE(EssenceTest ${SRCS})
-target_link_libraries(EssenceTest TDTowers TDUtils)
+set (TowerSrc Tower.cpp)
+add_library(TDTowers SHARED ${TowerSrc})
+target_link_libraries(TDTowers TDTowerCombiner)
+
+#SET(SRCS main.cpp)
+#ADD_EXECUTABLE(EssenceTest ${SRCS})
+#target_link_libraries(EssenceTest TDTowers TDUtils)

@@ -1,3 +1,14 @@
+/* TowerDispatcher.hpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
+
 #ifndef TD_MULTI_DISPATCH_HPP
 #define TD_MULTI_DISPATCH_HPP
 

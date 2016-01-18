@@ -1,3 +1,13 @@
+/* InputListener.cpp -- part of the DietyTD Controller subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #include "InputListener.hpp"
 
 bool InputListener::frameRenderingQueued (const Ogre::FrameEvent& frame_evt)
@@ -54,6 +64,7 @@ void InputListener::window_resized(Ogre::RenderTarget* ogre_window)
 bool InputListener::keyPressed (const OIS::KeyEvent& key_arg)
 {
     current_key = key_arg.key;
+    gui_key_evthandler(key_arg, true);
 	return true;
 }
 
@@ -62,6 +73,8 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
     ControllerUtil::INPUT_TYPE evt;
     bool valid_key = true;
     auto key_type = key_arg.key;
+
+    gui_key_evthandler(key_arg, false);
 
     if (key_type == OIS::KC_ESCAPE)
         evt = ControllerUtil::INPUT_TYPE::Esc;	
@@ -108,22 +121,27 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
     else
         valid_key = false;
 
-	if(valid_key)
-  	    for (auto& m_listeners : input_listeners)
+	if(valid_key) {
+  	    for (auto& m_listeners : input_listeners) {
 		    m_listeners.second->push(ControllerUtil::InputEvent(evt));
+        }
+    }
 
 	return true;
 }
 
 bool InputListener::mouseMoved (const OIS::MouseEvent& mouse_arg)
 {
+    gui_mouse_evthandler(mouse_arg, OIS::MouseButtonID::MB_Left, 2);
+
     //track where the mouse is being dragged to
     if(mouse_dragging)
     {
-        const OIS::MouseState &ms = mouse->getMouseState();
+        auto ms = mouse->getMouseState();
         ControllerUtil::INPUT_TYPE evt = ControllerUtil::INPUT_TYPE::MDrag;
-    	for (auto& m_listeners : input_listeners)
+    	for (auto& m_listeners : input_listeners) {
 		    m_listeners.second->push(ControllerUtil::InputEvent(evt, ms.X.abs - drag_pos_x, ms.Y.abs - drag_pos_y));          
+        }
 
         //update the last mouse position
         drag_pos_x = ms.X.abs;
@@ -136,9 +154,11 @@ bool InputListener::mouseMoved (const OIS::MouseEvent& mouse_arg)
 bool InputListener::mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id)
 {
     mouse_dragging = true;
-    const OIS::MouseState &ms = mouse->getMouseState();
+    auto ms = mouse->getMouseState();
     drag_pos_y = ms.Y.abs;
     drag_pos_x = ms.X.abs;
+    
+    gui_mouse_evthandler(mouse_arg, mouse_id, 0);
     return true;
 }
 
@@ -146,6 +166,8 @@ bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseB
 {
     ControllerUtil::INPUT_TYPE evt;
     bool valid_input = true;
+
+    gui_mouse_evthandler(mouse_arg, mouse_id, 1);
 
     if(mouse_id == OIS::MouseButtonID::MB_Left)
         evt = ControllerUtil::INPUT_TYPE::LClick;
@@ -156,16 +178,12 @@ bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseB
    
     if(valid_input)
     {
-        const OIS::MouseState &ms = mouse->getMouseState();
-    	for (auto& m_listeners : input_listeners)
+        auto ms = mouse->getMouseState();
+    	for (auto& m_listeners : input_listeners) {
 		    m_listeners.second->push(ControllerUtil::InputEvent(evt, ms.X.abs, ms.Y.abs));      
+        }
     }
     mouse_dragging = false;
 	return true;
-}
-
-bool InputListener::add_input_listener(std::string id, ControllerUtil::ControllerBufferType* buffer)
-{
-    return input_listeners.insert(std::make_pair(id, buffer)).second;;
 }
 

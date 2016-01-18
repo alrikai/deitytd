@@ -1,3 +1,11 @@
+// ocl_fractal.cl -- part of the DietyTD tests 
+//
+// Copyright (C) 2015 Alrik Firl 
+//
+// This software may be modified and distributed under the terms
+// of the MIT license.  See the LICENSE file for details.
+
+
 __kernel void fractal2d
          (__global uint* image,
           const float4 limits,

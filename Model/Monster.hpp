@@ -1,3 +1,13 @@
+/* Monster.hpp -- part of the DietyTD Model subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #ifndef TD_MONSTER_HPP
 #define TD_MONSTER_HPP
 
@@ -5,7 +15,9 @@
 #include "ModelUtils.hpp"
 #include "util/Types.hpp"
 #include "util/Elements.hpp"
-#include "StatusEffects.hpp"
+#include "util/MonsterProperties.hpp"
+#include "util/TowerProperties.hpp"
+//#include "StatusEffects.hpp"
 
 #include <tuple>
 #include <memory>

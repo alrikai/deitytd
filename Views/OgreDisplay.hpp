@@ -1,3 +1,13 @@
+/* OgreDisplay.hpp -- part of the DietyTD Views subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
+
 #ifndef TD_OGRE_DISPLAY_HPP
 #define TD_OGRE_DISPLAY_HPP
 
@@ -7,6 +17,7 @@
 #include "GameBackground.hpp"
 #include "ViewEventTypes.hpp"
 #include "ViewUtil.hpp"
+#include "GameGUI.hpp"
 
 #include "TowerDefense.hpp"
 #include "util/Types.hpp"
@@ -112,7 +123,7 @@ public:
 */
     OgreDisplay()
         : root (new Ogre::Root(plugins_cfg_filename)), cam_rotate(0.10f), cam_move(10.0f),
-        background(nullptr), td_event_queue(nullptr), game_events(nullptr), close_display(false)
+        background(nullptr), td_event_queue(nullptr), game_events(nullptr), close_display(false), gui(nullptr)
     {
         ogre_setup();
         setup_camera(); 
@@ -141,6 +152,7 @@ public:
 
         background.reset(new GameBackground(scene_mgmt, view_port));
         input_events = std::unique_ptr<ControllerUtil::ControllerBufferType>(new ControllerUtil::ControllerBufferType());
+
         Ogre::Root::getSingletonPtr()->addFrameListener(this);
     }
 
@@ -152,8 +164,9 @@ public:
                                          Ogre::Vector3 map_coord_offsets);
     void register_input_controller(Controller* controller)
     {
-        const std::string id {"ThisShouldBeSomethingMeaningful"};
+        const std::string id {"OgreDisplayView"};
         controller->register_input_listener(id, input_events.get());
+        gui->register_controller(controller);        
     }
 
     //for enqueueing frontend --> backend events
@@ -184,13 +197,19 @@ public:
     //void windowClosed(Ogre::RenderWindow* rw) override;
     bool frameRenderingQueued(const Ogre::FrameEvent& evt) override;
 
+    void update_gameinfo();
+
 private:        
     bool ogre_setup();
+    void gui_setup();
+
     void setup_camera(); 
     void setup_background();
     void handle_user_input();
 
+    void get_mapcoords(const std::vector<float>& world_position, float& x_coord, float& y_coord, const Ogre::AxisAlignedBox& map_box);
     void generate_tower(const float x_coord, const float y_coord, const float click_distance, const Ogre::AxisAlignedBox& mapobj);
+    void generate_information_request(std::vector<float>&& world_position);
 
     const static std::string resource_cfg_filename; 
     const static std::string plugins_cfg_filename;
@@ -209,6 +228,12 @@ private:
     Ogre::Viewport* view_port;
     Ogre::Light* main_light;
     Ogre::Light* spot_light;
+
+    //----------------------------------------
+    std::unique_ptr<GameGUI> gui;
+    //TODO: used to update the GUI passive info to reflect the current game state 
+    GameStateInformation game_state_info;
+    //----------------------------------------
 
     std::unique_ptr<GameBackground> background;
     std::unique_ptr<ControllerUtil::ControllerBufferType> input_events;
@@ -350,13 +375,25 @@ void OgreDisplay<BackendType>::start_display()
         auto m_scenenode = scene_mgmt->getEntity(mob_name)->getParentSceneNode(); 
         OgreUtil::nuke_scenenode(m_scenenode);
     };
+
+            
+    auto unitinfo_evt_fcn = [this](std::unique_ptr<RenderEvents::unit_information> info_evt)
+    {
+        //TODO: reeeeeally need to re-work how the GUI display will be arranged
+        info_evt->base_stats = current_selection->getName();
+        gui->display_information(info_evt->base_stats, info_evt->current_stats, info_evt->information);
+    };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //10 FPS is the bare minimum
     constexpr int max_ms_perframe = 100;
 
     double time_elapsed = 0;
+
+    //have the game commit suicide after 600 seconds
     const double TOTAL_TIME = 600 * 1000;
+
     auto start_time = std::chrono::high_resolution_clock::now();
     do
     {
@@ -384,6 +421,9 @@ void OgreDisplay<BackendType>::start_display()
         game_events->apply_mobmove_events(mobmove_evt_fcn);
         game_events->apply_mobremove_events(mobremove_evt_fcn);
 
+        //give request for user selection information
+        game_events->apply_unitinfo_events(unitinfo_evt_fcn);        
+        
         /////////////////////////////////////////////////////////////////////////////////////////////
      
         auto end_time = std::chrono::high_resolution_clock::now(); 
@@ -404,7 +444,7 @@ void OgreDisplay<BackendType>::setup_camera()
     camera->setFarClipDistance(6000);
     //have a 4:3 aspect ratio, looking back along the Z-axis (should we do Y-axis instead?) 
     camera->setAspectRatio(Ogre::Real(4.0f/3.0f));
-    camera->setPosition(Ogre::Vector3(0,0,300)); 
+    camera->setPosition(Ogre::Vector3(-20,0,300)); 
     camera->lookAt(Ogre::Vector3(0,0,0));
 }
 
@@ -416,16 +456,72 @@ bool OgreDisplay<BackendType>::ogre_setup()
     view_detail::load_resources(resource_cfg_filename);
     
     //configure the system
-    if(!root->restoreConfig())
-        if(!root->showConfigDialog())
+    if(!root->restoreConfig()) {
+        if(!root->showConfigDialog()) {
             return false;
+        }
+    }
 
-    render_window = root->initialise(true, "Minimal OGRE");
+    render_window = root->initialise(true, "DietyTD");
     scene_mgmt = root->createSceneManager("OctreeSceneManager");
     root_node = scene_mgmt->getRootSceneNode();
+	
+	gui_setup();
+
     return true;
 }
 
+
+template <class BackendType>
+void OgreDisplay<BackendType>::gui_setup()
+{
+    gui = std::unique_ptr<GameGUI> (new GameGUI (render_window));
+}
+
+
+//Q: who would call this?
+template <class BackendType>
+void OgreDisplay<BackendType>::update_gameinfo() 
+{
+    //TODO: populate this somehow?? Should this spawn a request to something (?) that has the info,
+    //or should it just periodically update the info, or should it be registered as some sort of event
+    //listener that updates when the backend sends new info?
+    GameStateInformation placeholder_info;
+    gui->update_gamestate_info(placeholder_info);
+}
+
+
+template <class BackendType>
+void OgreDisplay<BackendType>::get_mapcoords(const std::vector<float>& world_position, float& xnorm_coord, float& ynorm_coord, const Ogre::AxisAlignedBox& map_box)
+{
+    Ogre::Vector3 map_coord_mapping = map_box.getSize(); 
+    xnorm_coord = 0;
+    ynorm_coord = 0;
+
+    auto world_click_x = world_position[0];
+    auto world_click_y = world_position[1];
+
+    if(world_click_x < 0)
+        xnorm_coord = 0.5f - std::abs(world_click_x / map_coord_mapping.x);
+    else
+        xnorm_coord = 0.5f + std::abs(world_click_x / map_coord_mapping.x);
+
+    if(world_click_y < 0)
+        ynorm_coord = 0.5f - std::abs(world_click_y / map_coord_mapping.y);
+    else
+        ynorm_coord = 0.5f + std::abs(world_click_y / map_coord_mapping.y);
+}
+
+template <class BackendType>
+void OgreDisplay<BackendType>::generate_information_request(std::vector<float>&& world_position)
+{
+    float xnorm_coord, ynorm_coord;
+    get_mapcoords(world_position, xnorm_coord, ynorm_coord, this->background->get_map_aab());
+
+    using tower_evt_t = UserTowerEvents::print_tower_event<BackendType>;
+    std::unique_ptr<UserTowerEvents::tower_event<BackendType>> td_evt = std::unique_ptr<tower_evt_t> (new tower_evt_t(ynorm_coord, xnorm_coord));
+    td_event_queue->push(std::move(td_evt));            
+}
 
 template <class BackendType>
 void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y_coord, const float click_distance, const Ogre::AxisAlignedBox& map_box)
@@ -513,7 +609,8 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std
     //NOTE: position is (x, y, z)
     tower_snode->setPosition(target_location.x, target_location.y, target_location.z);
     tower_snode->scale(tower_scale, tower_scale, tower_scale);
-    tower_snode->showBoundingBox(true);
+    
+    tower_snode->showBoundingBox(!true);
 
     /*
     std::vector<std::string> particle_types
@@ -743,10 +840,23 @@ void OgreDisplay<BackendType>::handle_user_input()
             {
                 std::cout << "Mouse Lclick @[" << ui_evt.x_pos << ", " << ui_evt.y_pos << "]" << std::endl;
                 
+                //TODO: need to completely overhaul the raycasting and user selection code. More re-computation than is necessary here
+
                 //NOTE: current_selection is set to nullptr if nothing was selected. Might want to disallow selecting the game map and certain other objects
                 current_selection = view_detail::user_select(scene_mgmt, view_port, ui_evt.x_pos/width, ui_evt.y_pos/height);
-                if(current_selection)
-                    std::cout << "Selected " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+                if(current_selection) {
+                    //gets the position clicked in the world -- can get the map coordinates from this
+                    bool is_valid = false;
+                    float x_world_coord, y_world_coord, z_world_coord;
+                    std::tie(is_valid, x_world_coord, y_world_coord, z_world_coord) = view_detail::get_worldclick_coords(scene_mgmt, view_port, ui_evt.x_pos, ui_evt.y_pos);
+                    if(is_valid) {
+                        std::cout << "Selected " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+                        std::vector<float> worldclick_position {x_world_coord, y_world_coord, z_world_coord};
+                        generate_information_request(std::move(worldclick_position));
+                        //TODO: we should spawn an information request to the backend for the selection and update the GUI accordingly
+                        //request_selection = true;
+                    }
+                }
                 break;
             }
             case ControllerUtil::INPUT_TYPE::RClick:
@@ -805,6 +915,10 @@ bool OgreDisplay<BackendType>::frameRenderingQueued(const Ogre::FrameEvent& evt)
     {
         mob_it.second.update_position(1000.0f * evt.timeSinceLastFrame);
     }
+
+    //TODO: determine if this is a good place for this, or if I should put it in a seperate frame
+    //listener (i.e. in the controller? or in a GUI-specific frame listener?
+    CEGUI::System::getSingleton().injectTimePulse(evt.timeSinceLastFrame);
 
     return true;
 }

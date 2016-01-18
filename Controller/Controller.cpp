@@ -1,3 +1,12 @@
+/* Controller.cpp -- part of the DietyTD Controller subsystem implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
 #include "Controller.hpp"
 
 Controller::Controller(Ogre::Root* root, Ogre::RenderWindow* ogre_window)
@@ -32,7 +41,7 @@ void Controller::init()
     
     #if defined OIS_LINUX_PLATFORM
     ois_params.insert(std::make_pair(std::string("x11_mouse_grab"),    std::string("false")));
-    ois_params.insert(std::make_pair(std::string("x11_mouse_hide"),    std::string("false")));
+    ois_params.insert(std::make_pair(std::string("x11_mouse_hide"),    std::string("true")));
     ois_params.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
     ois_params.insert(std::make_pair(std::string("XAutoRepeatOn"),     std::string("true")));
     #endif

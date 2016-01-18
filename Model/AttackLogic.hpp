@@ -48,12 +48,14 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>>& tile_mobs, std::
           auto mob_stats = target_mob->get_attributes();
           auto atk_attributes = attack->get_attack_attributes();
           float atk_dmg = 0.f;
-          for (auto dmg_it = atk_attributes.damage.begin(); dmg_it != atk_attributes.damage.end(); ++dmg_it) {
 
-              const auto atkcoeff_type = std::make_pair(dmg_it->element_type, mob_stats.armor_class);
+          for (int elem_idx = 0; elem_idx < tower_property_modifier::NUM_ELEM; elem_idx++) {
+              
+              const auto atkcoeff_type = std::make_pair(static_cast<Elements>(elem_idx), mob_stats.armor_class);
               const auto dmg_factor_it = ElementInfo::damage_coeffs.find(atkcoeff_type);
+              
               if(dmg_factor_it != ElementInfo::damage_coeffs.end()) {
-                  const auto raw_dmg = dmg_it->damage_range.low + attack_roller.get_roll(dmg_it->damage_range.high - dmg_it->damage_range.low);
+                  const auto raw_dmg = atk_attributes.damage[elem_idx].low + attack_roller.get_roll(atk_attributes.damage[elem_idx].high - atk_attributes.damage[elem_idx].low);
                   atk_dmg += dmg_factor_it->second * raw_dmg;
               }
           }

@@ -35,8 +35,12 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
+        
+        const std::string config_file {"resources/default_attribute_values.yaml"};
+        const std::string dict_file {"resources/word_list.txt"};
+
         //td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
-        td_backend = std::unique_ptr<ModelType>(new ModelType);
+        td_backend = std::unique_ptr<ModelType>(new ModelType(dict_file, config_file));
 
         spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, GameMap::MAP_HEIGHT-1);  
         dest_point = GameMap::IndexCoordinate (0, 0); 

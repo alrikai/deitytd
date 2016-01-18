@@ -5,7 +5,9 @@
 #include "ModelUtils.hpp"
 #include "util/Types.hpp"
 #include "util/Elements.hpp"
-#include "StatusEffects.hpp"
+#include "util/MonsterProperties.hpp"
+#include "util/TowerProperties.hpp"
+//#include "StatusEffects.hpp"
 
 #include <tuple>
 #include <memory>

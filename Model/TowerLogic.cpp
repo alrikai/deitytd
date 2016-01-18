@@ -81,7 +81,7 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
 }
 
 
-bool TowerLogic::modify_tower(essence* modifier, const float x_coord, const float y_coord)
+bool TowerLogic::modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord)
 {
     //check if tower is at the specified position
     if(!map.is_obstructed(x_coord, y_coord))

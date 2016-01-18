@@ -6,9 +6,13 @@
 #include "TowerModel.hpp"
 #include "TowerAttack.hpp"
 
-#include "Essences.hpp"
-#include "EssenceSynthesis.hpp"
-#include "StatusEffectIDs.hpp"
+//#include "TowerProperties.hpp"
+#include "util/attribute_modifiers.hpp"
+#include "tower_combiner/TowerCombiner.hpp"
+
+//#include "Essences.hpp"
+//#include "EssenceSynthesis.hpp"
+//#include "StatusEffectIDs.hpp"
 
 #include <memory>
 #include <iostream>
@@ -30,7 +34,6 @@ std::vector<std::pair<T,T>> TowerInformation<T>::TowerTierCoefficients { {20,5},
 // forward declaration of mobs. Keep a ptr to the 'current' target //
 /////////////////////////////////////////////////////////////////////
 class Monster;
-class StatusEffect;
 
 class Tower
 {
@@ -40,15 +43,16 @@ public:
     Tower(tower_properties&& attributes, const std::string& id, const int tier_roll, const float row, const float col)
         : base_attributes(std::move(attributes)), tower_id(id), position(col, row), current_target(nullptr)
     {
-        modifiers.resize(tier_roll);
-        mod_count = 0;
+        //modifiers.resize(tier_roll);
+        //mod_count = 0;
         num_kills = 0;
         tier = static_cast<Tier>(tier_roll);
-
-        generate_statuseffects();
     }
+    virtual ~Tower(){}
 
-    virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
+    //when the tower hits some threshold for experience, have it gain semi-randomized new abilities 
+    //virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
+    virtual bool add_modifier(const TowerCombiner& tower_combiner, tower_property_modifier* modifier); 
     
     //this is baisically a factory function for generating a given towers' attacks.
     //Tower subclasses can override to do whatever extra steps they need
@@ -125,11 +129,12 @@ protected:
         return static_cast<typename std::underlying_type<EType>::type>(t);
     }
 
-    void generate_statuseffects();
+    //void generate_statuseffects();
 
     const static int MAX_UPGRADE_LEVEL = 3;
 
-    //the baseline, fundamental (and immutable) attributes
+    //the baseline, fundamental attributes. These represent the permenent attributes (so only permentant changes will
+    //be written to this one)
     tower_properties base_attributes;
     //the current, subject-to-change attributes
     tower_properties attack_attributes;
@@ -145,8 +150,11 @@ protected:
 
     //how many different groups of modifiers can there be? For now, we'll assume just essences?
     //before accessing, we want to make sure we dont exceed the tier in # elements
-    std::vector<std::unique_ptr<essence>> modifiers;
-    int mod_count;
+    //std::vector<std::unique_ptr<essence>> modifiers;
+    //int mod_count;
+
+    //TODO: need some infrastructure for keeping track of the characters / slots used
+    //...
 
     uint64_t last_timestamp;
     //the tower center position
@@ -156,6 +164,8 @@ protected:
     std::shared_ptr<Monster> current_target;
     uint32_t num_kills;
 
+    std::vector<tower_attribute_modifier*> status_effects;
+#if 0
     //when the tower attacks, it should spawn zero or more status effects, that apply to the tower and/or the monster.
     //The tower is the one that should know what statuses to spawn; the towerattack will just carry them along, as when
     //the attack collides, the status effects will be applied and modify the tower/monster/game state.
@@ -165,7 +175,6 @@ protected:
     //COULD just store the enum types, but then I would have to store each statuses' data as well.
     //--> need to put more thought into the design...
     friend class StatusEffect;
-    
     //the per-status effect metadata
     struct statuseffect_metadata
     {
@@ -180,6 +189,7 @@ protected:
 
     //the tower-wide status parameters
     StatusParameters status_params;
+#endif    
 };
 
 namespace TowerGenerator

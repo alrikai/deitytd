@@ -50,7 +50,7 @@ private:
     const static std::string map_material;
     const static std::string skybox_material;
 
-	  Ogre::SceneManager* scene_mgmt;
+	Ogre::SceneManager* scene_mgmt;
     Ogre::SceneNode* root_node;
     Ogre::Viewport* view_port;
     Ogre::SceneNode* map_node;

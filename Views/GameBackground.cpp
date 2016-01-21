@@ -48,10 +48,11 @@ void GameBackground::make_background()
         Ogre::Ray ray = cam->getCameraToViewportRay(map_extents.at(pt_idx)[0], map_extents.at(pt_idx)[1]);
         auto world_coord = ray.intersects(ray_aab);
 
-        if(world_coord.first)
+        if(world_coord.first) {
             std::cout << "@ " << pt_idx << " --> " << ray.getPoint(world_coord.second) << std::endl;
-        else
+        } else {
             std::cout << "NOTE: DIDNT INTERSECT " << std::endl;
+        }
         world_extents[pt_idx] = ray.getPoint(world_coord.second);
     }
 
@@ -96,9 +97,15 @@ void GameBackground::make_background()
     bg_material->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     bg_material->getTechnique(0)->getPass(0)->setLightingEnabled(false);
 
-    //initialize the background to black
+    //load the default background -- acts as the placeholder until a new one is generated
+    Ogre::Image default_bg;
+    default_bg.load("default_bg.png", "Popular");
+    //this should be equivalent to default_bg.getData()?
+    auto default_bgdatap = reinterpret_cast<uint8_t*>(default_bg.getPixelBox(0, 0).data);
     auto texture_buffer = std::unique_ptr<uint8_t[]>(new uint8_t [3 * bg_height * bg_width]);
-    std::fill(texture_buffer.get(), texture_buffer.get() + 3 * bg_height * bg_width, 0);
+
+    std::copy(default_bgdatap, default_bgdatap + 3 * bg_height * bg_width, texture_buffer.get());
+    //std::fill(texture_buffer.get(), texture_buffer.get() + 3 * bg_height * bg_width, 0);
     render_background_texture(std::move(texture_buffer));
 
     bg_rect = new Ogre::Rectangle2D(true);

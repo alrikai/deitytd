@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<GUIScheme version="5" name="DTDLook">
+	<Imageset filename="DTD.imageset" />
+	<Font filename="DejaVuSans-10.font" />
+	<LookNFeel filename="DTD.looknfeel" />
+	<WindowRendererSet filename="CEGUICoreWindowRendererSet" />
+	<FalagardMapping windowType="DTDLook/Button"      targetType="CEGUI/PushButton"  renderer="Core/Button"       lookNFeel="DTDLook/Button" />
+	<FalagardMapping windowType="DTDLook/ImageButton" targetType="CEGUI/PushButton"  renderer="Core/Button"       lookNFeel="DTDLook/ImageButton" />
+	<FalagardMapping windowType="DTDLook/MultiLineEditbox" targetType="CEGUI/MultiLineEditbox" renderer="Core/MultiLineEditbox" lookNFeel="DTDLook/MultiLineEditbox" />
+	<FalagardMapping windowType="DTDLook/VerticalScrollbar"   targetType="CEGUI/Scrollbar" renderer="Core/Scrollbar" lookNFeel="DTDLook/VerticalScrollbar" />
+	<FalagardMapping windowType="DTDLook/HorizontalScrollbar" targetType="CEGUI/Scrollbar" renderer="Core/Scrollbar" lookNFeel="DTDLook/HorizontalScrollbar" />
+	<FalagardMapping windowType="DTDLook/VerticalScrollbarThumb"   targetType="CEGUI/Thumb" renderer="Core/Button" lookNFeel="DTDLook/VerticalScrollbarThumb" />
+	<FalagardMapping windowType="DTDLook/HorizontalScrollbarThumb" targetType="CEGUI/Thumb" renderer="Core/Button" lookNFeel="DTDLook/HorizontalScrollbarThumb" />
+	<FalagardMapping windowType="DTDLook/StaticImage" targetType="DefaultWindow" renderer="Core/StaticImage" lookNFeel="DTDLook/StaticImage" />
+	<FalagardMapping windowType="DTDLook/StaticText"  targetType="DefaultWindow" renderer="Core/StaticText"  lookNFeel="DTDLook/StaticText" />
+</GUIScheme>
+

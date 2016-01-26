@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<GUILayout version="4" >
+    <Window type="DefaultWindow" name="DTDMainUI" >
+        <Property name="Area" value="{{0,0},{0,0},{1,0},{1,5}}" />
+        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+        <Window type="DTDLook/StaticText" name="numlives_edit" >
+            <Property name="Area" value="{{0,0},{0,0},{0,192},{0,64}}" />
+            <Property name="Text" value=" Lives:" />
+            <Property name="MaxSize" value="{{1,0},{1,0}}" />
+            <Property name="HorzScrollPageSize" value="182" />
+            <Property name="VertScrollPageSize" value="54" />
+            <Property name="HorzScrollDocumentSize" value="78" />
+            <Property name="VertScrollDocumentSize" value="27.9375" />
+        </Window>
+        <Window type="DTDLook/StaticText" name="numgold_edit" >
+            <Property name="Area" value="{{0,192},{0,0},{0,384},{0,64}}" />
+            <Property name="Text" value=" Essence:" />
+            <Property name="MaxSize" value="{{1,0},{1,0}}" />
+            <Property name="HorzScrollPageSize" value="182" />
+            <Property name="VertScrollPageSize" value="54" />
+            <Property name="HorzScrollDocumentSize" value="113" />
+            <Property name="VertScrollDocumentSize" value="27.9375" />
+        </Window>
+        <Window type="DTDLook/StaticText" name="numessence_edit" >
+            <Property name="Area" value="{{0,384},{0,0},{0,576},{0,64}}" />
+            <Property name="Text" value=" Gold:" />
+            <Property name="MaxSize" value="{{1,0},{1,0}}" />
+            <Property name="HorzScrollPageSize" value="182" />
+            <Property name="VertScrollPageSize" value="54" />
+            <Property name="HorzScrollDocumentSize" value="70" />
+            <Property name="VertScrollDocumentSize" value="27.9375" />
+        </Window>
+        <Window type="DTDLook/StaticText" name="staticinfo_text" >
+            <Property name="Area" value="{{0,1300},{0,124},{0,1600},{0,1024}}" />
+            <Property name="MaxSize" value="{{1,0},{1,0}}" />
+            <Property name="HorzScrollPageSize" value="290" />
+            <Property name="VertScrollPageSize" value="890" />
+            <Window type="DTDLook/MultiLineEditbox" name="description_info" >
+                <Property name="Area" value="{{0,5},{0,384},{0,295},{0,894}}" />
+                <Property name="Text" >
+</Property>
+                <Property name="ReadOnly" value="true" />
+                <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
+            </Window>
+            <Window type="DTDLook/MultiLineEditbox" name="stats_info" >
+                <Property name="Area" value="{{0,5},{0,256},{0,295},{0,384}}" />
+                <Property name="Text" >
+</Property>
+                <Property name="ReadOnly" value="true" />
+                <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
+            </Window>
+            <Window type="DTDLook/StaticImage" name="portrait_info" >
+                <Property name="Area" value="{{0,1},{0,0},{0,301},{0,256}}" />
+                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+            </Window>
+        </Window>
+        <Window type="DTDLook/ImageButton" name="quit_button" >
+            <Property name="Area" value="{{0.924375,-15},{0,1},{0.924375,105},{0,121}}" />
+            <Property name="HoverImage" value="DTDLook/RedOption" />
+            <Property name="AlwaysOnTop" value="true" />
+            <Property name="NormalImage" value="DTDLook/RedOption" />
+            <Property name="PushedImage" value="DTDLook/RedOption" />
+            <Property name="DisabledImage" value="DTDLook/RedOption" />
+        </Window>
+        <Window type="DTDLook/ImageButton" name="menu_button" >
+            <Property name="Area" value="{{0,1320},{0,0},{0,1440},{0,120}}" />
+            <Property name="HoverImage" value="DTDLook/GreenOption" />
+            <Property name="AlwaysOnTop" value="true" />
+            <Property name="NormalImage" value="DTDLook/GreenOption" />
+            <Property name="PushedImage" value="DTDLook/GreenOption" />
+            <Property name="DisabledImage" value="DTDLook/GreenOption" />
+        </Window>
+    </Window>
+</GUILayout>

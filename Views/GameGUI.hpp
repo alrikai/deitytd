@@ -120,6 +120,7 @@ public:
 
 private:	
 	void initialize();
+    void setup_animations();
 	void set_lives(int amount);
 	void set_gold(int amount);
 	void set_essence(int amount);

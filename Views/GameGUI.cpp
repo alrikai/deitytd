@@ -54,6 +54,26 @@ void GameGUI::set_essence(int amount)
 	gui_window->getChild("numessence_edit")->setText(new_string);
 }
 
+void GameGUI::setup_animations()
+{
+    CEGUI::AnimationManager& animation_mgmt = CEGUI::AnimationManager::getSingleton();
+    animation_mgmt.loadAnimationsFromXML("DTDLook.anims");
+
+    CEGUI::Animation* right_spinning_anim = animation_mgmt.getAnimation("RotateRightLoop");
+    CEGUI::Animation* left_spinning_anim = animation_mgmt.getAnimation("RotateLeftLoop");
+
+    CEGUI::AnimationInstance* menu_anim = animation_mgmt.instantiateAnimation(right_spinning_anim);
+    CEGUI::Window* menu_button = gui_window->getChild("menu_button");
+    menu_anim->setTargetWindow(menu_button);
+    menu_anim->start();
+
+    CEGUI::AnimationInstance* quit_anim = animation_mgmt.instantiateAnimation(left_spinning_anim);
+    CEGUI::Window* quit_button = gui_window->getChild("quit_button");
+    quit_anim->setTargetWindow(quit_button);
+    quit_anim->start();
+
+}
+
 void GameGUI::initialize()
 {
     //this call sets up all the CEGUI system objects with Ogre3D defaults. Namely, 
@@ -64,32 +84,44 @@ void GameGUI::initialize()
     //- CEGUI::System
     //Can get the created objects later via singletons, e.g. CEGUI::System::getSingletonPtr()
 
-    CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
-    CEGUI::SchemeManager::getSingleton().createFromFile("GameMenu.scheme");
-    CEGUI::SchemeManager::getSingleton().createFromFile("VanillaCommonDialogs.scheme");
-    CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
-    CEGUI::SchemeManager::getSingleton().createFromFile("Generic.scheme");
+    CEGUI::SchemeManager::getSingleton().createFromFile("DTDLook.scheme");
+    //CEGUI::SchemeManager::getSingleton().createFromFile("GameMenu.scheme");
+    //CEGUI::SchemeManager::getSingleton().createFromFile("VanillaCommonDialogs.scheme");
+    //CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
+    //CEGUI::SchemeManager::getSingleton().createFromFile("Generic.scheme");
 
-    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("GameMenuImages/MouseCursor");
+    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("DTDLook/MouseArrow");
 
 #if 1    
     //TODO: when we make our layout file, we'll load it here...
-    gui_window = CEGUI::WindowManager::getSingleton().loadLayoutFromFile("DietyTD2.layout"); 
+    gui_window = CEGUI::WindowManager::getSingleton().loadLayoutFromFile("DTDMainUI.layout"); 
  
+    //TODO: this should spawn the main menu
     auto menu_button_clicked = [](const CEGUI::EventArgs &e)
     {
         std::cout << "NOTE: menu button was clicked, but nothing will happen" << std::endl;
         return true;
     };
 
+    //TODO: should move this out to another function that'll trigger the shutdown sequence
+    auto quit_button_clicked = [](const CEGUI::EventArgs &e)
+    {
+        std::cout << "NOTE: quit button was clicked, but nothing will happen" << std::endl;
+        return true;
+    };
     /*
     gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
             CEGUI::Event::Subscriber(&menu_button_clicked));
     gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventMouseButtonDown, 
             CEGUI::Event::Subscriber(&menu_button_clicked));
     */
-    gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventMouseButtonUp, 
+
+    gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+            CEGUI::Event::Subscriber(&quit_button_clicked));
+    gui_window->getChild("menu_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
             CEGUI::Event::Subscriber(&menu_button_clicked));
+
+
 
 	gui_window->getChild("staticinfo_text")->getChild("stats_info")->setText("N/A");
 	gui_window->getChild("staticinfo_text")->getChild("description_info")->setText("N/A");
@@ -114,6 +146,7 @@ void GameGUI::initialize()
 
 #endif
 
+    setup_animations();
     CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_window);
 }
 

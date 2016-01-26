@@ -45,7 +45,7 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
-        
+        //choose the word dictionary and default modifier stats 
         const std::string config_file {"resources/default_attribute_values.yaml"};
         const std::string dict_file {"resources/word_list.txt"};
 
@@ -223,10 +223,11 @@ struct ActiveState : TDState
     //check if we're too slow, enforce the iteration speed to operate at a fixed timestep
     auto end_iter_time = std::chrono::high_resolution_clock::now();
     double time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_iter_time - current_timestamp).count(); 
-    if(time_elapsed > TIME_PER_ROUND)
+    if(time_elapsed > TIME_PER_ROUND) {
           std::cout << "Over the per-round target! -- " << time_elapsed << " ms" << std::endl;
-    else
+    } else {
         std::this_thread::sleep_for(std::chrono::milliseconds(std::llround(std::floor(TIME_PER_ROUND - time_elapsed))));
+    }
 
     //NOTE: we hope to say that each timestamp is equal to 1 iter (in ms). What do we do about the rounds that are over-time however?
     //--> the backend shouldnt care, since the backend just works in terms of timestamp values (and it doesn't care about the time 

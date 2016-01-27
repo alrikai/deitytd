@@ -115,6 +115,32 @@ public:
         set_essence(info.essence_amount);
 	}
 
+    //TODO: need to figure out the type of the tower_t that we'll be using, and then NOT have this be templated
+    //as I'll have to pass the 'active_tower' as state in this object, since the function signature required for 
+    //the CEGUI event subscribers doesn't allow arbitrary parameters (so I'll have to set a member variable)
+    template <typename tower_t>
+    void handle_tower_upgrade(tower_t* active_tower)
+    {
+        /*
+    auto wordcombine_button_clicked = [this](const CEGUI::EventArgs &e)
+    {
+        std::cout << "NOTE: word combination button was clicked, but nothing will happen" << std::endl;
+        this->gui_window->getChild("tower_upgrade_window")->setVisible(false);
+        return true;
+    };
+    gui_window->getChild("tower_upgrade_window")->getChild("word_combine_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+            CEGUI::Event::Subscriber(&wordcombine_button_clicked));
+
+         */
+        static bool initialized = false;
+        if(!initialized) {
+            gui_window->getChild("tower_upgrade_window")->getChild("word_combine_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+                CEGUI::Event::Subscriber(&GameGUI::word_combination_evthandler<tower_t>, this));
+            initialized = true;
+        }
+        //this will be invisible by default, and it'll become visible when a tower is clicked
+        gui_window->getChild("tower_upgrade_window")->setVisible(true);
+    }
 
     void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
@@ -124,6 +150,18 @@ private:
 	void set_lives(int amount);
 	void set_gold(int amount);
 	void set_essence(int amount);
+
+    //TODO: when we add in the proper infrastructure for getting the tower data, we would use this as the 
+    //subscriber for the tower word combine event clicks
+    template <class tower_t>
+    bool word_combination_evthandler(const CEGUI::EventArgs &e)
+    {
+        std::cout << "NOTE: word combination button was clicked, but nothing will happen" << std::endl;
+        this->gui_window->getChild("tower_upgrade_window")->setVisible(false);
+
+        //NOTE: also need to spawn the word combination window here...
+        return true;
+    }
 
 	CEGUI::OgreRenderer* gui_renderer;
     CEGUI::System* gui_sys;

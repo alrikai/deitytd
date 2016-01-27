@@ -94,6 +94,8 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
         evt = ControllerUtil::INPUT_TYPE::W;    
     else if(key_arg.key == OIS::KC_D)
         evt = ControllerUtil::INPUT_TYPE::D;
+    else if(key_arg.key == OIS::KC_C)
+        evt = ControllerUtil::INPUT_TYPE::C;
     else if(key_arg.key == OIS::KC_0)
         evt = ControllerUtil::INPUT_TYPE::ZERO;
     else if(key_arg.key == OIS::KC_1)

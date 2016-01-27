@@ -1,7 +1,7 @@
 <Imageset autoScaled="vertical" imagefile="DTDicons_v3.png" name="DTDLook" nativeHorzRes="2048" nativeVertRes="1654" version="2">
     <Image height="143" name="ButtonLeftNormal" width="80" xPos="0" yPos="0" />
-    <Image height="143" name="ButtonMiddleNormal" width="80" xPos="205" yPos="0" />
-    <Image height="143" name="ButtonRightNormal" width="80" xPos="104" yPos="0" />
+    <Image height="143" name="ButtonRightNormal" width="80" xPos="205" yPos="0" />
+    <Image height="143" name="ButtonMiddleNormal" width="80" xPos="104" yPos="0" />
     <Image height="143" name="ButtonLeftPushed" width="80" xPos="0" yPos="148" />
     <Image height="143" name="ButtonMiddlePushed" width="80" xPos="104" yPos="148" />
     <Image height="143" name="ButtonRightPushed" width="80" xPos="205" yPos="148" />

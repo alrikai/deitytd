@@ -33,6 +33,7 @@ GameGUI::~GameGUI()
     //TODO: do we destroy the singletons or anything?
 }
 
+
 void GameGUI::set_lives(int amount)
 {
 	static const std::string lives_string {"Lives: "};
@@ -115,16 +116,15 @@ void GameGUI::initialize()
     gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventMouseButtonDown, 
             CEGUI::Event::Subscriber(&menu_button_clicked));
     */
+    gui_window->getChild("tower_upgrade_window")->setVisible(false);
 
     gui_window->getChild("quit_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
             CEGUI::Event::Subscriber(&quit_button_clicked));
     gui_window->getChild("menu_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
             CEGUI::Event::Subscriber(&menu_button_clicked));
 
-
-
-	gui_window->getChild("staticinfo_text")->getChild("stats_info")->setText("N/A");
-	gui_window->getChild("staticinfo_text")->getChild("description_info")->setText("N/A");
+	gui_window->getChild("staticinfo_text")->getChild("stats_info")->setText("");
+	gui_window->getChild("staticinfo_text")->getChild("description_info")->setText("");
 
     //gui_window->getChild("staticinfo_text")->getChild("portrait_info")->setProperty("Image", 
 

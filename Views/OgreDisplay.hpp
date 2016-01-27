@@ -189,7 +189,9 @@ public:
     { return scene_mgmt; }
 
     void draw_maptiles(const int num_col_tiles, const int num_row_tiles)
-    { background->draw_tiles(num_col_tiles, num_row_tiles); }
+    { 
+        background->draw_tiles(num_col_tiles, num_row_tiles); 
+    }
 
     //Adjust mouse clipping area
     //void windowResized(Ogre::RenderWindow* rw) override;
@@ -800,6 +802,23 @@ void OgreDisplay<BackendType>::handle_user_input()
 
 
                     //TODO: enqueue a tower delete event for the backend
+                }
+                break;
+            }
+            case ControllerUtil::INPUT_TYPE::C:
+            {
+                //if we have a tower selected, need to fire off an event to the GUI to show the tower upgrade window
+                if(current_selection)
+                {
+                    //TODO: verify that a TOWER (not a monster) is selected
+
+                    //NOTE: we will need a lot more infrastructure here. In order to upgrade the tower, we need to know 
+                    //the information about the tower, plus we need some other data (e.g. #word slots, etc).
+                    //which will likely necessitate another information request to the backend, which will be something new
+                    //(but important) -- doing on-demand information requests between frontend and backend (or at least, 
+                    //handling the communication latency in a sensible manner). Simplest would just be to wait on getting
+                    //the response from the backend, but then we'll be blocking the frontend
+                    gui->handle_tower_upgrade(current_selection);
                 }
                 break;
             }

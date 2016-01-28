@@ -51,8 +51,8 @@ class Tower
 public:
     enum class Tier : int { ONE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN };
    
-    Tower(tower_properties&& attributes, const std::string& id, const int tier_roll, const float row, const float col)
-        : base_attributes(std::move(attributes)), tower_id(id), position(col, row), current_target(nullptr)
+    Tower(tower_properties&& attributes, const uint32_t tID, const std::string& name, const int tier_roll, const float row, const float col)
+        : base_attributes(std::move(attributes)), ID(tID), tower_name(name), position(col, row), current_target(nullptr)
     {
         //modifiers.resize(tier_roll);
         //mod_count = 0;
@@ -117,9 +117,14 @@ public:
         current_target.reset();
     }
 
-    inline std::string get_id() const
+    inline uint32_t get_id() const
     {
-        return tower_id;
+        return ID;
+    }
+
+    inline std::string get_name() const
+    {
+        return tower_name;
     }
 
     inline Coordinate<float> get_position() const
@@ -153,7 +158,8 @@ protected:
 
     //should we keep the tower model here? Will probably want to pull this out into its own class soon
     std::shared_ptr<TowerModel> tower_model;
-    std::string tower_id; 
+    const uint32_t ID;
+    std::string tower_name; 
 
     //assume we'll have tower tiers be in the range [1, 11). 
     Tier tier;
@@ -205,6 +211,6 @@ protected:
 
 namespace TowerGenerator
 {
-std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id, const float row, const float col);
+std::unique_ptr<Tower> make_fundamentaltower(const uint32_t ID, const int tier, const std::string& tower_id, const float row, const float col);
 }
 #endif

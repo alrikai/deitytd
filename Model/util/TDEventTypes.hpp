@@ -45,8 +45,8 @@ struct build_tower_event : public tower_event<BackendType>
     
     //NOTE: if we only ever build the base tower type, then we don't need a tower type ID.
     //      but if we ever add specialized basetowers, then we'll need IDs for them
-    build_tower_event(int tower_tier, float row, float col)
-        : tower_event<BackendType>(row, col), tier(tower_tier)
+    build_tower_event(uint32_t tower_ID, int tower_tier, float row, float col)
+        : tower_event<BackendType>(row, col), ID(tower_ID), tier(tower_tier)
     {}
 
     //need this now, as col_ and row_ are dependant names (either that or access them through "this->")
@@ -55,9 +55,10 @@ struct build_tower_event : public tower_event<BackendType>
 
     void apply (BackendType* td_backend) override
     {
-        td_backend->make_tower(tier, col_, row_);
+        td_backend->make_tower(ID, tier, col_, row_);
     }
 
+    uint32_t ID; 
     int tier;
 };
 

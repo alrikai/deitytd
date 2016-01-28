@@ -19,7 +19,7 @@ inline T L2dist(T r_diff, T c_diff)
     return std::sqrt(r_diff * r_diff + c_diff * c_diff);
 }
 
-bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_coord)
+bool TowerLogic::make_tower(const uint32_t ID, const int tier, const float x_coord, const float y_coord)
 {
     //the tower name and everything would have to be specified by the user when they make it, but until 
     //we implement a GUI we'll have to simulate that part here
@@ -61,9 +61,9 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
 
     //TODO: need to refactor t_list to work on TOWER-indices (e.g. [MAP_HEIGHT/TowerTileHeight][MAP_WIDTH/TowerTileWidth] array)
    
-    t_list[tower_row][tower_col] = TowerGenerator::make_fundamentaltower(tier, tower_name, block_offset.row, block_offset.col); 
+    t_list[tower_row][tower_col] = TowerGenerator::make_fundamentaltower(ID, tier, tower_name, block_offset.row, block_offset.col); 
     std::cout << "Generating Tower: " << "@ [" << block_offset.row << ", " << block_offset.col << "]: \n" << *(t_list[tower_row][tower_col].get()) << std::endl; 
-    
+     
     //get the average for each dimension (to get the center point)
     std::vector<float> dim_avgs (3, 0);
     std::for_each(selected_tower->second.polygon_points_.begin(), selected_tower->second.polygon_points_.end(), [&dim_avgs]
@@ -84,9 +84,11 @@ bool TowerLogic::make_tower(const int tier, const float x_coord, const float y_c
 
     //notify the frontend that a tower has been made
     std::unique_ptr<RenderEvents::create_tower> t_evt = std::unique_ptr<RenderEvents::create_tower>
-               (new RenderEvents::create_tower(t_list[tower_row][tower_col]->get_model(), tower_name, std::move(map_offsets)));
+               (new RenderEvents::create_tower(ID, t_list[tower_row][tower_col]->get_model(), tower_name, std::move(map_offsets)));
     td_frontend_events->add_maketower_event(std::move(t_evt));
     
+    //NEXT: update the tower information in the shared tower map
+
     return true;
 }
 
@@ -425,8 +427,9 @@ void TowerLogic::cycle_update_towers(const uint64_t onset_timestamp)
                 {
                     //spawn attack -- will need to take attack speed into account (maybe prior to checking the range?)
                     
-                    const std::string origin_tower_id = t_list[t_row][t_col]->get_id();
-                    const std::string attack_id = origin_tower_id + "_attack_" + std::to_string(onset_timestamp);
+                    const uint32_t origin_tower_id = t_list[t_row][t_col]->get_id();
+                    const std::string origin_tower_name = t_list[t_row][t_col]->get_name();
+                    const std::string attack_id = origin_tower_name + "_attack_" + std::to_string(onset_timestamp);
 
                     //get the normalized position of the target -- convert to tile position 
                     auto attack_target = t_list[t_row][t_col]->get_target();
@@ -438,7 +441,7 @@ void TowerLogic::cycle_update_towers(const uint64_t onset_timestamp)
 
                     //make the attack generation event
                     std::unique_ptr<RenderEvents::create_attack> t_evt = std::unique_ptr<RenderEvents::create_attack>
-                        (new RenderEvents::create_attack(attack_id, origin_tower_id, std::move(target)));
+                        (new RenderEvents::create_attack(attack_id, origin_tower_id, origin_tower_name, std::move(target)));
                     td_frontend_events->add_makeatk_event(std::move(t_evt));
 
                     //what parameters to have? perhaps a name and a timestamp?
@@ -506,18 +509,19 @@ void TowerLogic::cycle_update(const uint64_t onset_timestamp)
     for (auto attack_it = active_attacks.begin(); attack_it != active_attacks.end(); ++attack_it)
     {
         //dont need to update the frontent on every cycle (still looks smooth enough)
-      if(onset_timestamp % 5 == 0)
-      {
+        if(onset_timestamp % 5 == 0)
+        {
+            //get the amount the attack should move  
+            auto atk_movement = (*attack_it)->move_update(onset_timestamp);
+            const std::vector<float> movement {atk_movement.col, atk_movement.row, 0.0f};
 
-        //get the amount the attack should move  
-        auto atk_movement = (*attack_it)->move_update(onset_timestamp);
-        const std::vector<float> movement {atk_movement.col, atk_movement.row, 0.0f};
+            auto attack_id = (*attack_it)->get_id();
+            auto origin_id = (*attack_it)->get_origin_tower()->get_id();
+            auto origin_name = (*attack_it)->get_origin_tower()->get_name();
 
-        auto attack_id = (*attack_it)->get_id();
-        auto origin_id = (*attack_it)->get_origin_tower()->get_id();
-
-        auto t_evt = std::unique_ptr<RenderEvents::move_attack>(new RenderEvents::move_attack(attack_id, origin_id, movement, 150.0f));
-        td_frontend_events->add_moveatk_event(std::move(t_evt));
+            auto t_evt = std::unique_ptr<RenderEvents::move_attack>(new RenderEvents::move_attack(attack_id, origin_id, origin_name, movement, 150.0f));
+            td_frontend_events->add_moveatk_event(std::move(t_evt));
+        
         }
     }
 }

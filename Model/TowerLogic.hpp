@@ -29,6 +29,9 @@
 class TowerLogic
 {
 public:
+    static constexpr int MAP_NUMTILES_HEIGHT = GameMap::MAP_HEIGHT / GameMap::TowerTileHeight;
+    static constexpr int MAP_NUMTILES_WIDTH = GameMap::MAP_WIDTH / GameMap::TowerTileHeight;
+
     TowerLogic(const std::string& combo_dictfpath, const std::string& attribute_cfgfpath) 
         : tower_gen(combo_dictfpath, attribute_cfgfpath)
     {
@@ -88,7 +91,7 @@ public:
     }
 
     //methods called in response to frontend events, dispatched from the gameloop
-    bool make_tower(const int tier, const float x_coord, const float y_coord);
+    bool make_tower(const uint32_t ID, const int tier, const float x_coord, const float y_coord);
     bool modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord);
     bool print_tower(const float x_coord, const float y_coord);
     bool tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord);
@@ -134,7 +137,7 @@ private:
 
     GameMap map;
     //tower_generator tower_gen;
-   TowerCombiner tower_gen;
+    TowerCombiner tower_gen;
     std::map<std::string, TowerModel> tower_models;
     
     Pathfinder<GameMap> path_finder;

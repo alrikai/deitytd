@@ -112,6 +112,63 @@ struct TowerAttackAnimation : MoveableObject
 };
 
 template <class BackendType>
+struct TDMapInformation
+{
+    //reserved as the 'no identifier' identifier
+    static constexpr uint32_t INVALID_ID = 0x0;
+
+    TDMapInformation()
+    {
+        //initialize the tower mapping to have no valid IDs
+        for (int row = 0; row < BackendType::MAP_NUMTILES_HEIGHT; row++) {
+            for (int col = 0; col < BackendType::MAP_NUMTILES_WIDTH; col++) {
+                tower_ID_mapping[row][col] = INVALID_ID;
+            }
+        }
+    }
+
+    //TODO: need to see which coordinated are best/most convenient for storage purposes here...
+    void add_tower_ID(float xnorm_coord, float ynorm_coord, const uint32_t tower_ID)
+    {
+        float xtile = xnorm_coord * BackendType::MAP_NUMTILES_WIDTH;
+        float ytile = ynorm_coord * BackendType::MAP_NUMTILES_HEIGHT;
+        int tile_col = std::round(xtile);
+        int tile_row = std::round(ytile);
+
+        //TODO: not really sure what to do if this ever happens... might be exception throwin' time
+        if(tower_ID_mapping[tile_row][tile_col]) {
+            std::cerr << "ERROR -- TDMapInformation already has ID " << tower_ID_mapping[tile_row][tile_col] << " at " << tile_row << ", " << tile_col << std::endl;
+        }
+
+        tower_ID_mapping[tile_row][tile_col] = tower_ID;
+    }
+
+    //returns true if there's a tower, false otherwise
+    bool check_for_tower(float xnorm_coord, float ynorm_coord)
+    {
+        return (get_tower_ID(xnorm_coord, ynorm_coord) != 0);
+    }
+
+    uint32_t get_tower_ID (float xnorm_coord, float ynorm_coord)
+    {
+        //map the normalized coordinates to the map tile (Q: will there be rounding issues here?)
+        float xtile = xnorm_coord * BackendType::MAP_NUMTILES_WIDTH;
+        float ytile = ynorm_coord * BackendType::MAP_NUMTILES_HEIGHT;
+        int tile_col = std::round(xtile);
+        int tile_row = std::round(ytile);
+        return tower_ID_mapping[tile_row][tile_col];
+    }
+
+    //for faster lookup between user clicks and getting the constrituent tower ID
+    static constexpr double UNITS_PER_TILE_H = 1.0 / BackendType::MAP_NUMTILES_HEIGHT;
+    static constexpr double UNITS_PER_TILE_W = 1.0 / BackendType::MAP_NUMTILES_WIDTH;
+    using TowerMapContainer = std::array<std::array<uint32_t, BackendType::MAP_NUMTILES_WIDTH>, BackendType::MAP_NUMTILES_HEIGHT>;
+    TowerMapContainer tower_ID_mapping; 
+};
+
+//-----------------------------------------------------------------------------------
+
+template <class BackendType>
 class OgreDisplay : public Ogre::FrameListener, public Ogre::WindowEventListener
 {
 public:
@@ -123,7 +180,8 @@ public:
 */
     OgreDisplay()
         : root (new Ogre::Root(plugins_cfg_filename)), cam_rotate(0.10f), cam_move(10.0f),
-        background(nullptr), td_event_queue(nullptr), game_events(nullptr), close_display(false), gui(nullptr)
+        background(nullptr), td_event_queue(nullptr), game_events(nullptr), gui(nullptr), close_display(false), 
+        towercount_ID(TDMapInformation<BackendType>::INVALID_ID+0x1)
     {
         ogre_setup();
         setup_camera(); 
@@ -158,7 +216,7 @@ public:
 
     void start_display();
 
-    void place_tower(TowerModel* selected_tower, const std::string& tower_name, const Ogre::AxisAlignedBox& map_box,
+    void place_tower(TowerModel* selected_tower, const uint32_t tower_ID, const std::string& tower_name, const Ogre::AxisAlignedBox& map_box,
                      Ogre::Vector3 map_coord_offsets, Ogre::Vector3 world_coord_offsets);
     void place_mob(const CharacterModels::ModelIDs id, const std::string& mob_name, const Ogre::AxisAlignedBox& map_box, 
                                          Ogre::Vector3 map_coord_offsets);
@@ -248,6 +306,8 @@ private:
     //the plan is to eventually have multiple threads running, so making this
     //atomic ahead of time (although this might change in the future...)
     std::atomic<bool> close_display;
+    uint32_t towercount_ID;
+    TDMapInformation<BackendType> tower_mapinfo;
 
     //holds the state of the current selection of the user (or nullptr if none selected)
     //this will presumably either be towers or mobs -- wouldn't make sense to be able to click attacks
@@ -282,13 +342,13 @@ void OgreDisplay<BackendType>::start_display()
 
         //NOTE: this is the last piece of the puzzle. Should be the GameMap (GameBGMap), but I formally would get it from a scene query.
         Ogre::AxisAlignedBox map_box = this->background->get_map_aab();
-        this->place_tower(render_evt->t_model.get(), render_evt->t_name, map_box, t_map_offsets, t_world_offsets);
+        this->place_tower(render_evt->t_model.get(), render_evt->t_ID, render_evt->t_name, map_box, t_map_offsets, t_world_offsets);
     };
 
     auto atkbuild_evt_fcn = [this](std::unique_ptr<RenderEvents::create_attack> render_evt)
     {
-        auto origin_id = render_evt->origin_id;
-        Ogre::Vector3 origin = scene_mgmt->getEntity(origin_id)->getParentSceneNode()->getPosition();
+        auto origin_tname = render_evt->origin_tname;
+        Ogre::Vector3 origin = scene_mgmt->getEntity(origin_tname)->getParentSceneNode()->getPosition();
         Ogre::Entity* tower_atk = scene_mgmt->createEntity(render_evt->name, Ogre::SceneManager::PT_SPHERE);
         tower_atk->setMaterialName("Examples/Chrome");
         tower_atk->setRenderQueueGroup(Ogre::RENDER_QUEUE_MAIN);
@@ -300,7 +360,7 @@ void OgreDisplay<BackendType>::start_display()
         child_node->setPosition(origin.x, origin.y, origin.z);
         child_node->attachObject(tower_atk);  
 
-        TowerAttackAnimation attack_anim(origin_id, origin, child_node);
+        TowerAttackAnimation attack_anim(origin_tname, origin, child_node);
         tower_attacks.insert(std::make_pair(render_evt->name, attack_anim));
     };
 
@@ -554,21 +614,29 @@ void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y
     //this would come from the GUI (someday we'll have a GUI...)
     const int tier = 1;
 
+    //make a unique ID for the tower being generated. This will be common to the front and backend
+    const uint32_t tower_ID = towercount_ID;
+    towercount_ID += 1;
+    std::cout << "generating tower ID " << tower_ID << std::endl;
+
     //tell the backend that the user built a tower
     using tower_evt_t = UserTowerEvents::build_tower_event<BackendType>;
     std::unique_ptr<UserTowerEvents::tower_event<BackendType>> td_evt = 
-        std::unique_ptr<tower_evt_t> (new tower_evt_t(tier, norm_mapcoords_row, norm_mapcoords_col));
+        std::unique_ptr<tower_evt_t> (new tower_evt_t(tower_ID, tier, norm_mapcoords_row, norm_mapcoords_col));
     td_event_queue->push(std::move(td_evt));
 }
 
 template <class BackendType>
-void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const std::string& tower_name, const Ogre::AxisAlignedBox& map_box, 
+void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const uint32_t tower_ID, const std::string& tower_name, const Ogre::AxisAlignedBox& map_box, 
                                            Ogre::Vector3 map_coord_offsets, Ogre::Vector3 world_coord_offsets)
 {
-    std::cout << "TileCenter Offset: [" << map_coord_offsets.x << ", " << map_coord_offsets.y << "]" << std::endl;
+    std::cout << "TileCenter Offset: [" << map_coord_offsets.x << ", " << map_coord_offsets.y << "] --> ID: " << tower_ID << std::endl;
 
     //TODO: want the scale to be based on a few factors, such as the resolution, map size, and fractal dimensions
     const float tower_scale = 1.0f/4.0f;
+
+    //TODO: store the tower IDs here and add them to the shared tower information structure
+    tower_mapinfo.add_tower_ID(map_coord_offsets.x, map_coord_offsets.y, tower_ID);
 
     //NOTE: we want to have the tower ABOVE the map -- thus, its z coordinate has to be non-zero 
     const Ogre::Vector3 target_location { map_box.getHalfSize().x * (2 * (map_coord_offsets.x - 0.5f)), 

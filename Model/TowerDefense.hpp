@@ -33,7 +33,6 @@
 template <template <class>  class ViewType, class ModelType = TowerLogic>
 class TowerDefense
 {
-
   struct TDState;
 public:
 //the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and

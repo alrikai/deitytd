@@ -130,7 +130,7 @@ namespace TowerGenerator
  * then the user will upgrade it with various items, which will change its stats and character model.
  * Presumably its attack projectile as well. What about the element distribution?
  */
-std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& tower_id, const float row, const float col)
+std::unique_ptr<Tower> make_fundamentaltower(const uint32_t ID, const int tier, const std::string& tower_name, const float row, const float col)
 {
     //make some base stats based on the tower tier
     tower_properties base_attributes;
@@ -146,7 +146,7 @@ std::unique_ptr<Tower> make_fundamentaltower(const int tier, const std::string& 
 
     //etc...
 
-    auto base_tower = std::unique_ptr<Tower>(new Tower(std::move(base_attributes), tower_id, tier, row, col));
+    auto base_tower = std::unique_ptr<Tower>(new Tower(std::move(base_attributes), ID, tower_name, tier, row, col));
 
     //load a fractal mesh -- the base tower will always look the same, but the tower models will diverge as they're upgraded.
     //would it be worth sharing the base tower model and using a copy-on-write scheme for it?

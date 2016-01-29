@@ -18,6 +18,7 @@
 #include "TowerModel.hpp"
 #include "util/Types.hpp"
 #include "util/TDEventTypes.hpp"
+#include "shared/common_information.hpp"
 #include "Views/ViewEventTypes.hpp"
 #include "Pathfinder.hpp"
 
@@ -52,6 +53,10 @@ public:
         return map.is_obstructed(col_coord, row_coord);
     }
 
+    void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+	{
+        shared_tower_info = shared_info;
+	}
   
     //adds a tower model to the internal list
     bool add_tower(std::vector<std::vector<uint32_t>>&& polygon_mesh, std::vector<std::vector<float>>&& polygon_points, 
@@ -144,7 +149,8 @@ private:
 
     std::unique_ptr<Tower> t_list [TLIST_HEIGHT][TLIST_WIDTH];
     std::unique_ptr<ViewEvents> td_frontend_events;
-    
+    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
+
     //the set of monsters still among the living
     std::list<std::shared_ptr<Monster>> live_mobs;
     std::list<std::unique_ptr<TowerAttackBase>> active_attacks; 

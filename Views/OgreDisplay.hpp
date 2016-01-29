@@ -21,6 +21,7 @@
 
 #include "TowerDefense.hpp"
 #include "util/Types.hpp"
+#include "shared/common_information.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <OGRE/Ogre.h>
@@ -239,6 +240,11 @@ public:
         game_events = events;
     }
 
+	void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+	{
+        shared_tower_info = shared_info;
+	}
+
     Ogre::Root* get_root() const
     { return root.get(); }
     Ogre::RenderWindow* get_render_window() const 
@@ -302,6 +308,7 @@ private:
     //-- these are both owned by the TowerDefense class, hence the raw ponters
     TowerEventQueueType* td_event_queue;
     ViewEvents* game_events;
+    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
 
     //the plan is to eventually have multiple threads running, so making this
     //atomic ahead of time (although this might change in the future...)
@@ -635,8 +642,11 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const uin
     //TODO: want the scale to be based on a few factors, such as the resolution, map size, and fractal dimensions
     const float tower_scale = 1.0f/4.0f;
 
-    //TODO: store the tower IDs here and add them to the shared tower information structure
+    //store the tower IDs here 
     tower_mapinfo.add_tower_ID(map_coord_offsets.x, map_coord_offsets.y, tower_ID);
+
+	auto tinfo = shared_tower_info->get_towerinfo(tower_ID);
+	std::cout << tinfo.tower_name << std::endl;
 
     //NOTE: we want to have the tower ABOVE the map -- thus, its z coordinate has to be non-zero 
     const Ogre::Vector3 target_location { map_box.getHalfSize().x * (2 * (map_coord_offsets.x - 0.5f)), 

@@ -87,7 +87,9 @@ bool TowerLogic::make_tower(const uint32_t ID, const int tier, const float x_coo
                (new RenderEvents::create_tower(ID, t_list[tower_row][tower_col]->get_model(), tower_name, std::move(map_offsets)));
     td_frontend_events->add_maketower_event(std::move(t_evt));
     
-    //NEXT: update the tower information in the shared tower map
+    //add the tower information in the shared tower info map
+	CommonTowerInformation t_info = t_list[tower_row][tower_col]->get_common_info();
+	shared_tower_info->add_new_towerinfo(ID, t_info);
 
     return true;
 }

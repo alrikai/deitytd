@@ -6,8 +6,6 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
 #ifndef TOWER_PROPERTIES_HPP
 #define TOWER_PROPERTIES_HPP
 

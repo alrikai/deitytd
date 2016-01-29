@@ -14,6 +14,7 @@
 #include "GameMap.hpp"
 #include "TowerLogic.hpp"
 #include "util/TDEventTypes.hpp"
+#include "shared/common_information.hpp"
 
 #include <memory>
 #include <random>
@@ -55,10 +56,18 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
         dest_point = GameMap::IndexCoordinate (0, 0); 
         timestamp = 0;
 
+        //-----------------------------------------------------------------
+        //register the shared info to be used by the front and backends
+        shared_game_info = std::make_shared<game_info_t>();
+        td_backend->register_shared_info(shared_game_info);
+        td_view->register_shared_info(shared_game_info);
+        //-----------------------------------------------------------------
+
         //make the game state (default to paused, since the game logic shouldn't be started yet)
         game_state = std::unique_ptr<TDState> (new PausedState(this)); 
         std::string td_rootpath = TDHelpers::get_TD_path(); 
         std::cout << "TD rootpath: " << td_rootpath << std::endl;
+
     }
 
     void init_game();
@@ -101,6 +110,10 @@ private:
     std::unique_ptr<ViewType<ModelType>> td_view;
     //the backend
     std::unique_ptr<ModelType> td_backend;
+
+    //threadsafe and shared between the frontend and backend for faster information providing
+    using game_info_t = GameInformation<CommonTowerInformation>;
+    std::shared_ptr<game_info_t> shared_game_info;
     
     std::unique_ptr<std::thread> gameloop_thread;
     std::atomic<bool> continue_gameloop;

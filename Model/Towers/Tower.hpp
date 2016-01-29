@@ -14,12 +14,14 @@
 
 #include "util/Elements.hpp"
 #include "util/Types.hpp"
+#include "util/Types.hpp"
 #include "TowerModel.hpp"
 #include "TowerAttack.hpp"
 
 //#include "TowerProperties.hpp"
 #include "util/AttributeModifiers.hpp"
 #include "tower_combiner/TowerCombiner.hpp"
+#include "shared/common_information.hpp"
 
 //#include "Essences.hpp"
 //#include "EssenceSynthesis.hpp"
@@ -122,6 +124,18 @@ public:
         return ID;
     }
 
+	//returns the (self-reported) tower infomrnation
+	inline CommonTowerInformation get_common_info() const
+	{
+        CommonTowerInformation info;
+		info.base_tower_props = base_attributes;
+		info.tier = get_tier(tier);
+		//hmmm haven't implemented this part yet have I? --> use a placeholder for now
+        info.num_wordslots = info.tier;
+    	info.tower_name = tower_name;
+		return info;
+	}
+
     inline std::string get_name() const
     {
         return tower_name;
@@ -139,7 +153,7 @@ public:
 protected:
 
     template <typename EType>
-    auto get_tier(EType t)
+    auto get_tier(EType t) const
         -> typename std::underlying_type<EType>::type
     {
         return static_cast<typename std::underlying_type<EType>::type>(t);

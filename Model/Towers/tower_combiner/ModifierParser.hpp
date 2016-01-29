@@ -6,13 +6,10 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
-
 #ifndef TD_MODIFIER_PARSER_HPP
 #define TD_MODIFIER_PARSER_HPP
 
-#include "TowerModifiers.hpp"
+#include "util/TowerModifiers.hpp"
 
 #include <yaml-cpp/yaml.h>
 

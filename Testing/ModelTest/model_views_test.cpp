@@ -11,7 +11,7 @@
 #include "Controller/Controller.hpp"
 #include "../fractal_util.hpp"
 #include "Model/TowerDefense.hpp"
-#include "Model/util/Types.hpp"
+#include "util/Types.hpp"
 #include <memory>
 
 /*

@@ -16,6 +16,7 @@
 
 #include <OGRE/Ogre.h>
 
+#include "shared/common_information.hpp"
 
 /*
 //TODO: consolidate this and the OgreDisplay so we only have 1 framelistener on the View side of things
@@ -108,6 +109,12 @@ public:
         controller->register_gui_listener(std::move(gui_keyhandler), std::move(gui_mousehandler));
 	}
 
+    void register_shared_towerinfor(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+	{
+        shared_tower_info = shared_info;
+	}
+
+
 	inline void update_gamestate_info(const GameStateInformation& info) 
 	{
         set_lives(info.num_lives);
@@ -118,9 +125,10 @@ public:
     //TODO: need to figure out the type of the tower_t that we'll be using, and then NOT have this be templated
     //as I'll have to pass the 'active_tower' as state in this object, since the function signature required for 
     //the CEGUI event subscribers doesn't allow arbitrary parameters (so I'll have to set a member variable)
-    template <typename tower_t>
-    void handle_tower_upgrade(tower_t* active_tower)
+    void handle_tower_upgrade(uint32_t active_tower_ID)
     {
+        activetower_ID = active_tower_ID;
+
         /*
     auto wordcombine_button_clicked = [this](const CEGUI::EventArgs &e)
     {
@@ -135,7 +143,7 @@ public:
         static bool initialized = false;
         if(!initialized) {
             gui_window->getChild("tower_upgrade_window")->getChild("word_combine_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
-                CEGUI::Event::Subscriber(&GameGUI::word_combination_evthandler<tower_t>, this));
+                CEGUI::Event::Subscriber(&GameGUI::word_combination_evthandler, this));
             initialized = true;
         }
         //this will be invisible by default, and it'll become visible when a tower is clicked
@@ -153,10 +161,13 @@ private:
 
     //TODO: when we add in the proper infrastructure for getting the tower data, we would use this as the 
     //subscriber for the tower word combine event clicks
-    template <class tower_t>
+    
     bool word_combination_evthandler(const CEGUI::EventArgs &e)
     {
+        auto tinfo = shared_tower_info->get_towerinfo(activetower_ID);
         std::cout << "NOTE: word combination button was clicked, but nothing will happen" << std::endl;
+ 
+        std::cout << "selected tower: " << tinfo.tower_name << ": " << " tier: " << tinfo.tier << " stats: " << tinfo.base_tower_props << std::endl;
         this->gui_window->getChild("tower_upgrade_window")->setVisible(false);
 
         //NOTE: also need to spawn the word combination window here...
@@ -169,6 +180,9 @@ private:
 
     CEGUI::RenderTarget *gui_rendertarget;
     CEGUI::GUIContext *gui_context;
+
+    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
+    uint32_t activetower_ID;
 };
 
 

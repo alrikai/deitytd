@@ -6,8 +6,6 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
 #ifndef TD_OGRE_DISPLAY_HPP
 #define TD_OGRE_DISPLAY_HPP
 
@@ -243,6 +241,7 @@ public:
 	void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
 	{
         shared_tower_info = shared_info;
+        gui->register_shared_towerinfor(shared_tower_info);
 	}
 
     Ogre::Root* get_root() const
@@ -896,7 +895,16 @@ void OgreDisplay<BackendType>::handle_user_input()
                     //(but important) -- doing on-demand information requests between frontend and backend (or at least, 
                     //handling the communication latency in a sensible manner). Simplest would just be to wait on getting
                     //the response from the backend, but then we'll be blocking the frontend
-                    gui->handle_tower_upgrade(current_selection);
+ 
+                    std::cout << "Combining " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+
+                    auto selection_loc = current_selection->getParentSceneNode()->getPosition();
+                    std::vector<float> selection_position {selection_loc.x, selection_loc.y, selection_loc.z};
+                    float xnorm_coord, ynorm_coord;
+                    get_mapcoords(selection_position, xnorm_coord, ynorm_coord, this->background->get_map_aab());
+                    auto selection_ID = tower_mapinfo.get_tower_ID(xnorm_coord, ynorm_coord);
+                    
+                    gui->handle_tower_upgrade(selection_ID);
                 }
                 break;
             }

@@ -9,6 +9,7 @@
 #include "GameGUI.hpp"
 
 GameGUI::GameGUI(Ogre::RenderWindow* render_window)
+    : shared_tower_info (nullptr)
 {
     gui_renderer = &CEGUI::OgreRenderer::bootstrapSystem(*render_window);
     gui_sys = CEGUI::System::getSingletonPtr();

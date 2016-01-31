@@ -129,10 +129,16 @@ struct TDMapInformation
     //TODO: need to see which coordinated are best/most convenient for storage purposes here...
     void add_tower_ID(float xnorm_coord, float ynorm_coord, const uint32_t tower_ID)
     {
+        assert(xnorm_coord >= 0 && xnorm_coord <= 1);
+        assert(ynorm_coord >= 0 && ynorm_coord <= 1);
+
         float xtile = xnorm_coord * BackendType::MAP_NUMTILES_WIDTH;
         float ytile = ynorm_coord * BackendType::MAP_NUMTILES_HEIGHT;
-        int tile_col = std::round(xtile);
-        int tile_row = std::round(ytile);
+        int tile_col = std::floor(xtile);
+        int tile_row = std::floor(ytile);
+
+        assert(tile_row < BackendType::MAP_NUMTILES_HEIGHT);
+        assert(tile_col < BackendType::MAP_NUMTILES_WIDTH);
 
         //TODO: not really sure what to do if this ever happens... might be exception throwin' time
         if(tower_ID_mapping[tile_row][tile_col]) {
@@ -150,11 +156,18 @@ struct TDMapInformation
 
     uint32_t get_tower_ID (float xnorm_coord, float ynorm_coord)
     {
+        assert(xnorm_coord >= 0 && xnorm_coord <= 1);
+        assert(ynorm_coord >= 0 && ynorm_coord <= 1);
+
         //map the normalized coordinates to the map tile (Q: will there be rounding issues here?)
         float xtile = xnorm_coord * BackendType::MAP_NUMTILES_WIDTH;
         float ytile = ynorm_coord * BackendType::MAP_NUMTILES_HEIGHT;
-        int tile_col = std::round(xtile);
-        int tile_row = std::round(ytile);
+        int tile_col = std::floor(xtile);
+        int tile_row = std::floor(ytile);
+
+        assert(tile_row < BackendType::MAP_NUMTILES_HEIGHT);
+        assert(tile_col < BackendType::MAP_NUMTILES_WIDTH);
+        
         return tower_ID_mapping[tile_row][tile_col];
     }
 
@@ -955,8 +968,19 @@ void OgreDisplay<BackendType>::handle_user_input()
                     float x_world_coord, y_world_coord, z_world_coord;
                     std::tie(is_valid, x_world_coord, y_world_coord, z_world_coord) = view_detail::get_worldclick_coords(scene_mgmt, view_port, ui_evt.x_pos, ui_evt.y_pos);
                     if(is_valid) {
-                        std::cout << "Selected " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+
                         std::vector<float> worldclick_position {x_world_coord, y_world_coord, z_world_coord};
+                        float xnorm_coord, ynorm_coord;
+                        get_mapcoords(worldclick_position, xnorm_coord, ynorm_coord, this->background->get_map_aab());
+                        auto selection_towerID = tower_mapinfo.get_tower_ID(xnorm_coord, ynorm_coord);
+
+                        std::cout << "Selected tID " << selection_towerID << " -- " << current_selection->getName() << " @ " << current_selection->getParentSceneNode()->getPosition() << std::endl;
+
+                        /*
+                        float xnorm_coord, ynorm_coord;
+                        get_mapcoords(selection_position, xnorm_coord, ynorm_coord, this->background->get_map_aab());
+                        */
+
                         generate_information_request(std::move(worldclick_position));
                         //TODO: we should spawn an information request to the backend for the selection and update the GUI accordingly
                         //request_selection = true;

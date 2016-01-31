@@ -3,7 +3,9 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <string>
 #include <iostream>
+#include <sstream>
 
 #include "util/TowerProperties.hpp"
 
@@ -23,6 +25,14 @@ struct CommonTowerInformation
 
 	std::string tower_name;
     //TODO: how best to store the tower thumbnail image?
+	//
+	
+	std::string get_tower_info_string() const 
+	{
+        std::stringstream tinfo_oss;
+        tinfo_oss << tower_name << "\nTier: " << tier << " Attributes:\n" << base_tower_props << "\n";
+		return tinfo_oss.str();
+	}
 };
 
 template <typename tower_information_t>

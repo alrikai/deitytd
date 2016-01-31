@@ -71,12 +71,12 @@
             <Property name="PushedImage" value="DTDLook/GreenOption" />
             <Property name="DisabledImage" value="DTDLook/GreenOption" />
         </Window>
-        <Window type="DTDLook/StaticText" name="tower_upgrade_window" >
+        <Window type="DTDLook/StaticText" name="TowerUpgradeWindow" >
             <Property name="Area" value="{{0,766},{0,431},{0,1276},{0,907}}" />
             <Property name="MaxSize" value="{{1,0},{1,0}}" />
             <Property name="HorzScrollPageSize" value="500" />
             <Property name="VertScrollPageSize" value="466" />
-            <Window type="DTDLook/Button" name="word_combine_button" >
+            <Window type="DTDLook/Button" name="OpenWordCombineButton" >
                 <Property name="Area" value="{{0,9},{0,9},{0,502},{0,167}}" />
                 <Property name="Text" value="Word Power" />
             </Window>

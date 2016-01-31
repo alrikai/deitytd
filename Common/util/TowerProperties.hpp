@@ -138,7 +138,6 @@ struct tower_properties
     std::vector<event_attribute_modifier*> on_hit_events;
     std::vector<event_attribute_modifier*> on_death_events;
 
-
     friend std::ostream& operator <<(std::ostream& out_stream, const tower_properties& props);
 };
 

@@ -122,61 +122,46 @@ public:
         set_essence(info.essence_amount);
 	}
 
-    //TODO: need to figure out the type of the tower_t that we'll be using, and then NOT have this be templated
-    //as I'll have to pass the 'active_tower' as state in this object, since the function signature required for 
-    //the CEGUI event subscribers doesn't allow arbitrary parameters (so I'll have to set a member variable)
+	//called by the main frontend class in response to user input
     void handle_tower_upgrade(uint32_t active_tower_ID)
     {
         activetower_ID = active_tower_ID;
 
-        /*
-    auto wordcombine_button_clicked = [this](const CEGUI::EventArgs &e)
-    {
-        std::cout << "NOTE: word combination button was clicked, but nothing will happen" << std::endl;
-        this->gui_window->getChild("tower_upgrade_window")->setVisible(false);
-        return true;
-    };
-    gui_window->getChild("tower_upgrade_window")->getChild("word_combine_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
-            CEGUI::Event::Subscriber(&wordcombine_button_clicked));
-
-         */
         static bool initialized = false;
         if(!initialized) {
-            gui_window->getChild("tower_upgrade_window")->getChild("word_combine_button")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+            gui_window->getChild("TowerUpgradeWindow")->getChild("OpenWordCombineButton")->subscribeEvent(CEGUI::PushButton::EventClicked, 
                 CEGUI::Event::Subscriber(&GameGUI::word_combination_evthandler, this));
             initialized = true;
         }
         //this will be invisible by default, and it'll become visible when a tower is clicked
-        gui_window->getChild("tower_upgrade_window")->setVisible(true);
+        gui_window->getChild("TowerUpgradeWindow")->setVisible(true);
     }
 
     void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
 private:	
-	void initialize();
+	void initialize_mainUI();
+	void initialize_wordcomboUI();
+
     void setup_animations();
 	void set_lives(int amount);
 	void set_gold(int amount);
 	void set_essence(int amount);
 
-    //TODO: when we add in the proper infrastructure for getting the tower data, we would use this as the 
-    //subscriber for the tower word combine event clicks
+	//need tp have the various button handlers here
+	bool wordcombine_combinebtn(const CEGUI::EventArgs &e);
+	bool wordcombine_previewbtn(const CEGUI::EventArgs &e);
+	bool wordcombine_clearbtn(const CEGUI::EventArgs &e);
+    bool wordcombine_cancelbtn(const CEGUI::EventArgs &e);
     
-    bool word_combination_evthandler(const CEGUI::EventArgs &e)
-    {
-        auto tinfo = shared_tower_info->get_towerinfo(activetower_ID);
-        std::cout << "NOTE: word combination button was clicked, but nothing will happen" << std::endl;
- 
-        std::cout << "selected tower: " << tinfo.tower_name << ": " << " tier: " << tinfo.tier << " stats: " << tinfo.base_tower_props << std::endl;
-        this->gui_window->getChild("tower_upgrade_window")->setVisible(false);
-
-        //NOTE: also need to spawn the word combination window here...
-        return true;
-    }
+	bool word_combination_evthandler(const CEGUI::EventArgs &e);
 
 	CEGUI::OgreRenderer* gui_renderer;
     CEGUI::System* gui_sys;
     CEGUI::Window* gui_window;
+
+	CEGUI::Window* gui_wordcombine_window;
+    std::vector<CEGUI::Window*> session_word_slots;
 
     CEGUI::RenderTarget *gui_rendertarget;
     CEGUI::GUIContext *gui_context;

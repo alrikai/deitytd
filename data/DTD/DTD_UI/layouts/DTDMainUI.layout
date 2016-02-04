@@ -32,26 +32,26 @@
             <Property name="VertScrollDocumentSize" value="27.9375" />
         </Window>
         <Window type="DTDLook/StaticText" name="staticinfo_text" >
-            <Property name="Area" value="{{0,1300},{0,175},{0,1600},{0,1075}}" />
+            <Property name="Area" value="{{0.8,0},{0.15,0},{1,0},{1,0}}" />
             <Property name="MaxSize" value="{{1,0},{1,0}}" />
-            <Property name="HorzScrollPageSize" value="290" />
-            <Property name="VertScrollPageSize" value="890" />
+            <Property name="HorzScrollPageSize" value="310" />
+            <Property name="VertScrollPageSize" value="860" />
             <Window type="DTDLook/MultiLineEditbox" name="description_info" >
-                <Property name="Area" value="{{0,5},{0,384},{0,295},{0,894}}" />
+                <Property name="Area" value="{{0,0},{0.5,0},{1,0},{1,0}}" />
                 <Property name="Text" >
 </Property>
                 <Property name="ReadOnly" value="true" />
                 <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
             </Window>
             <Window type="DTDLook/MultiLineEditbox" name="stats_info" >
-                <Property name="Area" value="{{0,5},{0,256},{0,295},{0,384}}" />
+                <Property name="Area" value="{{0,0},{0.3,0},{1,0},{0.5,0}}" />
                 <Property name="Text" >
 </Property>
                 <Property name="ReadOnly" value="true" />
                 <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
             </Window>
             <Window type="DTDLook/StaticImage" name="portrait_info" >
-                <Property name="Area" value="{{0,1},{0,0},{0,301},{0,256}}" />
+                <Property name="Area" value="{{0,0},{0,0},{1,0},{0.3,0}}" />
                 <Property name="MaxSize" value="{{1,0},{1,0}}" />
             </Window>
         </Window>

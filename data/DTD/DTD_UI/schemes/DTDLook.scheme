@@ -13,5 +13,7 @@
 	<FalagardMapping windowType="DTDLook/HorizontalScrollbarThumb" targetType="CEGUI/Thumb" renderer="Core/Button" lookNFeel="DTDLook/HorizontalScrollbarThumb" />
 	<FalagardMapping windowType="DTDLook/StaticImage" targetType="DefaultWindow" renderer="Core/StaticImage" lookNFeel="DTDLook/StaticImage" />
 	<FalagardMapping windowType="DTDLook/StaticText"  targetType="DefaultWindow" renderer="Core/StaticText"  lookNFeel="DTDLook/StaticText" />
+	<FalagardMapping windowType="DTDLook/Static"      targetType="DefaultWindow" renderer="Core/Static"      lookNFeel="DTDLook/Static" />
+	<FalagardMapping windowType="DTDLook/ScrollablePane" targetType="CEGUI/ScrollablePane" renderer="Core/ScrollablePane" lookNFeel="DTDLook/ScrollablePane" />
 </GUIScheme>
 

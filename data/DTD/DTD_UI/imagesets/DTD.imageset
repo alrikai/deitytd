@@ -58,4 +58,14 @@
     <Image height="215" name="EditBoxCaret" width="68" xPos="700" yPos="482" />
     <Image height="285" name="RedOption" width="290" xPos="25" yPos="882" />
     <Image height="285" name="GreenOption" width="290" xPos="340" yPos="882" />
+    <Image height="30" name="StaticImageRight" width="30" xPos="1015" yPos="942" />
+    <Image height="30" name="StaticImageBottom" width="30" xPos="940" yPos="1007" />
+    <Image height="30" name="StaticImageLeft" width="30" xPos="872" yPos="935" />
+    <Image height="30" name="StaticImageTop" width="30" xPos="938" yPos="865" />
+    <Image height="50" name="StaticImageBottomRight" width="50" xPos="995" yPos="988" />
+    <Image height="50" name="StaticImageTopLeft" width="50" xPos="872" yPos="865" />
+    <Image height="50" name="StaticImageBottomLeft" width="50" xPos="872" yPos="988" />
+    <Image height="50" name="StaticImageTopRight" width="50" xPos="995" yPos="865" />
+    <Image height="50" name="StaticImageBackdrop" width="50" xPos="930" yPos="935" />
+    <Image height="341" name="BlankInventorySlot" width="450" xPos="680" yPos="1089" />
 </Imageset>

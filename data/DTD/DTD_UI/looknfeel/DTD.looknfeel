@@ -233,6 +233,55 @@
         </ImagerySection>
     </WidgetLook>
 
+   <WidgetLook name="DTDLook/StaticImageShared">
+        <ImagerySection name="frame">
+            <FrameComponent>
+                <Image component="TopLeftCorner" name="DTDLook/StaticImageTopLeft" />
+                <Image component="TopRightCorner" name="DTDLook/StaticImageTopRight" />
+                <Image component="BottomLeftCorner" name="DTDLook/StaticImageBottomLeft" />
+                <Image component="BottomRightCorner" name="DTDLook/StaticImageBottomRight" />
+                <Image component="LeftEdge" name="DTDLook/StaticImageLeft" />
+                <Image component="RightEdge" name="DTDLook/StaticImageRight" />
+                <Image component="TopEdge" name="DTDLook/StaticImageTop" />
+                <Image component="BottomEdge" name="DTDLook/StaticImageBottom" />
+                <ColourRectProperty name="FrameColours" />
+            </FrameComponent>
+        </ImagerySection>
+        <ImagerySection name="background">
+            <ImageryComponent>
+                <Area>
+                    <Dim type="LeftEdge" ><ImageDim name="DTDLook/StaticImageLeft" dimension="Width" /></Dim>
+                    <Dim type="TopEdge" ><ImageDim name="DTDLook/StaticImageTop" dimension="Height" /></Dim>
+                    <Dim type="RightEdge" >
+                        <OperatorDim op="Subtract">
+                            <UnifiedDim scale="1" type="RightEdge" />
+                            <ImageDim name="DTDLook/StaticImageRight" dimension="Width" />
+                        </OperatorDim>
+                    </Dim>
+                    <Dim type="BottomEdge" >
+                        <OperatorDim op="Subtract">
+                            <UnifiedDim scale="1" type="BottomEdge" />
+                            <ImageDim name="DTDLook/StaticImageBottom" dimension="Height" />
+                        </OperatorDim>
+                    </Dim>
+                </Area>
+                <Image name="DTDLook/StaticImageBackdrop" />
+                <!--<ColourRectProperty name="BackgroundColours" />-->
+                <Colours topLeft="FFFFFFFF" topRight="FFFFFFFF" bottomLeft="FFFFFFFF" bottomRight="FFFFFFFF" />
+                <VertFormat type="Stretched" />
+                <HorzFormat type="Stretched" />
+            </ImageryComponent>
+        </ImagerySection>
+        <ImagerySection name="background_noframe">
+            <ImageryComponent>
+                <Image name="DTDLook/StaticImageBackdrop" />
+                <!--<ColourRectProperty name="BackgroundColours" />-->
+                <Colours topLeft="FFFFFFFF" topRight="FFFFFFFF" bottomLeft="FFFFFFFF" bottomRight="FFFFFFFF" />
+                <VertFormat type="Stretched" />
+                <HorzFormat type="Stretched" />
+            </ImageryComponent>
+        </ImagerySection>
+    </WidgetLook>
 
     <WidgetLook name="DTDLook/HorizontalScrollbarThumb">
         <Property name="HorzFree" value="true" />
@@ -465,18 +514,18 @@
         <ImagerySection name="image_withframe">
             <ImageryComponent>
                 <Area>
-					<Dim type="LeftEdge" ><ImageDim name="DTDLook/StaticLeft" dimension="Width" /></Dim>
-					<Dim type="TopEdge" ><ImageDim name="DTDLook/StaticTop" dimension="Height" /></Dim>
+					<Dim type="LeftEdge" ><ImageDim name="DTDLook/StaticImageLeft" dimension="Width" /></Dim>
+					<Dim type="TopEdge" ><ImageDim name="DTDLook/StaticImageTop" dimension="Height" /></Dim>
 					<Dim type="RightEdge" >
                         <OperatorDim op="Subtract">
     						<UnifiedDim scale="1" type="RightEdge" />
-	        				<ImageDim name="DTDLook/StaticRight" dimension="Width" />
+	        				<ImageDim name="DTDLook/StaticImageRight" dimension="Width" />
 						</OperatorDim>
 					</Dim>
 					<Dim type="BottomEdge" >
                         <OperatorDim op="Subtract">
     						<UnifiedDim scale="1" type="BottomEdge" />
-	    					<ImageDim name="DTDLook/StaticBottom" dimension="Height" />
+	    					<ImageDim name="DTDLook/StaticImageBottom" dimension="Height" />
 						</OperatorDim>
 					</Dim>
 				</Area>
@@ -498,32 +547,32 @@
         <StateImagery name="Disabled" />
         <StateImagery name="EnabledFrame">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="frame" />
+                <Section look="DTDLook/StaticImageShared" section="frame" />
             </Layer>
         </StateImagery>
         <StateImagery name="DisabledFrame">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="frame" />
+                <Section look="DTDLook/StaticImageShared" section="frame" />
             </Layer>
         </StateImagery>
         <StateImagery name="WithFrameEnabledBackground">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="background" />
+                <Section look="DTDLook/StaticImageShared" section="background" />
             </Layer>
         </StateImagery>
         <StateImagery name="WithFrameDisabledBackground">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="background" />
+                <Section look="DTDLook/StaticImageShared" section="background" />
             </Layer>
         </StateImagery>
         <StateImagery name="NoFrameEnabledBackground">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="background_noframe" />
+                <Section look="DTDLook/StaticImageShared" section="background_noframe" />
             </Layer>
         </StateImagery>
         <StateImagery name="NoFrameDisabledBackground">
             <Layer>
-                <Section look="DTDLook/StaticShared" section="background_noframe" />
+                <Section look="DTDLook/StaticImageShared" section="background_noframe" />
             </Layer>
         </StateImagery>
         <StateImagery name="WithFrameImage">
@@ -831,6 +880,149 @@
         </StateImagery>
     </WidgetLook>
 
+    <WidgetLook name="DTDLook/ScrollablePane">
+        <NamedArea name="ViewableArea" />
+        <NamedArea name="ViewableAreaHScroll">
+            <Area>
+                <Dim type="BottomEdge" >
+                    <OperatorDim op="Subtract">
+                        <UnifiedDim scale="1" type="BottomEdge" />
+                        <WidgetDim widget="__auto_hscrollbar__" dimension="Height" />
+                    </OperatorDim>
+                </Dim>
+            </Area>
+        </NamedArea>
+        <NamedArea name="ViewableAreaVScroll">
+            <Area>
+                <Dim type="RightEdge" >
+                    <OperatorDim op="Subtract">
+                        <UnifiedDim scale="1" type="RightEdge" />
+                        <WidgetDim widget="__auto_vscrollbar__" dimension="Width" />
+                    </OperatorDim>
+                </Dim>
+            </Area>
+        </NamedArea>
+        <NamedArea name="ViewableAreaHVScroll">
+            <Area>
+                <Dim type="RightEdge" >
+                    <OperatorDim op="Subtract">
+                        <UnifiedDim scale="1" type="RightEdge" />
+                        <WidgetDim widget="__auto_vscrollbar__" dimension="Width" />
+                    </OperatorDim>
+                </Dim>
+                <Dim type="BottomEdge" >
+                    <OperatorDim op="Subtract">
+                        <UnifiedDim scale="1" type="BottomEdge" />
+                        <WidgetDim widget="__auto_hscrollbar__" dimension="Height" />
+                    </OperatorDim>
+                </Dim>
+            </Area>
+        </NamedArea>
+        <Child  type="DTDLook/HorizontalScrollbar" nameSuffix="__auto_hscrollbar__">
+            <Area>
+                <Dim type="Width" ><UnifiedDim scale="1" offset="-12" type="Width" /></Dim>
+                <Dim type="Height" ><AbsoluteDim value="12" /></Dim>
+            </Area>
+            <VertAlignment type="BottomAligned" />
+            <Property name="NonClient" value="true" />
+        </Child>
+        <Child  type="DTDLook/VerticalScrollbar" nameSuffix="__auto_vscrollbar__">
+            <Area>
+                <Dim type="Width" ><AbsoluteDim value="12" /></Dim>
+                <Dim type="Height" ><UnifiedDim scale="1" offset="-12" type="Height" /></Dim>
+            </Area>
+            <HorzAlignment type="RightAligned" />
+            <Property name="NonClient" value="true" />
+        </Child>
+        <StateImagery name="Enabled" />
+        <StateImagery name="Disabled" />
+    </WidgetLook>
+
+	<WidgetLook name="DTDLook/Static">
+        <PropertyDefinition redrawOnWrite="true" initialValue="tl:FFFFFFFF tr:FFFFFFFF bl:FFFFFFFF br:FFFFFFFF" type="ColourRect" name="FrameColours"/>
+        <PropertyDefinition redrawOnWrite="true" initialValue="tl:FFDFDFDF tr:FFDFDFDF bl:FFDFDFDF br:FFDFDFDF" type="ColourRect" name="BackgroundColours"/>
+        <PropertyDefinition redrawOnWrite="true" initialValue="0" type="float" name="TextPadding"/>
+        <PropertyDefinition redrawOnWrite="true" initialValue="LeftAligned" type="HorizontalTextFormatting" name="HorzFormatting"/>
+        <PropertyDefinition redrawOnWrite="true" initialValue="CentreAligned" type="VerticalTextFormatting" name="VertFormatting"/>
+        <Property name="BackgroundEnabled" value="true"/>
+        <Property name="FrameEnabled" value="true"/>
+        <Property name="Size" value="{{0, 256}, {0, 128}}" />
+        <ImagerySection name="label">
+            <TextComponent>
+                <Area>
+                    <Dim type="LeftEdge">
+                        <PropertyDim name="TextPadding"/>
+                    </Dim>
+                    <Dim type="TopEdge">
+                        <PropertyDim name="TextPadding"/>
+                    </Dim>
+                    <Dim type="RightEdge">
+                        <OperatorDim op="Subtract">
+                            <UnifiedDim scale="1" type="RightEdge"/>
+                            <PropertyDim name="TextPadding"/>
+                        </OperatorDim>
+                    </Dim>
+                    <Dim type="BottomEdge">
+                        <OperatorDim op="Subtract">
+                            <UnifiedDim scale="1" type="BottomEdge"/>
+                            <PropertyDim name="TextPadding"/>
+                        </OperatorDim>
+                    </Dim>
+                </Area>
+                <Colours topLeft="FF000000" bottomLeft="FF000000" topRight="FF000000" bottomRight="FF000000"/>
+                <VertFormatProperty name="VertFormatting"/>
+                <HorzFormatProperty name="HorzFormatting"/>
+            </TextComponent>
+        </ImagerySection>
+        <StateImagery name="Enabled">
+            <Layer>
+                <Section section="label"/>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="Disabled">
+            <Layer>
+                <Section section="label"/>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="EnabledFrame">
+            <Layer>
+                <Section section="frame" look="DTDLook/StaticShared"/>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="DisabledFrame">
+            <Layer>
+                <Section section="frame" look="DTDLook/StaticShared"/>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="WithFrameEnabledBackground">
+            <Layer>
+                <Section section="background" look="DTDLook/StaticShared">
+                    <ColourRectProperty name="BackgroundColours"/>
+                </Section>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="WithFrameDisabledBackground">
+            <Layer>
+                <Section section="background" look="DTDLook/StaticShared">
+                    <ColourRectProperty name="BackgroundColours"/>
+                </Section>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="NoFrameEnabledBackground">
+            <Layer>
+                <Section section="background_noframe" look="DTDLook/StaticShared">
+                    <ColourRectProperty name="BackgroundColours"/>
+                </Section>
+            </Layer>
+        </StateImagery>
+        <StateImagery name="NoFrameDisabledBackground">
+            <Layer>
+                <Section section="background_noframe" look="DTDLook/StaticShared">
+                    <ColourRectProperty name="BackgroundColours"/>
+                </Section>
+            </Layer>
+        </StateImagery>
+    </WidgetLook>
 
 </Falagard>
 

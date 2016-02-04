@@ -87,22 +87,23 @@ public:
         };
 
         //mouse_state:
-        //  0: clicked, 1: released, 2: neither (i.e. just movement)
-        std::function<void(OIS::MouseEvent, OIS::MouseButtonID, bool)> gui_mousehandler = [cvt_mouseevts](OIS::MouseEvent mouse_evt, OIS::MouseButtonID mouse_id, int mouse_state)
+        //  0: movement, 1: button down, 2: button up 
+        std::function<void(OIS::MouseEvent, OIS::MouseButtonID, int)> gui_mousehandler = [cvt_mouseevts](OIS::MouseEvent mouse_evt, OIS::MouseButtonID mouse_id, int mouse_state)
         {
             //std::cout << "mouse GUI event handler" << std::endl;
             auto& context = CEGUI::System::getSingleton().getDefaultGUIContext();
             //context.injectMouseMove(mouse_evt.state.X.rel, mouse_evt.state.Y.rel);
             context.injectMousePosition(mouse_evt.state.X.abs, mouse_evt.state.Y.abs);
 
-            // Scroll wheel.
+            //NOTE: the Z-axis is the scroll wheel
             if (mouse_evt.state.Z.rel) {
+                std::cout << "we're scrollllling" << std::endl;
                 context.injectMouseWheelChange(mouse_evt.state.Z.rel / 120.0f);
             }
 
-            if(mouse_state == 0) {
+            if(mouse_state == 1) {
                context.injectMouseButtonDown (cvt_mouseevts(mouse_id));
-            } else if (mouse_state == 1){
+            } else if (mouse_state == 2){
                context.injectMouseButtonUp (cvt_mouseevts(mouse_id));
             }
         }; 
@@ -143,6 +144,8 @@ private:
 	void initialize_mainUI();
 	void initialize_wordcomboUI();
 
+
+
     void setup_animations();
 	void set_lives(int amount);
 	void set_gold(int amount);
@@ -155,13 +158,16 @@ private:
     bool wordcombine_cancelbtn(const CEGUI::EventArgs &e);
     
 	bool word_combination_evthandler(const CEGUI::EventArgs &e);
+    
+    bool handle_inventory_item_dropped(const CEGUI::EventArgs& args);
 
 	CEGUI::OgreRenderer* gui_renderer;
     CEGUI::System* gui_sys;
     CEGUI::Window* gui_window;
 
 	CEGUI::Window* gui_wordcombine_window;
-    std::vector<CEGUI::Window*> session_word_slots;
+    //std::vector<CEGUI::Window*> session_word_slots;
+    CEGUI::HorizontalLayoutContainer* wordslot_layout;
 
     CEGUI::RenderTarget *gui_rendertarget;
     CEGUI::GUIContext *gui_context;

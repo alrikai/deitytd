@@ -53,9 +53,9 @@ public:
     bool keyReleased(const OIS::KeyEvent& key_arg);
 
     //mouse listeners
-    bool mouseMoved   (const OIS::MouseEvent& mouse_arg);
-    bool mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id);
-    bool mouseReleased(const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id);
+    bool mouseMoved   (const OIS::MouseEvent& mouse_arg) override;
+    bool mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id) override;
+    bool mouseReleased(const OIS::MouseEvent& mouse_arg, OIS::MouseButtonID mouse_id) override;
 
     void window_resized(Ogre::RenderTarget* ogre_window);
 

@@ -134,8 +134,7 @@ bool InputListener::keyReleased (const OIS::KeyEvent& key_arg)
 
 bool InputListener::mouseMoved (const OIS::MouseEvent& mouse_arg)
 {
-    gui_mouse_evthandler(mouse_arg, OIS::MouseButtonID::MB_Left, 2);
-
+    gui_mouse_evthandler(mouse_arg, OIS::MouseButtonID::MB_Left, 0);
     //track where the mouse is being dragged to
     if(mouse_dragging)
     {
@@ -160,7 +159,7 @@ bool InputListener::mousePressed (const OIS::MouseEvent& mouse_arg, OIS::MouseBu
     drag_pos_y = ms.Y.abs;
     drag_pos_x = ms.X.abs;
     
-    gui_mouse_evthandler(mouse_arg, mouse_id, 0);
+    gui_mouse_evthandler(mouse_arg, mouse_id, 1);
     return true;
 }
 
@@ -168,8 +167,6 @@ bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseB
 {
     ControllerUtil::INPUT_TYPE evt;
     bool valid_input = true;
-
-    gui_mouse_evthandler(mouse_arg, mouse_id, 1);
 
     if(mouse_id == OIS::MouseButtonID::MB_Left)
         evt = ControllerUtil::INPUT_TYPE::LClick;
@@ -180,6 +177,7 @@ bool InputListener::mouseReleased (const OIS::MouseEvent& mouse_arg, OIS::MouseB
    
     if(valid_input)
     {
+        gui_mouse_evthandler(mouse_arg, mouse_id, 2);
         auto ms = mouse->getMouseState();
     	for (auto& m_listeners : input_listeners) {
 		    m_listeners.second->push(ControllerUtil::InputEvent(evt, ms.X.abs, ms.Y.abs));      

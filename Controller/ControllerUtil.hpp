@@ -72,6 +72,9 @@ namespace ControllerUtil
             case INPUT_TYPE::D:
                 std::cout << "Key D" << std::endl;
             break;
+            case INPUT_TYPE::C:
+                std::cout << "Key C" << std::endl;
+            break;
             case INPUT_TYPE::ZERO:
                 std::cout << "Key 0" << std::endl;
             break;
@@ -112,7 +115,7 @@ namespace ControllerUtil
                 std::cout << "Mouse Rclick" << std::endl;
             break;
             case INPUT_TYPE::MDrag:
-                std::cout << "Mouse drag" << std::endl;
+                //std::cout << "Mouse drag" << std::endl;
             break;            default:
                 std::cout << "Unknown Type" << std::endl;
         };

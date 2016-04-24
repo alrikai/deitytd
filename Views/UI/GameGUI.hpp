@@ -17,6 +17,7 @@
 #include <OGRE/Ogre.h>
 
 #include "shared/common_information.hpp"
+#include "PlayerInventory.hpp"
 
 /*
 //TODO: consolidate this and the OgreDisplay so we only have 1 framelistener on the View side of things
@@ -115,7 +116,6 @@ public:
         shared_tower_info = shared_info;
 	}
 
-
 	inline void update_gamestate_info(const GameStateInformation& info) 
 	{
         set_lives(info.num_lives);
@@ -172,6 +172,7 @@ private:
     CEGUI::RenderTarget *gui_rendertarget;
     CEGUI::GUIContext *gui_context;
 
+    std::shared_ptr<PlayerInventory> inventory;
     std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
     uint32_t activetower_ID;
 };

@@ -77,13 +77,11 @@ void GameGUI::setup_animations()
 
 }
 
+
 bool GameGUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
 {
-    const CEGUI::DragDropEventArgs& dd_args =
-        static_cast<const CEGUI::DragDropEventArgs&>(args);
-
-    std::cout << "@inventory dragged handler" << std::endl;
-    /*
+    const CEGUI::DragDropEventArgs& dd_args = static_cast<const CEGUI::DragDropEventArgs&>(args);    
+    std::cout << "@inventory dragged handler -- #child: " << dd_args.window->getChildCount() << std::endl;
     if (!dd_args.window->getChildCount())
     {
         // add dragdrop item as child of target if target has no item already
@@ -91,9 +89,9 @@ bool GameGUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
         // Now we must reset the item position from it's 'dropped' location,
         // since we're now a child of an entirely different window
         dd_args.dragDropItem->setPosition(
-            UVector2(UDim(0.05f, 0),UDim(0.05f, 0)));
+            CEGUI::UVector2(CEGUI::UDim(0.05f, 0),CEGUI::UDim(0.05f, 0)));
     }
-    */
+    
 
     return true;
 }
@@ -123,17 +121,29 @@ void GameGUI::initialize_wordcomboUI()
     //need to update the thumbnail image to be that item, and 'activate' the dragcontainer + thumbnail group. 
     //... but I still DO need to figure out how to programatically make GUI window hierarchies and have them actually display && work
     //just for testing purposes, add in an item to the inventory
-    auto target_inventory_slot = gui_wordcombine_window->getChild("InventoryWindow")->getChild("slot_0");
+    //auto target_inventory_slot = gui_wordcombine_window->getChild("InventoryWindow")->getChild("slot_0");
 
+
+    int inventory_rows = 5;
+    int inventory_cols = 4;
+    int inventory_idx = 0;
+    for (int row = 0; row < inventory_rows; row++) {
+        for (int col = 0; col < inventory_cols; col++) {
+            std::string slot_id = "slot_" + std::to_string(inventory_idx);
+            std::cout << "subscribing slot " << slot_id << std::endl;
+            auto target_inventory_slot = gui_wordcombine_window->getChild("InventoryWindow")->getChild(slot_id);
+            target_inventory_slot->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
+                CEGUI::Event::Subscriber(&GameGUI::handle_inventory_item_dropped, this));
+
+            inventory_idx += 1;
+        }
+    }
+  /* 
     auto inventory_slot_dragged = [](const CEGUI::EventArgs &e)
     {
         std::cout << "NOTE: inventory slot dragging..." << std::endl;
         return true;
     };
-
-    target_inventory_slot->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
-                CEGUI::Event::Subscriber(&GameGUI::handle_inventory_item_dropped, this));
-   /* 
     target_inventory_slot->getChild("dragger")->subscribeEvent(CEGUI::DragContainer::EventDragStarted, 
             CEGUI::Event::Subscriber(&inventory_slot_dragged));
             */

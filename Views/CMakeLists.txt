@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 add_subdirectory(FractalFlames)
 
-SET(ViewSRCS GameBackground.cpp ViewUtil.cpp GameGUI.cpp)
+include_directories(UI)
+set(ViewSRCS GameBackground.cpp ViewUtil.cpp UI/GameGUI.cpp)
 include_directories(FractalFlames) 
 include_directories(
 	${OIS_INCLUDE_DIRS}

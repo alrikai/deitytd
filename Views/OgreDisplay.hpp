@@ -15,7 +15,7 @@
 #include "GameBackground.hpp"
 #include "ViewEventTypes.hpp"
 #include "ViewUtil.hpp"
-#include "GameGUI.hpp"
+#include "UI/GameGUI.hpp"
 
 #include "TowerDefense.hpp"
 #include "util/Types.hpp"
@@ -1002,7 +1002,7 @@ void OgreDisplay<BackendType>::handle_user_input()
             case ControllerUtil::INPUT_TYPE::MDrag:
             {
                 //provides the difference in current mouse pos. from the previous mouse pos.
-                std::cout << "Mouse Drag @[" << ui_evt.x_pos << ", " << ui_evt.y_pos << "]" << std::endl;
+                //std::cout << "Mouse Drag @[" << ui_evt.x_pos << ", " << ui_evt.y_pos << "]" << std::endl;
                 cam_yaw = ui_evt.x_pos;
                 cam_pitch = ui_evt.y_pos;
                 break;

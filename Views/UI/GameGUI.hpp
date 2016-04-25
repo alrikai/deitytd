@@ -17,7 +17,8 @@
 #include <OGRE/Ogre.h>
 
 #include "shared/common_information.hpp"
-#include "PlayerInventory.hpp"
+#include "shared/Player.hpp"
+#include "shared/PlayerInventory.hpp"
 
 /*
 //TODO: consolidate this and the OgreDisplay so we only have 1 framelistener on the View side of things
@@ -34,16 +35,6 @@ private:
 
 };
 */
-
-//this will hold all the information necessary for updating the passive game information
-struct GameStateInformation
-{
-	int num_lives;
-	int gold_amount;
-	int essence_amount;
-
-	//TODO: anything else around here?
-};
 
 /*
  * NOTE: this has to be initialized after the OgreDisplay is initialized (since CEGUI needs an Ogre 
@@ -111,16 +102,16 @@ public:
         controller->register_gui_listener(std::move(gui_keyhandler), std::move(gui_mousehandler));
 	}
 
-    void register_shared_towerinfor(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+    void register_shared_towerinfor(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
-        shared_tower_info = shared_info;
+        shared_gamestate_info = shared_info;
 	}
 
-	inline void update_gamestate_info(const GameStateInformation& info) 
+	inline void update_gamestate_info(const TDPlayerInformation& info) 
 	{
-        set_lives(info.num_lives);
-        set_gold(info.gold_amount);
-        set_essence(info.essence_amount);
+        set_lives(info.get_num_lives());
+        set_gold(info.get_num_gold());
+        set_essence(info.get_num_essence());
 	}
 
 	//called by the main frontend class in response to user input
@@ -173,7 +164,7 @@ private:
     CEGUI::GUIContext *gui_context;
 
     std::shared_ptr<PlayerInventory> inventory;
-    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
+    std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
     uint32_t activetower_ID;
 };
 

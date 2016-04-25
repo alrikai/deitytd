@@ -15,6 +15,7 @@
 #include "TowerLogic.hpp"
 #include "util/TDEventTypes.hpp"
 #include "shared/common_information.hpp"
+#include "shared/Player.hpp"
 
 #include <memory>
 #include <random>
@@ -49,8 +50,10 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
         const std::string config_file {"resources/default_attribute_values.yaml"};
         const std::string dict_file {"resources/word_list.txt"};
 
+		TDPlayerInformation defaultplayer_state(20, 0, 20);
+
         //td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
-        td_backend = std::unique_ptr<ModelType>(new ModelType(dict_file, config_file));
+        td_backend = std::unique_ptr<ModelType>(new ModelType(dict_file, config_file, defaultplayer_state));
 
         spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, GameMap::MAP_HEIGHT-1);  
         dest_point = GameMap::IndexCoordinate (0, 0); 
@@ -58,7 +61,7 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
 
         //-----------------------------------------------------------------
         //register the shared info to be used by the front and backends
-        shared_game_info = std::make_shared<game_info_t>();
+        shared_game_info = std::make_shared<game_info_t>(defaultplayer_state);
         td_backend->register_shared_info(shared_game_info);
         td_view->register_shared_info(shared_game_info);
         //-----------------------------------------------------------------
@@ -112,7 +115,7 @@ private:
     std::unique_ptr<ModelType> td_backend;
 
     //threadsafe and shared between the frontend and backend for faster information providing
-    using game_info_t = GameInformation<CommonTowerInformation>;
+    using game_info_t = GameInformation<CommonTowerInformation, TDPlayerInformation>;
     std::shared_ptr<game_info_t> shared_game_info;
     
     std::unique_ptr<std::thread> gameloop_thread;
@@ -387,7 +390,9 @@ void TowerDefense<ViewType, ModelType>::gloop_processing()
 template <template <class>  class ViewType, class ModelType>
 void TowerDefense<ViewType, ModelType>::gloop_postprocessing()
 {
-
+	//write a copy of the player's current state to the shared state
+	auto player_state_snapshot = td_backend->get_player_state();
+	shared_game_info->set_player_state_snapshot(std::move(player_state_snapshot));
 }
 
 #endif

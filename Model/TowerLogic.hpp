@@ -19,6 +19,7 @@
 #include "util/Types.hpp"
 #include "util/TDEventTypes.hpp"
 #include "shared/common_information.hpp"
+#include "shared/Player.hpp"
 #include "Views/ViewEventTypes.hpp"
 #include "Pathfinder.hpp"
 
@@ -33,8 +34,9 @@ public:
     static constexpr int MAP_NUMTILES_HEIGHT = GameMap::MAP_HEIGHT / GameMap::TowerTileHeight;
     static constexpr int MAP_NUMTILES_WIDTH = GameMap::MAP_WIDTH / GameMap::TowerTileHeight;
 
-    TowerLogic(const std::string& combo_dictfpath, const std::string& attribute_cfgfpath) 
-        : tower_gen(combo_dictfpath, attribute_cfgfpath)
+	//TODO: need to move the player initial state setting to elsewhere
+    TowerLogic(const std::string& combo_dictfpath, const std::string& attribute_cfgfpath, TDPlayerInformation default_pstate) 
+        : tower_gen(combo_dictfpath, attribute_cfgfpath), player_state(default_pstate)
     {
          //anything else to initialize goes here...
          td_frontend_events = std::unique_ptr<ViewEvents>(new ViewEvents());    
@@ -53,7 +55,7 @@ public:
         return map.is_obstructed(col_coord, row_coord);
     }
 
-    void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+    void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
         shared_tower_info = shared_info;
 	}
@@ -113,8 +115,7 @@ public:
 
     //for the end of the round -- clean all the state (i.e. live mobs, status effects, map tile mobs, etc)
     void reset_state()
-    {
-      
+    {      
       if(live_mobs.size() > 0) {
         std::cout << "mobs still around?" << std::endl;
       }
@@ -126,6 +127,11 @@ public:
     {
         return td_frontend_events.get();
     }
+
+	inline TDPlayerInformation get_player_state() const 
+	{
+        return player_state;
+	}
 
     //again, we assume the map dimensions and tile dimensions to be even multiples
     static constexpr int TLIST_HEIGHT = GameMap::MAP_HEIGHT / GameMap::TowerTileHeight;
@@ -149,7 +155,8 @@ private:
 
     std::unique_ptr<Tower> t_list [TLIST_HEIGHT][TLIST_WIDTH];
     std::unique_ptr<ViewEvents> td_frontend_events;
-    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
+    std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_tower_info;
+	TDPlayerInformation player_state;
 
     //the set of monsters still among the living
     std::list<std::shared_ptr<Monster>> live_mobs;

@@ -8,13 +8,27 @@
  * want to do multiplayer, it'll be helpful to have all the player state encapsulated in this manner
  */
 
+//Q: what should the inventory metadata have? --> should have information about what
+//the item is that's being held in the inventory. 
+//At the moment, this would be the characters used to generate words (eventually, I could
+//try to have other items as well, but for the forseeable future, it'll be the characters)
 struct InventoryMetadata
 {
+	InventoryMetadata()
+	{}
 
-    void swap(InventoryMetadata& meta_lhs, InventoryMetadata meta_rhs) 
+	explicit InventoryMetadata(std::string letter)
+		: letter(letter)
+	{}
+
+    friend void swap(InventoryMetadata& meta_lhs, InventoryMetadata meta_rhs) 
     {
-     
+		using std::swap;
+		swap(meta_lhs.letter, meta_rhs.letter);
     }
+
+	//might start using substrings in the future rather than just letters
+	std::string letter;
 };
 
 class PlayerInventory
@@ -54,12 +68,15 @@ public:
     }
 
 
-    bool swap_item(const int item_aidx, const int item_bidx)
+	//Q: in what case would a non-void return be useful? --> if I had non-block sized inventory items, such that 
+	//swapping two items could result in size mis-matches. I have no plans to do this though
+    void swap_item(const int item_aidx, const int item_bidx)
     {
+		using std::swap;
         assert(item_aidx >= 0 && item_aidx < NUM_INVENTORY_SLOTS);
         assert(item_bidx >= 0 && item_bidx < NUM_INVENTORY_SLOTS);
 
-        std::swap(inventory_data[item_aidx], inventory_data[item_bidx]);
+        swap(inventory_data[item_aidx], inventory_data[item_bidx]);
     }
 
 private:

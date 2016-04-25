@@ -135,11 +135,7 @@ bool TowerLogic::print_tower(const float x_coord, const float y_coord)
     return true;
 }
 
-//
-//  TODO: the below mehods are incomplete
-//
-
-
+//TODO: need to finish this to allow for manual targetting
 bool TowerLogic::tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord)
 {
     if(!map.is_obstructed(tower_xcoord, tower_ycoord))
@@ -488,6 +484,12 @@ void TowerLogic::cycle_update_mobs(const uint64_t onset_timestamp)
         if(std::get<1>(mob_movement_info)) {
           remove_mob_fcn(*mob_it);
           mob_it = live_mobs.erase(mob_it);
+
+		  //reduce the player #lives
+          player_state.lose_life();
+
+		  //TODO: anything else to do here? -- a mob made it to the exit
+
         } else {
           auto mob_movement = std::get<0>(mob_movement_info);
           const std::vector<float> movement {mob_movement.col, mob_movement.row, 0.0f};

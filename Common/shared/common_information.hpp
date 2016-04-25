@@ -35,16 +35,22 @@ struct CommonTowerInformation
 	}
 };
 
-template <typename tower_information_t>
+
+
+template <typename tower_information_t, typename player_information_t>
 class GameInformation
 {
 public:
     using tower_key_t = uint32_t;
     using tower_info_t = tower_information_t;
 
+    GameInformation(player_information_t player_info)
+		: player_info (player_info)
+	{}
+
     void add_new_towerinfo(tower_key_t tower_id, tower_info_t info)
     {
-        std::lock_guard<std::mutex> lock (info_mutx);
+        std::lock_guard<std::mutex> lock (tower_info_mutx);
 
         auto t_ins = tower_info.insert(std::make_pair(tower_id, info));
         //check if insertion was successful
@@ -60,7 +66,7 @@ public:
 
     void update_towerinfo(tower_key_t tower_id, tower_info_t info)
     {
-        std::lock_guard<std::mutex> lock (info_mutx);
+        std::lock_guard<std::mutex> lock (tower_info_mutx);
 
         auto tower_info_it = tower_info.find(tower_id);
         if(tower_info_it != tower_info.end()) {
@@ -74,7 +80,7 @@ public:
 
     tower_info_t get_towerinfo(tower_key_t tower_id)
     {
-        std::lock_guard<std::mutex> lock (info_mutx);
+        std::lock_guard<std::mutex> lock (tower_info_mutx);
 
         auto tower_info_it = tower_info.find(tower_id);
         if(tower_info_it != tower_info.end()) {
@@ -85,9 +91,27 @@ public:
             throw std::logic_error(error_str);
         }
     }
+
+	//-------------------------------------------------------------------------------
+	
+	inline void set_player_state_snapshot(player_information_t&& player_state)
+	{
+        std::lock_guard<std::mutex> lock (player_info_mutx);
+		player_info = std::move(player_state);
+	}
+
+	inline player_information_t get_player_state_snapshot() const
+	{
+        std::lock_guard<std::mutex> lock (player_info_mutx);
+		return player_info;
+	}
+
 private:
-    mutable std::mutex info_mutx;
+    mutable std::mutex tower_info_mutx;
     std::unordered_map<tower_key_t, tower_info_t> tower_info;
+
+    mutable std::mutex player_info_mutx;
+    player_information_t player_info;
 };
 
 #endif

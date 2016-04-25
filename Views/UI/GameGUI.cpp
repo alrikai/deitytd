@@ -9,7 +9,7 @@
 #include "GameGUI.hpp"
 
 GameGUI::GameGUI(Ogre::RenderWindow* render_window)
-    : shared_tower_info (nullptr)
+    : shared_gamestate_info (nullptr)
 {
     gui_renderer = &CEGUI::OgreRenderer::bootstrapSystem(*render_window);
     gui_sys = CEGUI::System::getSingletonPtr();
@@ -135,6 +135,12 @@ void GameGUI::initialize_wordcomboUI()
             target_inventory_slot->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
                 CEGUI::Event::Subscriber(&GameGUI::handle_inventory_item_dropped, this));
 
+			//for testing: enable the slot. Also note that you should have the background be non-draggable, and only enable dragging capabilities if 
+			//there's an item in that inventory slot.
+			auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_inventory_slot->getChild("dragger"));
+			//by default we don't want to have the backgrounds be draggable
+			slot_dragger->setDraggingEnabled(false);
+
             inventory_idx += 1;
         }
     }
@@ -218,7 +224,7 @@ void GameGUI::initialize_mainUI()
 
 bool GameGUI::word_combination_evthandler(const CEGUI::EventArgs &e)
 {
-	auto tinfo = shared_tower_info->get_towerinfo(activetower_ID);
+	auto tinfo = shared_gamestate_info->get_towerinfo(activetower_ID);
 	std::string tower_info_str = tinfo.get_tower_info_string();
 
 	this->gui_window->getChild("TowerUpgradeWindow")->setVisible(false);

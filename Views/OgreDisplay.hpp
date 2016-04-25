@@ -20,6 +20,7 @@
 #include "TowerDefense.hpp"
 #include "util/Types.hpp"
 #include "shared/common_information.hpp"
+#include "shared/Player.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <OGRE/Ogre.h>
@@ -251,10 +252,10 @@ public:
         game_events = events;
     }
 
-	void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation>> shared_info)
+	void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
-        shared_tower_info = shared_info;
-        gui->register_shared_towerinfor(shared_tower_info);
+        shared_gamestate_info = shared_info;
+        gui->register_shared_towerinfor(shared_gamestate_info);
 	}
 
     Ogre::Root* get_root() const
@@ -309,9 +310,6 @@ private:
 
     //----------------------------------------
     std::unique_ptr<GameGUI> gui;
-    //TODO: used to update the GUI passive info to reflect the current game state 
-    GameStateInformation game_state_info;
-    //----------------------------------------
 
     std::unique_ptr<GameBackground> background;
     std::unique_ptr<ControllerUtil::ControllerBufferType> input_events;
@@ -320,7 +318,7 @@ private:
     //-- these are both owned by the TowerDefense class, hence the raw ponters
     TowerEventQueueType* td_event_queue;
     ViewEvents* game_events;
-    std::shared_ptr<GameInformation<CommonTowerInformation>> shared_tower_info;
+    std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
 
     //the plan is to eventually have multiple threads running, so making this
     //atomic ahead of time (although this might change in the future...)
@@ -505,6 +503,8 @@ void OgreDisplay<BackendType>::start_display()
         //give request for user selection information
         game_events->apply_unitinfo_events(unitinfo_evt_fcn);        
         
+		//NOTE: we probably only need to call this every few iterations (not every iteration)
+        update_gameinfo();
         /////////////////////////////////////////////////////////////////////////////////////////////
      
         auto end_time = std::chrono::high_resolution_clock::now(); 
@@ -567,8 +567,8 @@ void OgreDisplay<BackendType>::update_gameinfo()
     //TODO: populate this somehow?? Should this spawn a request to something (?) that has the info,
     //or should it just periodically update the info, or should it be registered as some sort of event
     //listener that updates when the backend sends new info?
-    GameStateInformation placeholder_info;
-    gui->update_gamestate_info(placeholder_info);
+	auto player_state = shared_gamestate_info->get_player_state_snapshot();
+    gui->update_gamestate_info(player_state);
 }
 
 
@@ -657,7 +657,7 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const uin
     //store the tower IDs here 
     tower_mapinfo.add_tower_ID(map_coord_offsets.x, map_coord_offsets.y, tower_ID);
 
-	auto tinfo = shared_tower_info->get_towerinfo(tower_ID);
+	auto tinfo = shared_gamestate_info->get_towerinfo(tower_ID);
 	std::cout << tinfo.tower_name << std::endl;
 
     //NOTE: we want to have the tower ABOVE the map -- thus, its z coordinate has to be non-zero 

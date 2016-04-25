@@ -1,3 +1,12 @@
+/* Player.hpp -- part of the DietyTD Common implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
 #ifndef TD_COMMON_SHARED_PLAYER_HPP
 #define TD_COMMON_SHARED_PLAYER_HPP
 
@@ -22,14 +31,24 @@
  * for whether to read the value -- backend sets it, frontend reads it (and resets it). 
  */
 
+#include <iostream>
 #include "PlayerInventory.hpp"
 
 struct TDPlayerInformation
 {
 	TDPlayerInformation(int num_lives, int num_essence, int num_gold)
 		: num_lives(num_lives), num_essence(num_essence), num_gold(num_gold)
-	{}
-
+	{
+	
+		//TODO: just for experimentation, create some letter items and add them to the inventory...
+		InventoryMetadata letter_a ("a");
+		InventoryMetadata letter_c ("c");
+		InventoryMetadata letter_e ("e");
+	
+		inventory.add_item(letter_a);
+		inventory.add_item(letter_c);
+		inventory.add_item(letter_e);
+	}
  
     inline int get_num_lives() const 
 	{
@@ -60,6 +79,11 @@ struct TDPlayerInformation
     inline bool add_item(InventoryMetadata data)
 	{
         return inventory.add_item(data);
+	}
+
+	inline const PlayerInventory* get_inventory_state() const
+	{
+        return &inventory;
 	}
 
 	PlayerInventory inventory;

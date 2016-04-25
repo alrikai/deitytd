@@ -1,12 +1,16 @@
+/* PlayerInventory.hpp -- part of the DietyTD Common implementation 
+ *
+ * Copyright (C) 2015 Alrik Firl 
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+
 #ifndef TD_PLAYER_INVENTORY_HPP
 #define TD_PLAYER_INVENTORY_HPP
 
 #include <array>
-
-/* This should be the graphical component of the player inventory -- the actual inventory state
- * should be obtained from the player (hence I should have a player entity). In theory if I ever
- * want to do multiplayer, it'll be helpful to have all the player state encapsulated in this manner
- */
 
 //Q: what should the inventory metadata have? --> should have information about what
 //the item is that's being held in the inventory. 
@@ -31,7 +35,7 @@ struct InventoryMetadata
 	std::string letter;
 };
 
-class PlayerInventory
+struct PlayerInventory
 {
 public:
     static constexpr int NUM_INVENTORY_ROWS = 5;
@@ -79,7 +83,6 @@ public:
         swap(inventory_data[item_aidx], inventory_data[item_bidx]);
     }
 
-private:
     std::array<InventoryMetadata, NUM_INVENTORY_SLOTS> inventory_data;
     std::array<bool, NUM_INVENTORY_SLOTS> inventory_occupied;
 };

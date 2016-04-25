@@ -7,8 +7,8 @@
  */
 
 
-#ifndef TD_GAME_GUI_HPP
-#define TD_GAME_GUI_HPP
+#ifndef TD_VIEWS_UI_GAME_GUI_HPP
+#define TD_VIEWS_UI_GAME_GUI_HPP
 
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/Ogre/Renderer.h>
@@ -19,6 +19,8 @@
 #include "shared/common_information.hpp"
 #include "shared/Player.hpp"
 #include "shared/PlayerInventory.hpp"
+
+#include "TowerUI.hpp"
 
 /*
 //TODO: consolidate this and the OgreDisplay so we only have 1 framelistener on the View side of things
@@ -102,9 +104,12 @@ public:
         controller->register_gui_listener(std::move(gui_keyhandler), std::move(gui_mousehandler));
 	}
 
-    void register_shared_towerinfor(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
+    void register_shared_towerinfo(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
         shared_gamestate_info = shared_info;
+
+		//propogate the pointer to other sub-UIs as well
+        tower_modify_ui->register_shared_towerinfo(shared_info);
 	}
 
 	inline void update_gamestate_info(const TDPlayerInformation& info) 
@@ -112,60 +117,38 @@ public:
         set_lives(info.get_num_lives());
         set_gold(info.get_num_gold());
         set_essence(info.get_num_essence());
+
+		//next, update the inventory state based on the new player snapshot IFF the inventory is open
+		tower_modify_ui->update_inventory(info.get_inventory_state());
+
 	}
 
-	//called by the main frontend class in response to user input
+	//called by the main frontend class in response to user input. This is where we make the TowerUpgrade UI 
+	//the active window
     void handle_tower_upgrade(uint32_t active_tower_ID)
     {
-        activetower_ID = active_tower_ID;
-
-        static bool initialized = false;
-        if(!initialized) {
-            gui_window->getChild("TowerUpgradeWindow")->getChild("OpenWordCombineButton")->subscribeEvent(CEGUI::PushButton::EventClicked, 
-                CEGUI::Event::Subscriber(&GameGUI::word_combination_evthandler, this));
-            initialized = true;
-        }
-        //this will be invisible by default, and it'll become visible when a tower is clicked
-        gui_window->getChild("TowerUpgradeWindow")->setVisible(true);
+        tower_modify_ui->activate_towerUI(active_tower_ID);
     }
 
     void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
 private:	
 	void initialize_mainUI();
-	void initialize_wordcomboUI();
-
-
 
     void setup_animations();
 	void set_lives(int amount);
 	void set_gold(int amount);
 	void set_essence(int amount);
 
-	//need tp have the various button handlers here
-	bool wordcombine_combinebtn(const CEGUI::EventArgs &e);
-	bool wordcombine_previewbtn(const CEGUI::EventArgs &e);
-	bool wordcombine_clearbtn(const CEGUI::EventArgs &e);
-    bool wordcombine_cancelbtn(const CEGUI::EventArgs &e);
-    
-	bool word_combination_evthandler(const CEGUI::EventArgs &e);
-    
-    bool handle_inventory_item_dropped(const CEGUI::EventArgs& args);
-
 	CEGUI::OgreRenderer* gui_renderer;
     CEGUI::System* gui_sys;
     CEGUI::Window* gui_window;
 
-	CEGUI::Window* gui_wordcombine_window;
-    //std::vector<CEGUI::Window*> session_word_slots;
-    CEGUI::HorizontalLayoutContainer* wordslot_layout;
-
     CEGUI::RenderTarget *gui_rendertarget;
     CEGUI::GUIContext *gui_context;
 
-    std::shared_ptr<PlayerInventory> inventory;
+	std::unique_ptr<TowerUpgradeUI> tower_modify_ui;
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
-    uint32_t activetower_ID;
 };
 
 

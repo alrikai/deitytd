@@ -255,7 +255,7 @@ public:
 	void register_shared_info(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
         shared_gamestate_info = shared_info;
-        gui->register_shared_towerinfor(shared_gamestate_info);
+        gui->register_shared_towerinfo(shared_gamestate_info);
 	}
 
     Ogre::Root* get_root() const

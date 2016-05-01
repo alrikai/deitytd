@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <GUIScheme version="5" name="DTDLook">
 	<Imageset filename="DTD.imageset" />
+	<Imageset filename="DTDLetters.imageset" />
 	<Font filename="DejaVuSans-10.font" />
 	<LookNFeel filename="DTD.looknfeel" />
 	<WindowRendererSet filename="CEGUICoreWindowRendererSet" />

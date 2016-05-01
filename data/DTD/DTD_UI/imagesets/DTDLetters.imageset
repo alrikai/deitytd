@@ -1,0 +1,30 @@
+<Imageset autoScaled="true" imagefile="LETTERS2.png" name="DTDLetters" nativeHorzRes="1024" nativeVertRes="1024" version="2">
+    <Image height="335" name="A" width="450" xPos="5" yPos="5" />
+    <Image height="335" name="B" width="450" xPos="471" yPos="5" />
+    <Image height="335" name="C" width="450" xPos="940" yPos="5" />
+    <Image height="335" name="D" width="450" xPos="1410" yPos="5" />
+    <Image height="335" name="E" width="450" xPos="5" yPos="371" />
+    <Image height="335" name="F" width="450" xPos="471" yPos="371" />
+    <Image height="335" name="G" width="450" xPos="940" yPos="371" />
+    <Image height="335" name="H" width="450" xPos="1410" yPos="371" />
+    <Image height="335" name="L" width="450" xPos="1417" yPos="741" />
+    <Image height="335" name="K" width="450" xPos="945" yPos="741" />
+    <Image height="335" name="J" width="450" xPos="476" yPos="741" />
+    <Image height="335" name="I" width="450" xPos="10" yPos="741" />
+    <Image height="335" name="M" width="450" xPos="7" yPos="1127" />
+    <Image height="335" name="N" width="450" xPos="473" yPos="1127" />
+    <Image height="335" name="O" width="450" xPos="942" yPos="1127" />
+    <Image height="335" name="P" width="450" xPos="1412" yPos="1127" />
+    <Image height="335" name="Q" width="450" xPos="9" yPos="1511" />
+    <Image height="335" name="R" width="450" xPos="475" yPos="1511" />
+    <Image height="335" name="S" width="450" xPos="944" yPos="1511" />
+    <Image height="335" name="T" width="450" xPos="1414" yPos="1511" />
+    <Image height="335" name="U" width="450" xPos="8" yPos="1893" />
+    <Image height="335" name="V" width="450" xPos="474" yPos="1893" />
+    <Image height="335" name="W" width="450" xPos="943" yPos="1893" />
+    <Image height="335" name="X" width="450" xPos="1413" yPos="1893" />
+    <Image height="335" name="Y" width="450" xPos="7" yPos="2286" />
+    <Image height="335" name="Z" width="450" xPos="473" yPos="2286" />
+    <Image height="348" name="InventoryTile" width="455" xPos="976" yPos="2286" />
+    <Image height="348" name="BlankTile" width="455" xPos="1451" yPos="2286" />
+</Imageset>

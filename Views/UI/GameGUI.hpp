@@ -132,6 +132,7 @@ public:
 
     void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
+
 private:	
 	void initialize_mainUI();
 

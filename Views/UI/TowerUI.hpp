@@ -56,10 +56,13 @@ struct TowerUpgradeUI
 
 
 	CEGUI::Window* gui_window;
+	CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout;
 	CEGUI::Window* gui_wordcombine_window;
+	CEGUI::Window* gui_inventory_window;
+
+	//CEGUI::Imageset* letter_imgset;
     //std::vector<CEGUI::Window*> session_word_slots;
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
-    CEGUI::HorizontalLayoutContainer* wordslot_layout;
     //std::shared_ptr<PlayerInventory> inventory;
 
     uint32_t activetower_ID;

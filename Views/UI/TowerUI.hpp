@@ -53,7 +53,7 @@ struct TowerUpgradeUI
 	bool word_combination_evthandler(const CEGUI::EventArgs &e);
     
     bool handle_inventory_item_dropped(const CEGUI::EventArgs& args);
-
+    bool handle_letter_item_dropped(const CEGUI::EventArgs& args);
 
 	CEGUI::Window* gui_window;
 	CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout;

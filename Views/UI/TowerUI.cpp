@@ -40,12 +40,13 @@ void TowerUpgradeUI::initialize_wordcomboUI()
             std::string slot_id = "slot_" + std::to_string(inventory_idx);
             std::cout << "subscribing slot " << slot_id << std::endl;
             auto target_inventory_slot = gui_inventory_window->getChild("InventoryPanel")->getChild(slot_id);
-            target_inventory_slot->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
-                CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_inventory_item_dropped, this));
 
 			//for testing: enable the slot. Also note that you should have the background be non-draggable, and only enable dragging capabilities if 
 			//there's an item in that inventory slot.
 			auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_inventory_slot->getChild("dragger"));
+            slot_dragger->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
+                CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_inventory_item_dropped, this));
+
 			//by default we don't want to have the backgrounds be draggable
 			slot_dragger->setDraggingEnabled(false);
 
@@ -77,7 +78,13 @@ void TowerUpgradeUI::initialize_wordcomboUI()
         //we never want to be able to drag FROM these slots (I think...)
 		auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_letter_slot->getChild("ldragger"));
         slot_dragger->setDraggingEnabled(false);
-        disable_letter_slot(target_letter_slot);
+        
+		slot_dragger->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
+                CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_letter_item_dropped, this));
+	
+		disable_letter_slot(target_letter_slot);
+
+
     }
 
   /* 
@@ -128,9 +135,11 @@ void TowerUpgradeUI::update_inventory(const PlayerInventory* inventory)
 			}
 		}
 	}
-
 }
 
+//TODO: need to figure out a good way to manage the inventory. How to handle swapping items, 
+//reorganizing them, and maintaining the state between the player inventory and how the user 
+//re-arranges the items in the UI (i.e. how to keep track of both)
 bool TowerUpgradeUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
 {
     const CEGUI::DragDropEventArgs& dd_args = static_cast<const CEGUI::DragDropEventArgs&>(args);    
@@ -144,9 +153,16 @@ bool TowerUpgradeUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
         dd_args.dragDropItem->setPosition(
             CEGUI::UVector2(CEGUI::UDim(0.05f, 0),CEGUI::UDim(0.05f, 0)));
     }
-    
-
     return true;
+}
+
+bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
+{
+	//TODO: this is where you would want to put the tile from the inventory on the tile in the word combination set.
+	//Will need to store the state for the inventory tile to be moved, and figure out a good way to restore where 
+	//to put the inventory tile is the user clears it. 
+    std::cout << "dropped letter onto slot..." << std::endl;
+	return true;
 }
 
 bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
@@ -160,15 +176,19 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
 	gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("CurrentStatsEdit")->setText(tower_info_str);
 	gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("CombinedStatsEdit")->setText(tower_info_str);
 
-	//TODO: load the tower image here as well...
+	//TODO: load the tower image here as well... this will have to be a dynamic image, as we are 
+	//procedurally generating the tower models. Should be something where we take a 2D snapshot
+	//of the tower's 3D model when we generate it, and store it in a buffer. Then the first time
+	//we display it, we need to make a Ogre/CEGUI texture and write the buffer data to it (and finally,
+	//display it when we get to here)
     //...
 	
+	//activate the word combination window...
 	gui_wordcombine_window->enable();
 	gui_wordcombine_window->activate();
-
+    //... and activate the player inventory window
     gui_inventory_window->enable();
     gui_inventory_window->activate();
-	//TODO: DO I need to activate the inventory as well?
 
 	//populate the number of word slots for the menu
 	auto word_panel = gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("WordDropperPanel");
@@ -195,7 +215,9 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
         enable_letter_slot(target_letter_slot);
     }
 
-	//TODO: need to grab the current player inventory state and set that up 
+	//NOTE: we assume that the inventory will have already been updated with the player state, 
+	//since that happens on every iteration of the frontend (so we don't need to explicitly populate
+	//the player inventory)
 
 
 

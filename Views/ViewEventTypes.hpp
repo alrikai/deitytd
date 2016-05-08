@@ -151,6 +151,12 @@ namespace RenderEvents
         //TODO: how to make the portrait?
     };
 
+    //Q: do we even need the old state?
+    struct state_transition
+    {
+        GAME_STATE old_state;
+        GAME_STATE new_state;
+    };
 } //namespace RenderEvents
 
 
@@ -174,13 +180,15 @@ public:
     using RemoveMobQueueType = EventQueue<RenderEvents::remove_mob>;
 
     using UnitInfoQueueType = EventQueue<RenderEvents::unit_information>;
+    using StateTransitionQueueType = EventQueue<RenderEvents::state_transition>;
 
     enum class EventTypes 
     { 
       MakeTower,              DestroyTower, 
       MakeAttack, MoveAttack, DestroyAttack, 
       MakeMob,    MoveMob,    DestroyMob,
-      UnitInfo
+      UnitInfo,
+      StateTransition
     };
 
     ViewEvents()
@@ -195,6 +203,7 @@ public:
         removemob_evtqueue = std::unique_ptr<RemoveMobQueueType>(new RemoveMobQueueType());
 
         unitinfo_evtqueue = std::unique_ptr<UnitInfoQueueType>(new UnitInfoQueueType());
+        statetransition_evtqueue = std::unique_ptr<StateTransitionQueueType>(new StateTransitionQueueType());
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -237,6 +246,11 @@ public:
     void add_unitinfo_event(std::unique_ptr<RenderEvents::unit_information> evt)
     {
         unitinfo_evtqueue->push(std::move(evt));
+    }
+
+    void add_statetransition_event(std::unique_ptr<RenderEvents::state_transition> evt)
+    {
+        statetransition_evtqueue->push(std::move(evt));
     }
 //---------------------------------------------------------------------------------------------------------
 
@@ -293,6 +307,12 @@ public:
         execute_event_type<UnitInfoQueueType, ViewFcn>(unitinfo_evtqueue.get(), vfcn);
     }           
 
+    template <typename ViewFcn>
+    void apply_statetransition_events(ViewFcn& vfcn)
+    {
+        execute_event_type<StateTransitionQueueType, ViewFcn>(statetransition_evtqueue.get(), vfcn);
+    }           
+
 //---------------------------------------------------------------------------------------------------------
 /*
  * The question is, what do we do with the frontend executing the events?
@@ -328,6 +348,7 @@ private:
 
 
     std::unique_ptr<UnitInfoQueueType> unitinfo_evtqueue;
+    std::unique_ptr<StateTransitionQueueType> statetransition_evtqueue;
 };
 
 #endif

@@ -13,6 +13,10 @@
 #include <vector>
 //#include <map>
 
+//the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and
+//idle (between rounds, so towers building, upgrading, etc).
+enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
+
 struct CharacterModels
 {
   enum class ModelIDs

@@ -117,11 +117,14 @@ public:
         set_lives(info.get_num_lives());
         set_gold(info.get_num_gold());
         set_essence(info.get_num_essence());
-
-		//next, update the inventory state based on the new player snapshot IFF the inventory is open
-		tower_modify_ui->update_inventory(info.get_inventory_state());
-
 	}
+
+    inline void update_inventory_info(const TDPlayerInformation& info)
+    {
+		//update the inventory state based on the new player snapshot when the round ends and the
+        //dropped items are added to the inventory.
+		tower_modify_ui->update_inventory(info.get_inventory_state());
+    }
 
 	//called by the main frontend class in response to user input. This is where we make the TowerUpgrade UI 
 	//the active window

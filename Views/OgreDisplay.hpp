@@ -463,6 +463,26 @@ void OgreDisplay<BackendType>::start_display()
         gui->display_information(info_evt->base_stats, info_evt->current_stats, info_evt->information);
     };
 
+    auto gstate_transition_evt_fcn = [this](std::unique_ptr<RenderEvents::state_transition> state_transition_evt)
+    {
+        //TODO: need to take action based on the state transition type -- i.e. need to start a timer countdown if transitioning to IDLE,
+        //etc
+
+        std::string old_state = state_transition_evt->old_state == GAME_STATE::IDLE ? "IDLE" : state_transition_evt->old_state == GAME_STATE::ACTIVE ? "ACTIVE" : "PAUSED";
+        std::string new_state = state_transition_evt->new_state == GAME_STATE::IDLE ? "IDLE" : state_transition_evt->new_state == GAME_STATE::ACTIVE ? "ACTIVE" : "PAUSED";
+        std::cout << "@FRONTEND: Transitioning State: " << old_state << " --> " << new_state << std::endl;
+
+        //NOTE: from here, we need to take various actions based on the state transition being performed. We will probably want
+        //to break these out into their own functions eventually
+        if(state_transition_evt->old_state == GAME_STATE::ACTIVE && state_transition_evt->new_state == GAME_STATE::IDLE) {
+            //update the player inventory state with any new items obtained
+	        auto player_state = shared_gamestate_info->get_player_state_snapshot();
+            gui->update_inventory_info(player_state);
+
+            //TODO: add a countdown timer
+        }
+    };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //10 FPS is the bare minimum
@@ -502,6 +522,7 @@ void OgreDisplay<BackendType>::start_display()
 
         //give request for user selection information
         game_events->apply_unitinfo_events(unitinfo_evt_fcn);        
+        game_events->apply_statetransition_events(gstate_transition_evt_fcn);        
         
 		//NOTE: we probably only need to call this every few iterations (not every iteration)
         update_gameinfo();

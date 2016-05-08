@@ -16,6 +16,7 @@
 #include "util/TDEventTypes.hpp"
 #include "shared/common_information.hpp"
 #include "shared/Player.hpp"
+#include "ModelUtils.hpp"
 
 #include <memory>
 #include <random>
@@ -37,9 +38,6 @@ class TowerDefense
 {
   struct TDState;
 public:
-//the game states -- (at the moment), it's just in-round (mobs running, towers attacking, etc) and
-//idle (between rounds, so towers building, upgrading, etc).
-enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
 
 
     //it's possible that we'll move to normalized coordinates?
@@ -206,21 +204,32 @@ struct ActiveState : TDState
 
     //this would be the start of the (new) round. Right now (for testing) we put in a mob -- eventually we'll need to make this 
     //more extensive (and should refactor most of the logic out to somewhere else)
-    if(previous_state == GAME_STATE::IDLE) {
+    if(previous_state == GAME_STATE::IDLE) {     
 
-      //spawn a monster -- since we have no game mechanics in place, it's effectivly immortal
+      //TODO: we should have some expernal script / data file to determine the mob types, #mobs, and stats for a given wave
+      //for now we'll prototype that will just a hard-coded set of mobs
+      std::vector<mobwave_info> wave_mobinfo;
+
+      //NOTE: the below would be loaded from elsewhere at some point in the future...
+      mobwave_info wavemob_metadata;
+      //spawn a monster -- this is the only character model we got 
       const auto mob_model_id = CharacterModels::ModelIDs::ogre_S;
       //nomenclature (at the moment) -- model_id + wave id
       const std::string mob_id = CharacterModels::id_names[static_cast<int>(mob_model_id)] + "_w" + std::to_string(0);
-      TDState::td->td_backend->make_mob(mob_model_id, mob_id, TDState::td->spawn_point);
- 
-      const bool has_valid_path = TDState::td->td_backend->find_paths(TDState::td->spawn_point, TDState::td->dest_point);
-      //TODO: need to notify the user that their maze is more like a wall
+
+      //We want to pass in the mob characteristics for the wave... still need to figure out exactly what sort of interface is best here
+      wavemob_metadata.mob_model_id = mob_model_id;
+      wavemob_metadata.mob_id = mob_id;
+      wavemob_metadata.num_mobs = 1;
+      wave_mobinfo.push_back(wavemob_metadata);
+
+      bool has_valid_path = TDState::td->td_backend->enter_active_state(std::move(wave_mobinfo), TDState::td->spawn_point, TDState::td->dest_point);
       if(!has_valid_path) {
-        std::cout << "ERROR -- No valid path from [ " << TDState::td->spawn_point.col << ", " << TDState::td->spawn_point.row 
-                  << "] to [" << TDState::td->dest_point.col << ", " << TDState::td->dest_point.row << std::endl;
+          //TODO: need to notify the user that their maze is more like a wall
+          std::cout << "ERROR -- No valid path from [ " << TDState::td->spawn_point.col << ", " << TDState::td->spawn_point.row 
+                << "] to [" << TDState::td->dest_point.col << ", " << TDState::td->dest_point.row << std::endl;
       }
-      
+
       std::cout << "Entering IDLE state" << std::endl;     
     }
   }
@@ -254,7 +263,8 @@ struct ActiveState : TDState
     //if no more mobs alive, transition states
     if(TDState::td->td_backend->get_num_live_mobs() == 0) {
         std::cout << "No more mobs, transitioning to IDLE" << std::endl;
-        TDState::td->td_backend->reset_state();
+
+        TDState::td->td_backend->enter_idle_state();
         return GAME_STATE::IDLE;
     } else {
         return state;

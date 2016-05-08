@@ -61,6 +61,7 @@ struct TowerUpgradeUI
 	CEGUI::Window* gui_wordcombine_window;
 	CEGUI::Window* gui_inventory_window;
 
+  PlayerInventory inventory_snapshot;
 	//CEGUI::Imageset* letter_imgset;
     //std::vector<CEGUI::Window*> session_word_slots;
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;

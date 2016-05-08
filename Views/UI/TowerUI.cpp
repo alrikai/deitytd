@@ -41,15 +41,22 @@ void TowerUpgradeUI::initialize_wordcomboUI()
             std::cout << "subscribing slot " << slot_id << std::endl;
             auto target_inventory_slot = gui_inventory_window->getChild("InventoryPanel")->getChild(slot_id);
 
+
 			//for testing: enable the slot. Also note that you should have the background be non-draggable, and only enable dragging capabilities if 
 			//there's an item in that inventory slot.
 			auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_inventory_slot->getChild("dragger"));
-            slot_dragger->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
+            slot_dragger->subscribeEvent(CEGUI::DragContainer::EventDragEnded,
                 CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_inventory_item_dropped, this));
+
+            slot_dragger->subscribeEvent(CEGUI::DragContainer::EventDragStarted,
+                CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_inventory_item_dragging, this));
+
+
 
 			//by default we don't want to have the backgrounds be draggable
 			slot_dragger->setDraggingEnabled(false);
-
+            //NOTE: the ID's here will overlap with the IDs in the word combo slots. This shouldn't (?) be an issue, but we'll have to be aware of it..
+            slot_dragger->setID(inventory_idx);
             inventory_idx += 1;
         }
     }
@@ -78,13 +85,12 @@ void TowerUpgradeUI::initialize_wordcomboUI()
         //we never want to be able to drag FROM these slots (I think...)
 		auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_letter_slot->getChild("ldragger"));
         slot_dragger->setDraggingEnabled(false);
-        
+        slot_dragger->setID(letter_slotidx);
+
 		slot_dragger->subscribeEvent(CEGUI::Window::EventDragDropItemDropped,
                 CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_letter_item_dropped, this));
 	
 		disable_letter_slot(target_letter_slot);
-
-
     }
 
   /* 
@@ -153,6 +159,18 @@ bool TowerUpgradeUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
         dd_args.dragDropItem->setPosition(
             CEGUI::UVector2(CEGUI::UDim(0.05f, 0),CEGUI::UDim(0.05f, 0)));
     }
+    return true;
+}
+
+
+bool TowerUpgradeUI::handle_inventory_item_dragging(const CEGUI::EventArgs& args)
+{
+    const CEGUI::DragDropEventArgs& dd_args = static_cast<const CEGUI::DragDropEventArgs&>(args);    
+    auto dragging_slot = dd_args.window;
+    auto slot_id = dragging_slot->getName();
+
+    std::cout << "Starting to drag slot " << slot_id << " -- " << dragging_slot->getID() << std::endl;
+
     return true;
 }
 

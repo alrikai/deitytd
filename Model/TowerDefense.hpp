@@ -44,14 +44,10 @@ public:
     explicit TowerDefense(ViewType<ModelType>* view)
         : td_view(view)
     {
-        //choose the word dictionary and default modifier stats 
-        const std::string config_file {"resources/default_attribute_values.yaml"};
-        const std::string dict_file {"resources/word_list.txt"};
-
 		TDPlayerInformation defaultplayer_state(20, 0, 20);
 
         //td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
-        td_backend = std::unique_ptr<ModelType>(new ModelType(dict_file, config_file, defaultplayer_state));
+        td_backend = std::unique_ptr<ModelType>(new ModelType(defaultplayer_state));
 
         spawn_point = GameMap::IndexCoordinate (GameMap::MAP_WIDTH-1, GameMap::MAP_HEIGHT-1);  
         dest_point = GameMap::IndexCoordinate (0, 0); 
@@ -306,6 +302,8 @@ void TowerDefense<ViewType, ModelType>::init_game()
 
     //hook up the backend and frontends, so we can send events from backend to frontend 
     td_view->register_backend_eventqueue(td_backend->get_frontend_eventqueue());
+
+    td_backend->enter_idle_state();
 
     //...
 }

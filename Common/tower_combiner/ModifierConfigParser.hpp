@@ -6,9 +6,6 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
-
 #ifndef MODIFIER_CONFIG_PARSER_HPP
 #define MODIFIER_CONFIG_PARSER_HPP
 

@@ -211,6 +211,10 @@ bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
     //TODO: need to also update the inventory state... how to handle cacelling though?
     //
 
+    //mark down what letters are active
+    word_letters[dragged_idx] = target_letter; 
+    word_letter_count++;
+
     return true;
 }
 
@@ -241,7 +245,14 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
 
     //populate the number of word slots for the menu
     auto word_panel = gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("WordDropperPanel");
-    const int num_word_slots = tinfo.num_wordslots;
+    
+    const int num_word_slots = 20; //tinfo.num_wordslots;
+
+    //reset any letter state
+    for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
+        word_letters[letter_idx] = "";
+    }
+    word_letter_count = 0;
 
     std::cout << "activating the first " << num_word_slots << " word slots" << std::endl;
 
@@ -327,21 +338,108 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
     return true;
 }
 
+std::pair<bool, std::string> TowerUpgradeUI::combine_currentletters()
+{
+     //concatenate the letters to form a word
+    bool is_structurally_valid = true;
+    std::string combine_word = "";
+    for (int letter_idx = 0; letter_idx < word_letter_count; letter_idx++) {
+        if(!word_letters[letter_idx].empty()) {
+            combine_word += word_letters[letter_idx];
+        } else {
+            //TODO: do we throw up an error or something if there's a gap?
+            //...
+            std::cout << "ERROR -- this isn't a valid word because there's a space in it" << std::endl;
+            is_structurally_valid = false; 
+        }
+    }
+
+    return std::make_pair(is_structurally_valid, combine_word);
+}
+
+
 
 bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
 {
-    std::cout << "combining words...." << std::endl;
+    //see what letters we have active, and do the word combination logic
+    
+    //TODO: figure out how best to handle structurally invalid words (i.e. if there are spaces)
+    //auto tinfo = shared_gamestate_info->get_towerinfo(activetower_ID);
+
+
+    bool is_structurally_valid = false;
+    std::string combine_word = "";
+    std::tie(is_structurally_valid, combine_word) = combine_currentletters();
+
+    if(is_structurally_valid) {
+        //see if the combined word is a valid one
+        std::cout << "combining word: " << combine_word << std::endl;
+
+        //TODO: need to invoke the combination stuff...
+        auto tower_cmbmgmt = get_towercombiner();
+        auto valid_word = tower_cmbmgmt.check_combination(combine_word);
+        if(valid_word) {
+            std::cout << "@COMBINE -- word " << combine_word << " is valid word" << std::endl;
+            tower_properties cmb_stats = tower_cmbmgmt.make_wordcombination(combine_word);
+        } else {
+
+        }
+    } else {
+
+    }
+
     return true;
 }
 
 bool TowerUpgradeUI::wordcombine_previewbtn(const CEGUI::EventArgs &e)
 {
     std::cout << "previewing word combination...." << std::endl;
+
+    bool is_structurally_valid = false;
+    std::string combine_word = "";
+    std::tie(is_structurally_valid, combine_word) = combine_currentletters();
+
+    if(is_structurally_valid) {
+        //see if the combined word is a valid one
+        std::cout << "combining word: " << combine_word << std::endl;
+
+        //TODO: need to invoke the combination stuff...
+        auto tower_cmbmgmt = get_towercombiner();
+        auto valid_word = tower_cmbmgmt.check_combination(combine_word);
+        if(valid_word) {
+            std::cout << "@COMBINE -- word " << combine_word << " is valid word" << std::endl;
+            tower_properties cmb_stats = tower_cmbmgmt.make_wordcombination(combine_word);
+
+            //these are placeholders... need to decide what to use for the name, how to handle the tier, etc.
+            const std::string tower_name {"PLACEHOLDER"};
+            const int tier = 1337;
+
+            std::stringstream tinfo_oss;
+            tinfo_oss << tower_name << "\nTier: " << tier << " Attributes:\n" << cmb_stats << "\n";
+		    auto tower_info_str = tinfo_oss.str();
+            gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("CombinedStatsEdit")->setText(tower_info_str);
+        } else { 
+            std::cout << "@COMBINE -- word " << combine_word << " is NOT valid word" << std::endl;
+        }
+    } else {
+        std::cout << "@COMBINE -- word " << combine_word << " is NOT a structurally valid word" << std::endl;
+    }
+
     return true;
 }
 
 bool TowerUpgradeUI::wordcombine_clearbtn(const CEGUI::EventArgs &e)
 {
+
+    //TODO: need to clear the current letter selections, move the icons back to the inventory,
+    //and reset any inventory state changes that were enacted
+
+    //reset any letter state
+    for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
+        word_letters[letter_idx] = "";
+    }
+    word_letter_count = 0;
+
     std::cout << "clearing word combination...." << std::endl;
     return true;
 }

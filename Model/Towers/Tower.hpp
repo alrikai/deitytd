@@ -65,7 +65,8 @@ public:
 
     //when the tower hits some threshold for experience, have it gain semi-randomized new abilities 
     //virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
-    virtual bool add_modifier(const TowerCombiner& tower_combiner, tower_property_modifier* modifier); 
+    //virtual bool add_modifier(const TowerCombiner& tower_combiner, tower_property_modifier* modifier); 
+    virtual bool add_modifier(tower_property_modifier* modifier); 
     
     //this is baisically a factory function for generating a given towers' attacks.
     //Tower subclasses can override to do whatever extra steps they need

@@ -111,6 +111,14 @@ std::unique_ptr<TowerAttackBase> Tower::generate_attack(const std::string& attac
     }
 }
 
+bool Tower::add_modifier(tower_property_modifier* modifier)
+{
+
+    //NOTE: what do we do here?
+    std::cout << "@Tower::add_modifier with " << typeid(*modifier).name() << std::endl;
+    return true;
+}
+/*
 bool Tower::add_modifier(const TowerCombiner& tower_combiner, tower_property_modifier* modifier)
 {
 
@@ -118,6 +126,7 @@ bool Tower::add_modifier(const TowerCombiner& tower_combiner, tower_property_mod
     std::cout << "@Tower::add_modifier with " << typeid(*modifier).name() << std::endl;
     return true;
 }
+*/
 
 
 

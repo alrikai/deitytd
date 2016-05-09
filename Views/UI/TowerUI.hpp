@@ -32,6 +32,11 @@ struct TowerUpgradeUI
         gui_window->getChild("TowerUpgradeWindow")->setVisible(false);
 
         initialize_wordcomboUI();
+
+        for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
+            word_letters[letter_idx] = "";
+        }
+        word_letter_count = 0;
 	}
 
 	void initialize_wordcomboUI();
@@ -56,17 +61,22 @@ struct TowerUpgradeUI
     bool handle_inventory_item_dragging(const CEGUI::EventArgs& args);
     bool handle_letter_item_dropped(const CEGUI::EventArgs& args);
 
+    std::pair<bool, std::string> combine_currentletters();
+
 	CEGUI::Window* gui_window;
 	CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout;
 	CEGUI::Window* gui_wordcombine_window;
 	CEGUI::Window* gui_inventory_window;
 
-  PlayerInventory inventory_snapshot;
+    PlayerInventory inventory_snapshot;
 	//CEGUI::Imageset* letter_imgset;
     //std::vector<CEGUI::Window*> session_word_slots;
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
     //std::shared_ptr<PlayerInventory> inventory;
 
+    static constexpr int MAX_NUM_LETTERS = 20;
+    std::array<std::string, MAX_NUM_LETTERS> word_letters;
+    int word_letter_count;
     uint32_t activetower_ID;
 };
 

@@ -4,8 +4,6 @@ set(make_include_current_dir on)
 #add_subdirectory(util)
 #include_directories(util)
 
-set(YAML-CPP yaml-cpp)
-
 include_directories(Towers)
 add_subdirectory(Towers)
 

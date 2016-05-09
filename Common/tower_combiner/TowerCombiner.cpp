@@ -6,9 +6,6 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
-
 #include "TowerCombiner.hpp"
 #include "ModifierConfigParser.hpp"
 

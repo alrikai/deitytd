@@ -46,8 +46,8 @@ class TowerLogic
         static constexpr int MAP_NUMTILES_WIDTH = GameMap::MAP_WIDTH / GameMap::TowerTileHeight;
 
         //TODO: need to move the player initial state setting to elsewhere
-        TowerLogic(const std::string& combo_dictfpath, const std::string& attribute_cfgfpath, TDPlayerInformation default_pstate) 
-            : tower_gen(combo_dictfpath, attribute_cfgfpath), player_state(default_pstate)
+        TowerLogic(TDPlayerInformation default_pstate) 
+            : player_state(default_pstate)
         {
             //anything else to initialize goes here...
             td_frontend_events = std::unique_ptr<ViewEvents>(new ViewEvents());    
@@ -190,7 +190,7 @@ class TowerLogic
 
         GameMap map;
         //tower_generator tower_gen;
-        TowerCombiner tower_gen;
+        //TowerCombiner tower_gen;
         std::map<std::string, TowerModel> tower_models;
 
         Pathfinder<GameMap> path_finder;

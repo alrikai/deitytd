@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include "util/TowerProperties.hpp"
+#include "tower_combiner/TowerCombiner.hpp"
 
 /*
  * the idea is to have something here that'll be written to by the backend and read by the frontend,
@@ -113,5 +114,19 @@ private:
     mutable std::mutex player_info_mutx;
     player_information_t player_info;
 };
+
+
+//this is the singleton for the towercombiner. I am still not entirely sure that this is the best way
+//to go, but I think I can have it s.t. this is really ONLY used from the frontend (and we just pass
+//the tower_properties w/ a modify event to the backend from the frontend... but we'll have to see?)
+inline const TowerCombiner& get_towercombiner()
+{
+	//choose the word dictionary and default modifier stats 
+	const static std::string config_file {"resources/default_attribute_values.yaml"};
+	const static std::string dict_file {"resources/word_list.txt"};
+
+	static TowerCombiner tower_gen(dict_file, config_file);
+	return tower_gen;
+}
 
 #endif

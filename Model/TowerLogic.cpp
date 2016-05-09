@@ -98,11 +98,13 @@ bool TowerLogic::make_tower(const uint32_t ID, const int tier, const float x_coo
 bool TowerLogic::modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord)
 {
     //check if tower is at the specified position
-    if(!map.is_obstructed(x_coord, y_coord))
+    if(!map.is_obstructed(x_coord, y_coord)) {
         return false;
+    }
 
     auto t_tile = map.get_bounding_tile(x_coord, y_coord);
-    return t_list[t_tile.row][t_tile.col]->add_modifier(tower_gen, modifier);
+    //return t_list[t_tile.row][t_tile.col]->add_modifier(tower_gen, modifier);
+    return t_list[t_tile.row][t_tile.col]->add_modifier(modifier);
 }
 
 

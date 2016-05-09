@@ -48,6 +48,10 @@ struct TowerUpgradeUI
         shared_gamestate_info = shared_info;
 	}
 
+    inline bool is_showing() const 
+    {
+        return gui_wordcombine_window->isVisible();
+    }
 
 	//need to have the various button handlers here
 	bool wordcombine_combinebtn(const CEGUI::EventArgs &e);

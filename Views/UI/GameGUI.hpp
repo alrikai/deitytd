@@ -135,6 +135,12 @@ public:
 
     void display_information(const std::string& base_stats, const std::string& current_stats, const std::string& unit_info);
 
+    //returns whether a subwindow is showing. Is used to disable certain things in the frontend (i.e. panning the camera)
+    inline bool is_subwindow_showing() const 
+    {
+        //eventually there would be others
+        return tower_modify_ui->is_showing();
+    }
 
 private:	
 	void initialize_mainUI();

@@ -415,7 +415,7 @@ bool TowerUpgradeUI::wordcombine_previewbtn(const CEGUI::EventArgs &e)
             const int tier = 1337;
 
             std::stringstream tinfo_oss;
-            tinfo_oss << tower_name << "\nTier: " << tier << " Attributes:\n" << cmb_stats << "\n";
+            tinfo_oss << tower_name << "\nTier: " << tier << " \nAttributes:\n" << cmb_stats << "\n";
 		    auto tower_info_str = tinfo_oss.str();
             gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("CombinedStatsEdit")->setText(tower_info_str);
         } else { 

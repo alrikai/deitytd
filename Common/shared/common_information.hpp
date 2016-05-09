@@ -31,7 +31,7 @@ struct CommonTowerInformation
 	std::string get_tower_info_string() const 
 	{
         std::stringstream tinfo_oss;
-        tinfo_oss << tower_name << "\nTier: " << tier << " Attributes:\n" << base_tower_props << "\n";
+        tinfo_oss << tower_name << "\nTier: " << tier << " \nAttributes:\n" << base_tower_props << "\n";
 		return tinfo_oss.str();
 	}
 };

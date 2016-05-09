@@ -1035,9 +1035,11 @@ void OgreDisplay<BackendType>::handle_user_input()
         ControllerUtil::print_input_type(ui_evt.event_type);
     }
 
-    camera->move(camera_direction);
-    camera->yaw(Ogre::Degree(cam_yaw)*-0.2f);
-    camera->pitch(Ogre::Degree(cam_pitch)*-0.2f);
+    if(!gui->is_subwindow_showing()) {
+        camera->move(camera_direction);
+        camera->yaw(Ogre::Degree(cam_yaw)*-0.2f);
+        camera->pitch(Ogre::Degree(cam_pitch)*-0.2f);
+    }
 }
 
 //void windowResized(Ogre::RenderWindow* rw) override;

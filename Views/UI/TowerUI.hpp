@@ -78,6 +78,9 @@ struct TowerUpgradeUI
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
     //std::shared_ptr<PlayerInventory> inventory;
 
+    using tower_modifyinfo = std::pair<uint32_t, tower_properties>;
+    std::vector<tower_modifyinfo> active_tower_mods;
+
     static constexpr int MAX_NUM_LETTERS = 20;
     std::array<std::string, MAX_NUM_LETTERS> word_letters;
     int word_letter_count;

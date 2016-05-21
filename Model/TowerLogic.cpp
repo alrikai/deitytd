@@ -94,8 +94,26 @@ bool TowerLogic::make_tower(const uint32_t ID, const int tier, const float x_coo
     return true;
 }
 
+//this one does a wholesale replacement of the target tower, while the other one adds a new modifier
+//to the existing tower properties 
+bool TowerLogic::modify_tower(tower_properties props, const float x_coord, const float y_coord)
+{
+    //check if tower is at the specified position
+    if(!map.is_obstructed(x_coord, y_coord)) {
+        return false;
+    }
 
-bool TowerLogic::modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord)
+    //TODO: need to get these coordinates worked out a bit better?
+
+    auto t_tile = map.get_bounding_tile(x_coord/GameMap::TowerTileWidth, y_coord/GameMap::TowerTileHeight);
+    return t_list[t_tile.row][t_tile.col]->set_properties(std::move(props));
+//    auto& target_tower = t_list[t_tile.row][t_tile.col];
+//    return target_tower->set_properties(std::move(props));
+}
+
+
+
+bool TowerLogic::modify_tower(tower_property_modifier modifier, const float x_coord, const float y_coord)
 {
     //check if tower is at the specified position
     if(!map.is_obstructed(x_coord, y_coord)) {
@@ -104,7 +122,7 @@ bool TowerLogic::modify_tower(tower_property_modifier* modifier, const float x_c
 
     auto t_tile = map.get_bounding_tile(x_coord, y_coord);
     //return t_list[t_tile.row][t_tile.col]->add_modifier(tower_gen, modifier);
-    return t_list[t_tile.row][t_tile.col]->add_modifier(modifier);
+    return t_list[t_tile.row][t_tile.col]->add_modifier(std::move(modifier));
 }
 
 

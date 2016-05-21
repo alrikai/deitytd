@@ -365,8 +365,6 @@ bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
     
     //TODO: figure out how best to handle structurally invalid words (i.e. if there are spaces)
     //auto tinfo = shared_gamestate_info->get_towerinfo(activetower_ID);
-
-
     bool is_structurally_valid = false;
     std::string combine_word = "";
     std::tie(is_structurally_valid, combine_word) = combine_currentletters();
@@ -381,12 +379,40 @@ bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
         if(valid_word) {
             std::cout << "@COMBINE -- word " << combine_word << " is valid word" << std::endl;
             tower_properties cmb_stats = tower_cmbmgmt.make_wordcombination(combine_word);
-        } else {
 
+            //TODO: need to take this tower_properties stat and generate a tower modify event
+            active_tower_mods.emplace_back(std::make_pair(activetower_ID, std::move(cmb_stats)));
+        } else {
+            //do we warn the user? or just have the individual letter combinations?
+            std::cout << "@COMBINE -- word " << combine_word << " is a dictionary word" << std::endl;
         }
     } else {
-
+        //TODO: will we ever add the ability to do sentences? That would be pretty neat... in which case we
+        //would need spaces as a character. For now though, I guess it's just an error
+        std::cout << "@COMBINE -- word " << combine_word << " is NOT a valid word" << std::endl;
     }
+
+    //NOTE: we should also close the UI
+    gui_wordcombine_window->setVisible(false);
+
+    //CEGUI::WindowManager::getSingleton().destroyWindow(wordslot_layout);
+    //wordslot_layout = nullptr;
+    /*
+    //how to delete GUI widgets?
+    for (auto wslot_widgetit : session_word_slots) {
+    CEGUI::WindowManager::getSingleton().destroyWindow(wslot_widgetit);
+    }
+    session_word_slots.clear();
+    */  
+    //TBH, no idea what the difference between disable and deactivate is here
+    gui_wordcombine_window->disable();
+    gui_wordcombine_window->deactivate();
+
+    gui_inventory_window->disable();
+    gui_inventory_window->deactivate();
+
+    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_window);
+
 
     return true;
 }

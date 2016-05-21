@@ -142,6 +142,22 @@ public:
         return tower_modify_ui->is_showing();
     }
 
+    inline bool has_pending_tower_modifications() const 
+    {
+        return tower_modify_ui->active_tower_mods.size() > 0;
+    }
+
+    //kind of weird to return a pointer to a vector... maybe I should just return an iterator? I want to modify the
+    //TowerUI vector however. or... I could just return a copy of the vector, and clear the one in the TowerUI?
+    //this assumes that the caller will handle all of the events... but that seems like a safe bet anyways
+    inline std::vector<TowerUpgradeUI::tower_modifyinfo> get_pending_tower_modifications() const 
+    {
+        auto active_mods = tower_modify_ui->active_tower_mods;
+
+        tower_modify_ui->active_tower_mods.clear();
+        return active_mods;
+    }
+
 private:	
 	void initialize_mainUI();
 

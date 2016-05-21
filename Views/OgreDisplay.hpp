@@ -147,6 +147,14 @@ struct TDMapInformation
         }
 
         tower_ID_mapping[tile_row][tile_col] = tower_ID;
+        
+        auto id_it = location_mapping.find(tower_ID);
+        if(id_it != location_mapping.end()) {
+            //update the location... or throw an error, not sure if towers should be movable?
+            id_it->second = std::make_pair(tile_row, tile_col);
+        } else {
+            location_mapping.insert(std::make_pair(tower_ID, std::make_pair(ynorm_coord, xnorm_coord)));
+        }
     }
 
     //returns true if there's a tower, false otherwise
@@ -172,11 +180,27 @@ struct TDMapInformation
         return tower_ID_mapping[tile_row][tile_col];
     }
 
+    std::tuple<bool, float,float> get_tower_location (const uint32_t tower_ID)
+    {
+        auto id_it = location_mapping.find(tower_ID);
+        if(id_it != location_mapping.end()) {
+            return std::make_tuple(true, id_it->second.first, id_it->second.second);
+        } else {
+            //NOTE: this might be indicative of a logic error, as we shouldn't have scenrios where the 
+            //ID is not a valid one
+            std::cout << "ERROR -- tower ID " << tower_ID << " does not correspond to a valid tower" << std::endl;
+            return std::make_tuple(false, -1.f, -1.f);
+        }        
+    }
+
     //for faster lookup between user clicks and getting the constrituent tower ID
     static constexpr double UNITS_PER_TILE_H = 1.0 / BackendType::MAP_NUMTILES_HEIGHT;
     static constexpr double UNITS_PER_TILE_W = 1.0 / BackendType::MAP_NUMTILES_WIDTH;
     using TowerMapContainer = std::array<std::array<uint32_t, BackendType::MAP_NUMTILES_WIDTH>, BackendType::MAP_NUMTILES_HEIGHT>;
     TowerMapContainer tower_ID_mapping; 
+
+    //something to help simplify the location lookups from ID
+    std::map<uint32_t, std::pair<float,float>> location_mapping;
 };
 
 //-----------------------------------------------------------------------------------
@@ -277,6 +301,7 @@ public:
     bool frameRenderingQueued(const Ogre::FrameEvent& evt) override;
 
     void update_gameinfo();
+    void dispatch_towerui_events();
 
 private:        
     bool ogre_setup();
@@ -526,6 +551,7 @@ void OgreDisplay<BackendType>::start_display()
         
 		//NOTE: we probably only need to call this every few iterations (not every iteration)
         update_gameinfo();
+        dispatch_towerui_events();
         /////////////////////////////////////////////////////////////////////////////////////////////
      
         auto end_time = std::chrono::high_resolution_clock::now(); 
@@ -592,6 +618,32 @@ void OgreDisplay<BackendType>::update_gameinfo()
     gui->update_gamestate_info(player_state);
 }
 
+template <class BackendType>
+void OgreDisplay<BackendType>::dispatch_towerui_events() 
+{
+    //check if any tower modification events are pending, and if so, generate the backend events to handle them
+    if(gui->has_pending_tower_modifications()) {
+        auto pending_mods = gui->get_pending_tower_modifications();
+        for (auto tmod : pending_mods) {
+            const uint32_t tower_id = tmod.first;
+            const auto tower_props = tmod.second;
+
+            //get the tower location from the given ID
+            bool valid_tID = false;
+            float tower_row, tower_col;
+            std::tie(valid_tID, tower_row, tower_col) = tower_mapinfo.get_tower_location (tower_id);
+            
+            //notify the backend that a tower modification has to be performed
+            if(valid_tID) {
+                using tower_evt_t = UserTowerEvents::modify_tower_event<tower_properties, BackendType>;
+                std::unique_ptr<UserTowerEvents::tower_event<BackendType>> td_evt = 
+                    std::unique_ptr<tower_evt_t> (new tower_evt_t(tower_props, tower_row, tower_col));
+                td_event_queue->push(std::move(td_evt));
+            }
+        }
+    }
+}
+
 
 template <class BackendType>
 void OgreDisplay<BackendType>::get_mapcoords(const std::vector<float>& world_position, float& xnorm_coord, float& ynorm_coord, const Ogre::AxisAlignedBox& map_box)
@@ -637,15 +689,17 @@ void OgreDisplay<BackendType>::generate_tower(const float x_coord, const float y
 
     float n_map_col = 0;
     float n_map_row = 0;
-    if(world_click.x < 0)
+    if(world_click.x < 0) {
         n_map_col = 0.5f - std::abs(world_click.x / map_coord_mapping.x);
-    else
+    } else {
         n_map_col = 0.5f + std::abs(world_click.x / map_coord_mapping.x);
+    }
 
-    if(world_click.y < 0)
+    if(world_click.y < 0) {
         n_map_row = 0.5f - std::abs(world_click.y / map_coord_mapping.y);
-    else
+    } else {
         n_map_row = 0.5f + std::abs(world_click.y / map_coord_mapping.y);
+    }
   
     const float norm_mapcoords_col = n_map_col; 
     const float norm_mapcoords_row = n_map_row;
@@ -689,8 +743,9 @@ void OgreDisplay<BackendType>::place_tower(TowerModel* selected_tower, const uin
     Ogre::ManualObject* tower_obj = scene_mgmt->createManualObject(tower_name); 
     std::string tower_material_name {selected_tower->tower_material_name_};
     //have a default material to use?
-    if(tower_material_name.empty())
+    if(tower_material_name.empty()) {
         tower_material_name = "BaseWhiteNoLighting";
+    }
 
     tower_obj->begin(tower_material_name, Ogre::RenderOperation::OT_TRIANGLE_LIST);
     {

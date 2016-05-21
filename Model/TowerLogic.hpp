@@ -110,7 +110,10 @@ class TowerLogic
 
         //methods called in response to frontend events, dispatched from the gameloop
         bool make_tower(const uint32_t ID, const int tier, const float x_coord, const float y_coord);
-        bool modify_tower(tower_property_modifier* modifier, const float x_coord, const float y_coord);
+
+        bool modify_tower(tower_properties props, const float x_coord, const float y_coord);
+        bool modify_tower(tower_property_modifier modifier, const float x_coord, const float y_coord);
+        
         bool print_tower(const float x_coord, const float y_coord);
         bool tower_taget(const float tower_xcoord, const float tower_ycoord, const float target_xcoord, const float target_ycoord);
         //is run at the start of the round (i.e. in the transition from IDLE --> INROUND), assuming the obstructions

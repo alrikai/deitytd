@@ -6,14 +6,10 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-
-
 #ifndef TD_BACKEND_EVENTTYPES_HPP
 #define TD_BACKEND_EVENTTYPES_HPP
 
 #include "EventQueue.hpp"
-//gotta get the build system ironed out better..
-//#include </home/alrik/boost_1_55_0/boost/lockfree/spsc_queue.hpp>
 
 namespace UserTowerEvents 
 {
@@ -69,8 +65,8 @@ struct modify_tower_event : public tower_event<BackendType>
        : modifier(nullptr)
     {}
 
-    modify_tower_event(T* mod_type, float row, float col)
-       :  tower_event<BackendType>(row, col), modifier(mod_type)
+    modify_tower_event(T mod_type, float row, float col)
+       :  tower_event<BackendType>(row, col), modifier(std::move(mod_type))
     {}
 
     using tower_event<BackendType>::col_;
@@ -81,7 +77,7 @@ struct modify_tower_event : public tower_event<BackendType>
         td_backend->modify_tower(modifier, col_, row_);
     }
 
-    T* modifier;
+    T modifier;
 };
 
 template <typename BackendType>

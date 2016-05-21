@@ -66,7 +66,7 @@ public:
     //when the tower hits some threshold for experience, have it gain semi-randomized new abilities 
     //virtual bool add_modifier(tower_generator tower_gen, essence* modifier); 
     //virtual bool add_modifier(const TowerCombiner& tower_combiner, tower_property_modifier* modifier); 
-    virtual bool add_modifier(tower_property_modifier* modifier); 
+    virtual bool add_modifier(tower_property_modifier&& modifier); 
     
     //this is baisically a factory function for generating a given towers' attacks.
     //Tower subclasses can override to do whatever extra steps they need
@@ -82,10 +82,21 @@ public:
         return tower_model;
     }
    
+    virtual bool set_properties(tower_properties&& props) 
+    {
+        base_attributes += props;
+        //Q: anything else we need to change? or is this it?
+        std::cout << "NOTE: changed tower " << get_name() << " properties to: \n" << base_attributes << std::endl;
+
+        //Q: is this return entirely vestigial?
+        return true;
+    }
+
     virtual void apply_modifier(const std::vector<tower_properties>& modifier_list)
     {
-        for (auto modifier : modifier_list)  
+        for (auto modifier : modifier_list) { 
             base_attributes += modifier;
+        }
     }
 
     //NOTE: we would also trigger any on-kill effects here (if the tower has them)

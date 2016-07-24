@@ -18,5 +18,7 @@ add_library(TDView SHARED ${ViewSRCS})
 target_link_libraries(TDView 
 	TowersBackend
 	TDViewUI
+	TDTowerCombiner
+	${YAML-CPP}
 	${OpenCV_LIBS}
 	${OGREVIEW_LIBS})

@@ -1,5 +1,54 @@
 #include "TowerUI.hpp"
 
+
+//helper function for clearing out the word combination UI panel
+namespace detail {
+void clear_combinepanel(CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout)
+{
+    const std::string blankletter_imgname = "DTDLetters/BlankTile";
+   
+    auto word_panel = gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("WordDropperPanel");
+    const int num_words = word_panel->getChildCount();
+    for (int letter_slotidx = 0; letter_slotidx < num_words; letter_slotidx++) {
+        std::string slot_id = "letter_" + std::to_string(letter_slotidx);
+        auto target_letter_image = word_panel->getChild(slot_id)->getChild("ldragger")->getChild("limage");
+        target_letter_image->setProperty("Image", blankletter_imgname);
+    }
+}
+
+void draw_inventory(const PlayerInventory& inventory_snapshot, CEGUI::Window* gui_inventory_window)
+{
+    //std::cout << "Updating UI..." << std::endl;
+    for (int row = 0; row < PlayerInventory::NUM_INVENTORY_ROWS; row++) {
+        for (int col = 0; col < PlayerInventory::NUM_INVENTORY_COLS; col++) {
+
+            int inventory_idx = row*PlayerInventory::NUM_INVENTORY_COLS+col;
+
+            auto target_letter_info = inventory_snapshot.get_item(inventory_idx);
+            if(target_letter_info.first) {
+                //std::cout << "inventory[" << row << "][" << col << "] occupied -- " 
+                //<< inventory_snapshot.inventory_data[row*PlayerInventory::NUM_INVENTORY_COLS+col].letter << std::endl;
+                std::string slot_id = "slot_" + std::to_string(inventory_idx);
+                auto target_inventory_slot = gui_inventory_window->getChild("InventoryPanel")->getChild(slot_id);
+
+                auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_inventory_slot->getChild("dragger"));
+                //by default we don't want to have the backgrounds be draggable
+                slot_dragger->setDraggingEnabled(true);
+
+                //Q: can we just set the text? on the staticimage? or do we need to have an imageset of letters?
+                auto target_letter = target_letter_info.second.letter;
+                std::transform(target_letter.begin(), target_letter.end(), target_letter.begin(), ::toupper);
+                std::string letter_tilename = "DTDLetters/" + target_letter;
+
+                auto slot_simage = slot_dragger->getChild("image");
+                slot_simage->setProperty("Image", letter_tilename); 
+            }
+        }
+    }
+}
+
+} //namespace detail
+
 void TowerUpgradeUI::initialize_wordcomboUI()
 {
     gui_wordcombine_window = CEGUI::WindowManager::getSingleton().loadLayoutFromFile("DTDWordCombineUI.layout"); 
@@ -52,8 +101,6 @@ void TowerUpgradeUI::initialize_wordcomboUI()
             slot_dragger->subscribeEvent(CEGUI::DragContainer::EventDragStarted,
                     CEGUI::Event::Subscriber(&TowerUpgradeUI::handle_inventory_item_dragging, this));
 
-
-
             //by default we don't want to have the backgrounds be draggable
             slot_dragger->setDraggingEnabled(false);
             //NOTE: the ID's here will overlap with the IDs in the word combo slots. This shouldn't (?) be an issue, but we'll have to be aware of it..
@@ -75,11 +122,8 @@ void TowerUpgradeUI::initialize_wordcomboUI()
 
     //Initially, (i.e. when we first make this window), we just want to have EVERYTHING deactivated, 
     //since there will be no towers or anything. (and it wont even be visible)
-    //TODO: this is a completely arbitrary # (is just the size of the inventory). Should make this the longest word
-    //in the dictionary, and make the inventory larger
-    const int max_num_letters = 20;
     auto word_panel = gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("WordDropperPanel");
-    for (int letter_slotidx = 0; letter_slotidx < max_num_letters; letter_slotidx++) {
+    for (int letter_slotidx = 0; letter_slotidx < MAX_NUM_LETTERS; letter_slotidx++) {
         std::string slot_id = "letter_" + std::to_string(letter_slotidx);
         auto target_letter_slot = word_panel->getChild(slot_id);
 
@@ -112,44 +156,32 @@ void TowerUpgradeUI::activate_towerUI(uint32_t active_tID)
     gui_window->getChild("TowerUpgradeWindow")->setVisible(true);
 }
 
-
 //Q: how best to handle the inventory updating? We would need to have some sort of 'previous' inventory state, and
 //just change parts of it? Or just wholesale re-create the inventory each time?
 void TowerUpgradeUI::update_inventory(const PlayerInventory* inventory)
 {
+    //NOTE: we don't want to call this function from another thread if the tower UI window is already open, 
+    //as then we'll have a race condition on our hands... does this happen as-is?
+    //
+
+    auto window_visible = gui_wordcombine_window->isVisible();
+    if(window_visible) {
+        std::cout << "ERROR -- we should not update the inventory if the Tower UI window is open!" << std::endl;
+    }
+
     //make a copy of the current inventory state
     inventory_snapshot = *inventory;
+    //this version is to revert to in the event the user clears the word set 
+    pristine_inventory_snapshot = *inventory;
 
-    //std::cout << "Updating UI..." << std::endl;
-    for (int row = 0; row < PlayerInventory::NUM_INVENTORY_ROWS; row++) {
-        for (int col = 0; col < PlayerInventory::NUM_INVENTORY_COLS; col++) {
-
-            int inventory_idx = row*PlayerInventory::NUM_INVENTORY_COLS+col;
-            if(inventory->inventory_occupied[inventory_idx]) {
-                //std::cout << "inventory[" << row << "][" << col << "] occupied -- " << inventory->inventory_data[row*PlayerInventory::NUM_INVENTORY_COLS+col].letter << std::endl;
-
-                std::string slot_id = "slot_" + std::to_string(inventory_idx);
-                auto target_inventory_slot = gui_inventory_window->getChild("InventoryPanel")->getChild(slot_id);
-
-                auto slot_dragger = reinterpret_cast<CEGUI::DragContainer*>(target_inventory_slot->getChild("dragger"));
-                //by default we don't want to have the backgrounds be draggable
-                slot_dragger->setDraggingEnabled(true);
-
-                //Q: can we just set the text? on the staticimage? or do we need to have an imageset of letters?
-                auto target_letter = inventory->inventory_data[inventory_idx].letter;
-                std::transform(target_letter.begin(), target_letter.end(), target_letter.begin(), ::toupper);
-                std::string letter_tilename = "DTDLetters/" + target_letter;
-
-                auto slot_simage = slot_dragger->getChild("image");
-                slot_simage->setProperty("Image", letter_tilename); 
-            }
-        }
-    }
+    detail::clear_combinepanel(gui_wordcombine_layout);
+    detail::draw_inventory(inventory_snapshot, gui_inventory_window);
 }
 
 //TODO: need to figure out a good way to manage the inventory. How to handle swapping items, 
 //reorganizing them, and maintaining the state between the player inventory and how the user 
 //re-arranges the items in the UI (i.e. how to keep track of both)
+//--> maybe just have the inventory NOT be user modifiable?
 bool TowerUpgradeUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
 {
     //window --> the drag container the user has released
@@ -190,11 +222,12 @@ bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
     auto dragged_slot = dd_args.dragDropItem;
     //the letter slot being dropped on
     auto letter_slot = dd_args.window;
-
     auto dragged_idx = dragged_slot->getID();
 
     //Q: can we just set the text? on the staticimage? or do we need to have an imageset of letters?
-    auto target_letter = inventory_snapshot.inventory_data[dragged_idx].letter;
+    auto target_letter_info = inventory_snapshot.get_item(dragged_idx); 
+    assert(target_letter_info.first);
+    auto target_letter = target_letter_info.second.letter;
     std::transform(target_letter.begin(), target_letter.end(), target_letter.begin(), ::toupper);
     std::string letter_tilename = "DTDLetters/" + target_letter;
 
@@ -208,11 +241,15 @@ bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
     auto dragged_img = dragged_slot->getChild("image");
     dragged_img->setProperty("Image", defaultinventory_tilename);
 
-    //TODO: need to also update the inventory state... how to handle cacelling though?
-    //
+    //also update the inventory state
+    inventory_snapshot.remove_item(dragged_idx);
 
+    //TODO: I need the ID of the letter element that the letter was dropped ONTO for this
+
+    const auto letter_slot_id = letter_slot->getID();
+    assert(letter_slot_id >= 0 && letter_slot_id < MAX_NUM_LETTERS);
     //mark down what letters are active
-    word_letters[dragged_idx] = target_letter; 
+    word_letters[letter_slot_id] = target_letter; 
     word_letter_count++;
 
     return true;
@@ -246,15 +283,13 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
     //populate the number of word slots for the menu
     auto word_panel = gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("WordDropperPanel");
     
-    const int num_word_slots = 20; //tinfo.num_wordslots;
-
     //reset any letter state
     for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
         word_letters[letter_idx] = "";
     }
     word_letter_count = 0;
 
-    std::cout << "activating the first " << num_word_slots << " word slots" << std::endl;
+    std::cout << "activating the first " << MAX_NUM_LETTERS << " word slots" << std::endl;
 
     //this is to enable the word slot again -- so we can drag letters to enabled slots
     auto enable_letter_slot = [] (CEGUI::Window* target_letter_slot) {
@@ -264,7 +299,7 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
 
     //NOTE: we will have ALL N letter slots present in the UI, but only M <= N slots will be active,
     //based on the tower itself (and maybe the player? i.e. upgrade to make higher #slots?)
-    for (int letter_slotidx = 0; letter_slotidx < num_word_slots; letter_slotidx++) {
+    for (int letter_slotidx = 0; letter_slotidx < MAX_NUM_LETTERS; letter_slotidx++) {
         std::string slot_id = "letter_" + std::to_string(letter_slotidx);
         auto target_letter_slot = word_panel->getChild(slot_id);
 
@@ -278,8 +313,6 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
     //NOTE: we assume that the inventory will have already been updated with the player state, 
     //since that happens on every iteration of the frontend (so we don't need to explicitly populate
     //the player inventory)
-
-
 
 #if 0
     //NOTE: we want to have ~4 per panel view
@@ -392,6 +425,10 @@ bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
         std::cout << "@COMBINE -- word " << combine_word << " is NOT a valid word" << std::endl;
     }
 
+    //TODO: we need to be able to write the changes to this inventory BACK to the player inventory
+    std::cout << "TODO: write local inventory state changes back to the global player inventory" << std::endl;
+
+
     //NOTE: we should also close the UI
     gui_wordcombine_window->setVisible(false);
 
@@ -454,25 +491,40 @@ bool TowerUpgradeUI::wordcombine_previewbtn(const CEGUI::EventArgs &e)
     return true;
 }
 
+
+
 bool TowerUpgradeUI::wordcombine_clearbtn(const CEGUI::EventArgs &e)
 {
 
     //TODO: need to clear the current letter selections, move the icons back to the inventory,
     //and reset any inventory state changes that were enacted
 
+    detail::clear_combinepanel(gui_wordcombine_layout);
+
     //reset any letter state
     for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
         word_letters[letter_idx] = "";
     }
     word_letter_count = 0;
+    //reset any local inventory changes
+    inventory_snapshot = pristine_inventory_snapshot;
 
     std::cout << "clearing word combination...." << std::endl;
+    detail::draw_inventory(inventory_snapshot, gui_inventory_window);
+
     return true;
 }
 
 bool TowerUpgradeUI::wordcombine_cancelbtn(const CEGUI::EventArgs &e)
 {
     gui_wordcombine_window->setVisible(false);
+
+    detail::clear_combinepanel(gui_wordcombine_layout);
+    //reset any letter state
+    for (int letter_idx = 0; letter_idx < MAX_NUM_LETTERS; letter_idx++) {
+        word_letters[letter_idx] = "";
+    }
+    word_letter_count = 0;
 
     //CEGUI::WindowManager::getSingleton().destroyWindow(wordslot_layout);
     //wordslot_layout = nullptr;

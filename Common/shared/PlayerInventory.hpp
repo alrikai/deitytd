@@ -83,6 +83,27 @@ public:
         swap(inventory_data[item_aidx], inventory_data[item_bidx]);
     }
 
+    std::pair<bool, InventoryMetadata> get_item(const int index) const
+    {
+        assert(index >= 0 && index <= NUM_INVENTORY_SLOTS);
+        if(inventory_occupied[index]) {
+            return std::make_pair(true, inventory_data[index]);
+        } else {
+            return std::make_pair(false, InventoryMetadata());
+        }
+    }
+
+    void remove_item(const int index)
+    {
+        assert(index >= 0 && index <= NUM_INVENTORY_SLOTS);
+
+        //sanity check that we are removing something that does exist
+        assert(inventory_occupied[index]);
+
+        //just doing lazy removal, I guess (I think we can get away with this?)
+        inventory_occupied[index] = false;
+    }
+
     std::array<InventoryMetadata, NUM_INVENTORY_SLOTS> inventory_data;
     std::array<bool, NUM_INVENTORY_SLOTS> inventory_occupied;
 };

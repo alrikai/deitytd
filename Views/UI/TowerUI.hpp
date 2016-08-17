@@ -73,6 +73,7 @@ struct TowerUpgradeUI
 	CEGUI::Window* gui_inventory_window;
 
     PlayerInventory inventory_snapshot;
+    PlayerInventory pristine_inventory_snapshot;
 	//CEGUI::Imageset* letter_imgset;
     //std::vector<CEGUI::Window*> session_word_slots;
     std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
@@ -81,6 +82,8 @@ struct TowerUpgradeUI
     using tower_modifyinfo = std::pair<uint32_t, tower_properties>;
     std::vector<tower_modifyinfo> active_tower_mods;
 
+    //TODO: this is a completely arbitrary # (is just the size of the inventory). Should make this the longest word
+    //in the dictionary, and make the inventory larger
     static constexpr int MAX_NUM_LETTERS = 20;
     std::array<std::string, MAX_NUM_LETTERS> word_letters;
     int word_letter_count;

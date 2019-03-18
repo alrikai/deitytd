@@ -18,7 +18,7 @@
 #include "TowerAttack.hpp"
 
 //#include "TowerProperties.hpp"
-#include "util/attribute_modifiers.hpp"
+#include "util/AttributeModifiers.hpp"
 #include "tower_combiner/TowerCombiner.hpp"
 
 //#include "Essences.hpp"

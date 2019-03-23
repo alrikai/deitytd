@@ -87,15 +87,6 @@ RUN mkdir ogre/build && cd ogre/build && cmake .. && make -j2 && sudo make insta
 RUN cd cegui && hg import ogre-find-patch.diff --no-commit
 RUN mkdir cegui/build && cd cegui/build && cmake .. && make -j2 && sudo make install
 
-#cmake -DCMAKE_CXX_FLAGS=-isystem\ /usr/local/include/OGRE ..
-
-#COPY *.txt deitytd/
-#COPY Controller deitytd/Controller
-#COPY Testing deitytd/Testing
-#COPY Common deitytd/Common
-#COPY cmake deitytd/cmake
-#COPY Model deitytd/Model
-
 # Enable additional output from Launcher
 #ENV QT_VERBOSE true
 #ENV QT_TESTING true

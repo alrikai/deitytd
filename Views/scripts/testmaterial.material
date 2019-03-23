@@ -9,7 +9,7 @@ material FractalTower
             texture_unit 
 	    {
 	        lighting on
-	        texture /home/alrik/Projects/towerdefense/data/TDraw_image_1.png 2d		
+	        texture /home/alrik/Projects/diety/data/TDraw_image_1.png 2d
             }
 	}
     }

@@ -505,7 +505,22 @@ void OgreDisplay<BackendType>::start_display()
             gui->update_inventory_info(player_state);
 
             //TODO: add a countdown timer
+
+        } else if(state_transition_evt->old_state == GAME_STATE::IDLE && state_transition_evt->new_state == GAME_STATE::ACTIVE) {
+
+            //NOTE: what do we do if the inventory is open when the timer ends? Do we auto/force close it? --> I guess so?
+            gui->close_all_windows();
+
+            //TODO: get any state changes from the UI (i.e. to the inventory)
+            auto ui_inventory_update_info = gui->get_inventory_updates();
+            if(ui_inventory_update_info.first) {
+                //NOTE: since we were IDLE, any and all inventory updates should come from the UI
+	            shared_gamestate_info->set_player_state_snapshot(std::move(ui_inventory_update_info.second));
+				//TODO: do we need to get the merged player state back?
+            }
+
         }
+
     };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,6 +631,9 @@ void OgreDisplay<BackendType>::update_gameinfo()
     //listener that updates when the backend sends new info?
 	auto player_state = shared_gamestate_info->get_player_state_snapshot();
     gui->update_gamestate_info(player_state);
+
+    //TODO: how do we merge changes made on the GUI-side to the master-copy of the inventory?
+
 }
 
 template <class BackendType>

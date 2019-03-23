@@ -43,6 +43,18 @@ struct TowerUpgradeUI
     void activate_towerUI(uint32_t active_tower_ID);
 
 	void update_inventory(const PlayerInventory* inventory);
+    inline PlayerInventory get_inventory_updates() const
+    {
+        return inventory_snapshot;
+    }
+
+    inline void close_all_windows()
+    {
+        if(is_showing()) {
+            std::cout << "TODO: all windows should be closed!" << std::endl;
+        }
+    }
+
     inline void register_shared_towerinfo(std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_info)
 	{
         shared_gamestate_info = shared_info;

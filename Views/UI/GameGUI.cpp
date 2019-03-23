@@ -42,6 +42,7 @@ void GameGUI::set_lives(int amount)
 	static const std::string lives_string {"Lives: "};
 	auto new_string = amount > 0 ? lives_string + std::to_string(amount) : "You're Dead!";
    	gui_window->getChild("numlives_edit")->setText(new_string);
+    num_lives_ = amount;
 }
 
 void GameGUI::set_gold(int amount)
@@ -49,6 +50,7 @@ void GameGUI::set_gold(int amount)
 	static const std::string gold_string {"Gold: "};
     auto new_string = gold_string + std::to_string(amount);
 	gui_window->getChild("numgold_edit")->setText(new_string);
+	num_gold_ = amount;
 }
 
 void GameGUI::set_essence(int amount)
@@ -56,6 +58,7 @@ void GameGUI::set_essence(int amount)
 	static const std::string essence_string {"Essence: "};
     auto new_string = essence_string + std::to_string(amount);
 	gui_window->getChild("numessence_edit")->setText(new_string);
+	num_essence_ = amount;
 }
 
 void GameGUI::setup_animations()

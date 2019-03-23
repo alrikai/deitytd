@@ -119,11 +119,49 @@ public:
         set_essence(info.get_num_essence());
 	}
 
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    //NOTE: these are sort of redundant, as we now have the shared_gamestate_info as a member variable. So, we don't need to have
+    //external input regarding the player info updates. How to handle this?
     inline void update_inventory_info(const TDPlayerInformation& info)
     {
 		//update the inventory state based on the new player snapshot when the round ends and the
         //dropped items are added to the inventory.
 		tower_modify_ui->update_inventory(info.get_inventory_state());
+
+    }
+
+    inline std::pair<bool, TDPlayerInformation> get_inventory_updates() const
+    {
+        //check if we made any changes to the player inventory
+        //.... so far the only place that would happen is in the tower UI. In theory we will eventually
+        //add more, different UIs which could also affect the player inventory. In which case, we'll have
+        //to aggregate the inventory changes and keep a consistent version.... somewhere, s.t. when a UI
+        //opens it'll get the current inventory, and when it closes we'll update our frontend master copy
+        //of the inventory with any changes that may have been made. Or something like that
+
+        auto ui_snapshot = tower_modify_ui->get_inventory_updates();
+
+        //TODO: this is where we would do some sort of check to see if the inventory has changed?
+        //....
+        //
+
+		TDPlayerInformation ui_playerinfo (num_lives_, num_essence_, num_gold_);
+
+		//TODO: need to merge the inventory data here?
+		//ui_playerinfo.add_item(ui_snapshot);
+
+        bool inventory_updated = true;
+        return std::make_pair(inventory_updated, ui_playerinfo);
+    }
+    //--------------------------------------------------------------------------------------------------------------------------------------
+
+    inline void close_all_windows()
+    {
+        if(tower_modify_ui->is_showing()) {
+            tower_modify_ui->close_all_windows();
+        }
+
+        //TODO: close any other open windows
     }
 
 	//called by the main frontend class in response to user input. This is where we make the TowerUpgrade UI 
@@ -138,8 +176,10 @@ public:
     //returns whether a subwindow is showing. Is used to disable certain things in the frontend (i.e. panning the camera)
     inline bool is_subwindow_showing() const 
     {
-        //eventually there would be others
-        return tower_modify_ui->is_showing();
+        //TODO: eventually (as we add other UI windows) there would be others to check
+        bool tower_ui_flag = tower_modify_ui->is_showing();
+
+        return tower_ui_flag;
     }
 
     inline bool has_pending_tower_modifications() const 
@@ -159,6 +199,10 @@ public:
     }
 
 private:	
+	int num_lives_;
+	int num_gold_;
+	int num_essence_;
+
 	void initialize_mainUI();
 
     void setup_animations();

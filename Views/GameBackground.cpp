@@ -22,7 +22,7 @@ GameBackground::GameBackground(Ogre::SceneManager* scene, Ogre::Viewport* vport)
     bg_height = 1024;
 
     //make the background generator
-    bg_generator = std::unique_ptr<fflame_generator<data_t, pixel_t>> (new fflame_generator<data_t, pixel_t>(bg_height, bg_width, 1));
+    bg_generator = std::make_unique<fflame_generator<data_t, pixel_t>>(bg_height, bg_width, 1);
     //pass in a queue to hold the finished flame frames
     bg_framequeue = std::unique_ptr<EventQueue<uint8_t []>>(new EventQueue<uint8_t []>(MAX_BGQUEUE));
     bg_generator->register_framequeue(bg_framequeue.get());

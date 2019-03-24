@@ -87,6 +87,9 @@ RUN mkdir ogre/build && cd ogre/build && cmake .. && make -j2 && sudo make insta
 RUN cd cegui && hg import ogre-find-patch.diff --no-commit
 RUN mkdir cegui/build && cd cegui/build && cmake .. && make -j2 && sudo make install
 
+RUN git clone https://github.com/alrikai/fflames.git
+RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
+
 # Enable additional output from Launcher
 #ENV QT_VERBOSE true
 #ENV QT_TESTING true

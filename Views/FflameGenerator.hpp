@@ -87,7 +87,9 @@ private:
     {
         //std::vector<std::shared_ptr<affine_fcns::variant<data_t>>> working_variants(num_working_variants); 
         std::vector<std::string> working_variants(num_working_variants); 
-        for (int i = 0; i < num_working_variants; ++i) 
+        working_variants[0] = "linear";
+
+        for (int i = 1; i < num_working_variants; ++i) 
         {
             working_variants.at(i) = FFlames::affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
             //auto selected_variant = affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
@@ -103,7 +105,7 @@ private:
     void render_fflame();
 
     //the number of variants to have active
-    static constexpr uint8_t num_working_variants = 5;
+    static constexpr uint8_t num_working_variants = 7;
     std::thread::id worker_overloard_id;
 
     //pause generation if above the max, resume if paused and below the min
@@ -211,7 +213,7 @@ void fflame_generator<data_t, pixel_t>::generate_fflame(FFlames::fflame_util::fa
             //4. mutate the variants
             auto selected_variant = FFlames::affine_fcns::variant_list<data_t>::variant_names[total_variant_rng(flame_gen)];
             //replace a random variant (that's not the linear variant)
-            int mod_idx = total_variant_rng(flame_gen) % num_working_variants;
+            int mod_idx = total_variant_rng(flame_gen) % (num_working_variants - 1) + 1;
             flamer->fcn.at(mod_idx).reset(variant_maker.flame_maker.create_product(selected_variant)); 
             flamer->randomize_parameters(-2, 2);
 

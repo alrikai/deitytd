@@ -13,6 +13,7 @@
 #include <array>
 #include <limits>
 #include <list>
+#include <queue>
 
 // does a BFS on the map, finds the costs of traversal for any given point to
 // the destination Then from this we can find the optimal path for any of the
@@ -65,7 +66,7 @@ public:
       const int row_idx = current_tile->idx_location.row;
       const int col_idx = current_tile->idx_location.col;
 
-      for (int neighbor_idx = 0; neighbor_idx < CONN; ++neighbor_idx) {
+      for (size_t neighbor_idx = 0; neighbor_idx < CONN; ++neighbor_idx) {
         auto idx_offsets = four_neighbor[neighbor_idx];
         const int neighbor_row = row_idx + idx_offsets.row;
         const int neighbor_col = col_idx + idx_offsets.col;

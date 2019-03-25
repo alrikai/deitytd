@@ -68,8 +68,9 @@ public:
   void stop_generation() {
     if (fflame_state.load()) {
       fflame_state.store(false);
-      for (int th_idx = 0; th_idx < fflame_workers.size(); ++th_idx)
+      for (size_t th_idx = 0; th_idx < fflame_workers.size(); ++th_idx) {
         fflame_workers.at(th_idx)->finish_flame();
+      }
       fflame_th->join();
     }
   }
@@ -254,6 +255,9 @@ void fflame_generator<data_t, pixel_t>::render_fflame() {
       ff_renderer->template render<frame_t, pixel_t>(&image,
                                                      std::move(hist_info));
       cv::Mat_<pixel_t> cv_wrap(image.rows, image.cols, image.data);
+
+      //TODO: see if this would normalize better/
+      //cv_wrap.convertTo(logged_image, CV_8UC3);
       cv::normalize(cv_wrap, cv_wrap, 0, 255, cv::NORM_MINMAX, -1);
 
       /*

@@ -19,7 +19,7 @@
 
 template <typename EventType> class EventQueue {
 public:
-  explicit EventQueue(const int max_sz = 500, const int max_wait = 0)
+  explicit EventQueue(const size_t max_sz = 500, const int max_wait = 0)
       : buffer_size(max_sz), timeout_len(max_wait) {}
 
   ~EventQueue() {
@@ -65,7 +65,7 @@ private:
 
   mutable std::mutex cleanup_;
   // maximum buffer size, will circle back around if maximum size reached
-  int buffer_size;
+  size_t buffer_size;
   int timeout_len;
 
   std::atomic<int> num_producers;

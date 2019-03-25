@@ -223,7 +223,7 @@ public:
   OgreDisplay()
       : root(new Ogre::Root(plugins_cfg_filename)), cam_rotate(0.10f),
         cam_move(10.0f), background(nullptr), td_event_queue(nullptr),
-        game_events(nullptr), gui(nullptr), close_display(false),
+        gui(nullptr), game_events(nullptr), close_display(false),
         towercount_ID(TDMapInformation<BackendType>::INVALID_ID + 0x1) {
     ogre_setup();
     setup_camera();

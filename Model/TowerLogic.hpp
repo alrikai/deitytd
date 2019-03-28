@@ -164,7 +164,11 @@ public:
                           GameMap::IndexCoordinate spawn_point,
                           GameMap::IndexCoordinate dest_point) {
     for (auto mob_metadata : mob_info) {
-      make_mob(mob_metadata.mob_model_id, mob_metadata.mob_id, spawn_point);
+        for (size_t mob_idx = 0; mob_idx < mob_metadata.num_mobs; mob_idx++) {
+            auto mob_id_i = mob_metadata.mob_id + "_mob_" + std::to_string(mob_idx);
+            //TODO: adjust spawn point slightly? Or at least, take the mob bounding boxes into account?
+            make_mob(mob_metadata.mob_model_id, mob_id_i, spawn_point);
+        }
     }
 
     // checks if there's a valid maze from the spawn to the destination point --

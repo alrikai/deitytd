@@ -25,4 +25,6 @@ TARGET_LINK_LIBRARIES(TestModel
 #${PCL_SURFACE_LIBRARIES}
 #${PCL_FEATURES_LIBRARIES}
 					  
-
+add_executable(GameMechanicsTest TestGameMechanics.cpp)
+target_link_libraries(GameMechanicsTest gtest_main)
+add_test(NAME GameMechanics_test COMMAND GameMechanicsTest)

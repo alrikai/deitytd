@@ -40,6 +40,8 @@ struct MoveableObject {
     x_delta = 0.0f;
     y_delta = 0.0f;
     is_active = false;
+	//TODO: what does this do?
+	move_duration = 0;
   }
 
   virtual void update_movedest(const Ogre::Vector3 &dest_pos,

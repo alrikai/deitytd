@@ -1,5 +1,4 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.11)
-enable_testing()
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)

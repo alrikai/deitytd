@@ -87,11 +87,12 @@ public:
   // adds a tower model to the internal list
   void make_mob(const CharacterModels::ModelIDs mob_id,
                 const std::string &mob_name,
-                const GameMap::IndexCoordinate &map_tile) {
+                const GameMap::IndexCoordinate &map_tile,
+				const GameMap::PointCoordinate &spawn_offset) {
     auto mtile = map.get_tile(map_tile);
     auto mobtile_center = mtile->tile_center;
-    const float mob_row = mobtile_center.row;
-    const float mob_col = mobtile_center.col;
+    const float mob_row = mobtile_center.row + spawn_offset.row;
+    const float mob_col = mobtile_center.col + spawn_offset.col;
 
     // should be {x, y, z} --> hence at creation it's {col, row, z}
     std::vector<float> map_offsets{mob_col, mob_row, 0};
@@ -163,11 +164,20 @@ public:
   bool enter_active_state(std::vector<mobwave_info> &&mob_info,
                           GameMap::IndexCoordinate spawn_point,
                           GameMap::IndexCoordinate dest_point) {
+	// loop over the different types of mobs
     for (auto mob_metadata : mob_info) {
-        for (size_t mob_idx = 0; mob_idx < mob_metadata.num_mobs; mob_idx++) {
+        // loop over the #mobs of each type in the wave
+		for (size_t mob_idx = 0; mob_idx < mob_metadata.num_mobs; mob_idx++) {
             auto mob_id_i = mob_metadata.mob_id + "_mob_" + std::to_string(mob_idx);
-            //TODO: adjust spawn point slightly? Or at least, take the mob bounding boxes into account?
-            make_mob(mob_metadata.mob_model_id, mob_id_i, spawn_point);
+
+            // adjust spawn point slightly, so that all the mobs dont spawn on the same location
+			float sign = (mob_idx <= mob_metadata.num_mobs / 2) ? -1 : 1;
+            auto height_space = sign * mob_idx * (0.5 * GameMap::TowerTileHeight / mob_metadata.num_mobs);
+            auto width_space = sign * mob_idx * (0.5 * GameMap::TowerTileWidth / mob_metadata.num_mobs);
+			// NOTE: need to normalize offsets for them to be used as offsets
+			GameMap::PointCoordinate spawn_offset (width_space / GameMap::TowerTileWidth, height_space / GameMap::TowerTileHeight);
+
+            make_mob(mob_metadata.mob_model_id, mob_id_i, spawn_point, spawn_offset);
         }
     }
 

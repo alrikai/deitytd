@@ -125,6 +125,8 @@ public:
                     const float y_coord);
   bool modify_tower(tower_property_modifier modifier, const float x_coord,
                     const float y_coord);
+  // returns a non-owning pointer to the tower at the tile index
+  Tower* get_tower(const float x_coord, const float y_coord);
 
   bool print_tower(const float x_coord, const float y_coord);
   bool tower_taget(const float tower_xcoord, const float tower_ycoord,

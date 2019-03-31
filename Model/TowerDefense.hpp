@@ -87,6 +87,11 @@ public:
                                  tower_name);
   }
 
+
+  ModelType* get_td_backend () const {
+    return td_backend.get();
+  }
+
 private:
   // aim for 30Hz
   static constexpr double TIME_PER_ROUND = 1000.0 / 30.0;

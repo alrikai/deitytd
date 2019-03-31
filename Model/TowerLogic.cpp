@@ -166,6 +166,14 @@ bool TowerLogic::print_tower(const float x_coord, const float y_coord) {
   return true;
 }
 
+
+Tower* TowerLogic::get_tower(const float x_coord, const float y_coord) {
+  auto t_tile = map.get_bounding_tile(x_coord, y_coord);
+  const int tile_row = t_tile.row / GameMap::TowerTileHeight;
+  const int tile_col = t_tile.col / GameMap::TowerTileWidth;
+  return t_list[tile_row][tile_col].get();
+}
+
 // TODO: need to finish this to allow for manual targetting
 bool TowerLogic::tower_taget(const float tower_xcoord, const float tower_ycoord,
                              const float target_xcoord,

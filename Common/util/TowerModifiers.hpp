@@ -52,6 +52,8 @@
  s.t. when we have each as an object to be applied to the
 */
 
+namespace TowerModifiers {
+
 struct flat_damage : stat_attribute_modifier {
   static constexpr uint32_t ID = 0x1;
   struct parameter_cfg {
@@ -479,23 +481,25 @@ struct  : tower_attribute_modifier
 };
 */
 
+} 
+
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_damage::parameter_cfg &cfg);
+                         const TowerModifiers::flat_damage::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const enhanced_damage::parameter_cfg &cfg);
+                         const TowerModifiers::enhanced_damage::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const enhanced_speed::parameter_cfg &cfg);
+                         const TowerModifiers::enhanced_speed::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_range::parameter_cfg &cfg);
+                         const TowerModifiers::flat_range::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_crit_chance::parameter_cfg &cfg);
+                         const TowerModifiers::flat_crit_chance::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_crit_multiplier::parameter_cfg &cfg);
+                         const TowerModifiers::flat_crit_multiplier::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_type_damage::parameter_cfg &cfg);
+                         const TowerModifiers::flat_type_damage::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const enhanced_type_damage::parameter_cfg &cfg);
+                         const TowerModifiers::enhanced_type_damage::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
-                         const flat_damage_onhit::parameter_cfg &cfg);
+                         const TowerModifiers::flat_damage_onhit::parameter_cfg &cfg);
 
 #endif

@@ -11,6 +11,7 @@
 #define MODIFIER_CONFIG_PARSER_HPP
 
 #include "ModifierParser.hpp"
+#include "util/TowerModifiers.hpp"
 #include <yaml-cpp/yaml.h>
 
 #include <string>
@@ -81,48 +82,48 @@ void get_modifier_configs(modifierfactory_t &attribute_fact,
     // mod_attributes << std::endl;
 
     switch (ID) {
-    case flat_damage::ID: {
-      parse_modifier<modifierfactory_t, flat_damage>(
+    case TowerModifiers::flat_damage::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_damage>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case enhanced_damage::ID: {
-      parse_modifier<modifierfactory_t, enhanced_damage>(
+    case TowerModifiers::enhanced_damage::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::enhanced_damage>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case enhanced_speed::ID: {
-      parse_modifier<modifierfactory_t, enhanced_speed>(
+    case TowerModifiers::enhanced_speed::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::enhanced_speed>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case flat_range::ID: {
-      parse_modifier<modifierfactory_t, flat_range>(
+    case TowerModifiers::flat_range::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_range>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case flat_crit_chance::ID: {
-      parse_modifier<modifierfactory_t, flat_crit_chance>(
+    case TowerModifiers::flat_crit_chance::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_crit_chance>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case flat_crit_multiplier::ID: {
-      parse_modifier<modifierfactory_t, flat_crit_multiplier>(
+    case TowerModifiers::flat_crit_multiplier::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_crit_multiplier>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case flat_type_damage::ID: {
-      parse_modifier<modifierfactory_t, flat_type_damage>(
+    case TowerModifiers::flat_type_damage::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_type_damage>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case enhanced_type_damage::ID: {
-      parse_modifier<modifierfactory_t, enhanced_type_damage>(
+    case TowerModifiers::enhanced_type_damage::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::enhanced_type_damage>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }
-    case flat_damage_onhit::ID: {
-      parse_modifier<modifierfactory_t, flat_damage_onhit>(
+    case TowerModifiers::flat_damage_onhit::ID: {
+      parse_modifier<modifierfactory_t, TowerModifiers::flat_damage_onhit>(
           attribute_fact, mod_attributes, std::move(modifier_name));
       break;
     }

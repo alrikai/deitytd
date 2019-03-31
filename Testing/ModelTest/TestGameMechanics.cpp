@@ -168,12 +168,11 @@ protected:
 
   DTDBackendTest() {
     view = new TestStubs::FrontStub<TDBackendType>();
+	//view is now owned by the td object, so no need to delete
     td = std::make_shared<TDType> (view);
   }
 
-  virtual ~DTDBackendTest() {
-    delete view;
-  }
+  virtual ~DTDBackendTest() {}
 
   void SetUp() override { 
     td->init_game();
@@ -200,9 +199,33 @@ TEST_F (DTDBackendTest, BasicAttack) {
   float ycoord = 0;
 
   auto td_backend = td->get_td_backend();
+  
+  // TODO: load a config for the monster, create a mob from that
+  //make the mob next
+  float mob_pos_x = 1.0;
+  float mob_pos_y = 1.0;
+  auto mob = std::make_shared<Monster>(CharacterModels::ModelIDs::ogre_S, "T0", mob_pos_x,mob_pos_y);
+
   td_backend->make_tower(tid, tier, xcoord,ycoord);
-
-
+  auto basic_tower = td_backend->get_tower(xcoord, ycoord);
+  basic_tower->set_target(mob);
+  const std::string basic_attack_id {"basic_T0_atk"};
+  auto basic_attack = basic_tower->generate_attack(basic_attack_id, 0);
+  //this is the default (fundamental) tower stats, without any boosts
+  auto basic_attack_vals = basic_attack->get_attack_attributes();
+  for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
+	  if (dmg_idx == 0) {
+		ASSERT_EQ(basic_attack_vals.damage[dmg_idx].low, 2);
+		ASSERT_EQ(basic_attack_vals.damage[dmg_idx].high, 5);
+	  } else {
+		ASSERT_EQ(basic_attack_vals.damage[dmg_idx].low, 0);
+		ASSERT_EQ(basic_attack_vals.damage[dmg_idx].high, 0);
+	  }
+  }
+  ASSERT_EQ(basic_attack_vals.attack_speed, 1);
+  ASSERT_EQ(basic_attack_vals.attack_range, 3);
+  ASSERT_EQ(basic_attack_vals.crit_chance, 0);
+  ASSERT_EQ(basic_attack_vals.crit_multiplier, 100);
 
 
 /*
@@ -227,12 +250,6 @@ TEST_F (DTDBackendTest, BasicAttack) {
   view->td_event_queue->push(std::move(mod_td_evt));
 */
 
-  // TODO: load a config for the monster, create a mob from that
-  //make the mob next
-  float mob_pos_x = 1.0;
-  float mob_pos_y = 1.0;
-  auto mob = std::make_shared<Monster>(CharacterModels::ModelIDs::ogre_S, "T0", mob_pos_x,mob_pos_y);
-
   // have the tower target the mob
   
   Tower* test_tower = nullptr; 
@@ -253,15 +270,16 @@ TEST_F (DTDBackendTest, BasicAttack) {
   //TODO: assert on the attack values
   auto attack_vals = attack->get_attack_attributes();
   
-  
+ 
+  auto expected_props = tprop + basic_attack_vals;
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    ASSERT_EQ(attack_vals.damage[dmg_idx].low, tprop.damage[dmg_idx].low);
-    ASSERT_EQ(attack_vals.damage[dmg_idx].high, tprop.damage[dmg_idx].high);
+    ASSERT_EQ(attack_vals.damage[dmg_idx].low, expected_props.damage[dmg_idx].low);
+    ASSERT_EQ(attack_vals.damage[dmg_idx].high, expected_props.damage[dmg_idx].high);
   }
-  ASSERT_EQ(attack_vals.attack_speed, tprop.attack_speed);
-  ASSERT_EQ(attack_vals.attack_range, tprop.attack_range);
-  ASSERT_EQ(attack_vals.crit_chance, tprop.crit_chance);
-  ASSERT_EQ(attack_vals.crit_multiplier, tprop.crit_multiplier);
+  ASSERT_EQ(attack_vals.attack_speed, expected_props.attack_speed);
+  ASSERT_EQ(attack_vals.attack_range, expected_props.attack_range);
+  ASSERT_EQ(attack_vals.crit_chance, expected_props.crit_chance);
+  ASSERT_EQ(attack_vals.crit_multiplier, expected_props.crit_multiplier);
 
 
   attack->set_target(Coordinate<float>(mob_pos_x, mob_pos_y));

@@ -3,6 +3,7 @@
 #include "util/TowerModifiers.hpp"
 #include "Common/tower_combiner/ModifierParser.hpp"
 #include "Model/TowerDefense.hpp"
+#include "Model/AttackLogic.hpp"
 #include "util/Types.hpp"
 #include "Model/Monster.hpp"
 
@@ -16,6 +17,7 @@
 
 #include <memory>
 #include <vector>
+#include <list>
 #include <string>
 
 namespace TestStubs {
@@ -81,76 +83,75 @@ void add_tower_displayinfo(TDType& td)
 		  const uint32_t ID = value["ID"].as<uint32_t>();
 		  const std::string type = value["type"].as<std::string>();
 		  auto mod_attributes = value["value"];
-		  
 		  switch (ID) {
-		case TowerModifiers::flat_damage::ID: {
-		  TowerModifiers::flat_damage::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_damage tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::enhanced_damage::ID: {
-          TowerModifiers::enhanced_damage::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::enhanced_damage tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::enhanced_speed::ID: {
-          TowerModifiers::enhanced_speed::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::enhanced_speed tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::flat_range::ID: {
-          TowerModifiers::flat_range::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_range tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::flat_crit_chance::ID: {
-          TowerModifiers::flat_crit_chance::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_crit_chance tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::flat_crit_multiplier::ID: {
-          TowerModifiers::flat_crit_multiplier::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_crit_multiplier tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::flat_type_damage::ID: {
-		  TowerModifiers::flat_type_damage::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_type_damage tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::enhanced_type_damage::ID: {
-          TowerModifiers::enhanced_type_damage::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::enhanced_type_damage tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		case TowerModifiers::flat_damage_onhit::ID: {
-          TowerModifiers::flat_damage_onhit::parameter_cfg cfg;
-		  parse_modifier_parameters(mod_attributes, cfg);
-          TowerModifiers::flat_damage_onhit tmod (cfg);
-		  tmod.aggregate_modifier(tower_modifier);
-		  break;
-		}
-		default: {
-		  std::cerr << "Invalid ID " << ID << std::endl;
-		  break;
-		}
-		}
+		      case TowerModifiers::flat_damage::ID: {
+		      TowerModifiers::flat_damage::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_damage tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::enhanced_damage::ID: {
+			  TowerModifiers::enhanced_damage::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::enhanced_damage tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::enhanced_speed::ID: {
+			  TowerModifiers::enhanced_speed::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::enhanced_speed tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::flat_range::ID: {
+			  TowerModifiers::flat_range::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_range tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::flat_crit_chance::ID: {
+			  TowerModifiers::flat_crit_chance::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_crit_chance tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::flat_crit_multiplier::ID: {
+			  TowerModifiers::flat_crit_multiplier::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_crit_multiplier tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::flat_type_damage::ID: {
+			  TowerModifiers::flat_type_damage::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_type_damage tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::enhanced_type_damage::ID: {
+			  TowerModifiers::enhanced_type_damage::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::enhanced_type_damage tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			case TowerModifiers::flat_damage_onhit::ID: {
+			  TowerModifiers::flat_damage_onhit::parameter_cfg cfg;
+			  parse_modifier_parameters(mod_attributes, cfg);
+			  TowerModifiers::flat_damage_onhit tmod (cfg);
+			  tmod.aggregate_modifier(tower_modifier);
+			  break;
+			}
+			default: {
+			  std::cerr << "Invalid ID " << ID << std::endl;
+			  break;
+			}
+		  }
 	  }
 	  return tower_modifier;
   }
@@ -223,50 +224,20 @@ TEST_F (DTDBackendTest, BasicAttack) {
   ASSERT_EQ(basic_attack_vals.crit_chance, 0);
   ASSERT_EQ(basic_attack_vals.crit_multiplier, 100);
 
-
-/*
-  // make a base tower
-  using build_evt_t = UserTowerEvents::build_tower_event<TDBackendType>;
-  auto build_td_evt = std::make_unique<build_evt_t>(tid, tier, ycoord,xcoord);
-  view->td_event_queue->push(std::move(build_td_evt));
-*/
-
   // load the tower modifiers, apply them to the base tower
   const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_t0.yaml"};
   tower_property_modifier tmod = TestStubs::parse_tower(tower_fpath);
-
   tower_properties tprop;
   tprop.apply_property_modifier(tmod);
-
-
   td_backend->modify_tower(tprop, xcoord,ycoord);
-/*
-  using modify_evt_t = typename UserTowerEvents::modify_tower_event<TestStubs::FrontStub<TDBackendType>::ModifierType, TDBackendType>;
-  auto mod_td_evt = std::make_unique<modify_evt_t>(tprop, ycoord,xcoord);
-  view->td_event_queue->push(std::move(mod_td_evt));
-*/
-
-  // have the tower target the mob
-  
   Tower* test_tower = nullptr; 
   test_tower = td_backend->get_tower(xcoord, ycoord);
-  /*
-  while (!test_tower) {
-	  td_backend->get_tower(xcoord, ycoord);
-	  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	  std::cout << "Trying again...." << std::endl;
-  }
-  */
+  // have the tower target the mob
   test_tower->set_target(mob);
 
   const std::string attack_id {"T0_atk"};
-  // TODO: apply an attack from the tower to the mob
   auto attack = test_tower->generate_attack(attack_id, 0);
-
-  //TODO: assert on the attack values
   auto attack_vals = attack->get_attack_attributes();
-  
- 
   auto expected_props = tprop + basic_attack_vals;
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
     ASSERT_EQ(attack_vals.damage[dmg_idx].low, expected_props.damage[dmg_idx].low);
@@ -277,14 +248,26 @@ TEST_F (DTDBackendTest, BasicAttack) {
   ASSERT_EQ(attack_vals.crit_chance, expected_props.crit_chance);
   ASSERT_EQ(attack_vals.crit_multiplier, expected_props.crit_multiplier);
 
-
   attack->set_target(Coordinate<float>(mob_pos_x, mob_pos_y));
 
+  std::list<std::weak_ptr<Monster>> moblist; 
+  moblist.emplace_back(mob);
+  compute_attackhit(moblist, std::move(attack));
+
+  //check the mob state, make sure the correct damage was done
+  MonsterStats mob_stats = mob->get_attributes();
+  ASSERT_EQ(mob_stats.health, 50);
   // TODO: see if we can just define the set of tower types, and the set of mob types,
   // and automatically do the testing for every tower vs every mob
 
 }
 
+/* TODO: Other tests to have:
+ *
+ * 1. the full set of attack types / attributes
+ * 2. the full set of mob armor / effects
+ * 3. 
+ */
 
 
 }

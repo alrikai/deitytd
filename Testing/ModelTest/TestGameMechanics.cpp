@@ -69,24 +69,20 @@ void add_tower_displayinfo(TDType& td)
 		  throw std::runtime_error(ostr.str());
 	  }
 
-	  YAML::Node modifier_node = cfg_root["TowerAttributes"];
-	  std::cout << modifier_node.size() << " #modifiers" << std::endl;
-	  for (auto mod_it = modifier_node.begin(); mod_it != modifier_node.end();
-		   mod_it++) {
+	  YAML::Node tower_node = cfg_root["TowerAttributes"];
+	  assert(tower_node.size() == 3);
 
-		YAML::Node key = mod_it->first;
-		assert(key.Type() == YAML::NodeType::Scalar);
-		YAML::Node value = mod_it->second;
-		assert(value.Type() == YAML::NodeType::Map);
-
-		auto modifier_name = key.as<std::string>();
-		const uint32_t ID = value["ID"].as<uint32_t>();
-		auto mod_attributes = value["attributes"];
-
-		// std::cout << modifier_name << " ID: " << ID << " -- attributes: " <<
-		// mod_attributes << std::endl;
-	    
-		switch (ID) {
+	  auto tower_name = tower_node["name"].as<std::string>();
+	  auto tower_tier = tower_node["tier"].as<uint32_t>();
+	  YAML::Node tower_attributes = tower_node["attributes"];
+	  const size_t num_attributes = tower_attributes.size();
+	  for (size_t attr_idx = 0; attr_idx < num_attributes; attr_idx++) {
+		  YAML::Node value = tower_attributes[attr_idx];
+		  const uint32_t ID = value["ID"].as<uint32_t>();
+		  const std::string type = value["type"].as<std::string>();
+		  auto mod_attributes = value["value"];
+		  
+		  switch (ID) {
 		case TowerModifiers::flat_damage::ID: {
 		  TowerModifiers::flat_damage::parameter_cfg cfg;
 		  parse_modifier_parameters(mod_attributes, cfg);

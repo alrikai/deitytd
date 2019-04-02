@@ -201,7 +201,10 @@ TEST_F (DTDBackendTest, BasicAttack) {
   //make the mob next
   float mob_pos_x = 1.0;
   float mob_pos_y = 1.0;
-  auto mob = std::make_shared<Monster>(CharacterModels::ModelIDs::ogre_S, "T0", mob_pos_x,mob_pos_y);
+  const std::string mob_fpath { TDHelpers::get_basepath() + "/data/tests/monsters/basic_t0.yaml"};
+  std::vector<std::shared_ptr<Monster>> mobs = parse_monster(mob_fpath, "T0_", 1);
+  auto mob = mobs[0];
+  mob->set_position(Coordinate<float>(mob_pos_x, mob_pos_y));
 
   td_backend->make_tower(tid, tier, xcoord,ycoord);
   auto basic_tower = td_backend->get_tower(xcoord, ycoord);

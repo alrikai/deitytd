@@ -99,8 +99,16 @@ public:
 
     // TODO: use the mob_id to dispatch the appropriate monster creation (will
     // need some factory for this)
+    const std::string mob_fpath {TDHelpers::get_basepath() + "/data/tests/monsters/basic_t0.yaml"};
+    std::vector<std::shared_ptr<Monster>> mobs = parse_monster(mob_fpath, mob_name, 1);
+    //TODO: we are using this to just make 1 mob -- maybe we need to refactor, hmmmmm?
+    auto mob_ = mobs[0];
+    mob_->set_position(Coordinate<float>(mob_col, mob_row));
+
+    /*
     auto mob_ = std::shared_ptr<Monster>(
         make_monster<Monster>(mob_id, mob_name, mob_col, mob_row));
+    */
     // TODO: anything else we need to do here?
     //
     mtile->resident_mobs.push_back(mob_);

@@ -16,6 +16,11 @@ struct MonsterStats {
    * TODO: determine which stats are needed for the monster type
    *
    */
+
+  MonsterStats(float health, float speed, Elements armor, float armor_amt) 
+      : health(health), speed(speed), armor_class(armor), armor_amount(armor_amt)
+  {}
+
   float health;
   float speed;
   // currently using the same elements as the attacks; consider if we want a

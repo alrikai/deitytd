@@ -20,9 +20,23 @@ enum class GAME_STATE { ACTIVE, IDLE, PAUSED };
 struct CharacterModels {
   enum class ModelIDs { ogre_S = 0 };
 
+
+  static std::string to_string(ModelIDs id) {
+      return id_names[(int) id];
+  }
+ 
+  static ModelIDs to_modelid(const std::string& strid) {
+    for (size_t id_idx = 0; id_idx < id_names.size(); id_idx++) {
+        if (strid == id_names[id_idx]) {
+            return (ModelIDs) id_idx;
+        }
+    }
+  }
+
   // might not want / need this here (need the model string on the front-end
   // side) static const std::map <ModelIDs, std::string> id_names;
   static const std::vector<std::string> id_names;
+  
 };
 
 #endif

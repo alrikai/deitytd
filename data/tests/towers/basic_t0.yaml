@@ -1,0 +1,20 @@
+---
+TowerAttributes: 
+    name: T0_TT
+    tier: 1
+    attributes: 
+        - ID: 1
+          type: flat_damage
+          value: {value_low: 10, value_high: 20}
+        - ID: 2
+          type: enhanced_damage
+          value: {percent_edamage: 30} 
+        - ID: 3
+          type: enhanced_speed
+          value: {percent_espeed: 15}
+#
+#  ID: 
+#  attributes: 
+#
+#  ID: 
+#  attributes: 

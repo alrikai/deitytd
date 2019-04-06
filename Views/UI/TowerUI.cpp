@@ -1,6 +1,5 @@
 #include "TowerUI.hpp"
 
-
 //helper function for clearing out the word combination UI panel
 namespace detail {
 void clear_combinepanel(CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout)
@@ -149,11 +148,9 @@ void TowerUpgradeUI::initialize_wordcomboUI()
        */
 }
 
-
-void TowerUpgradeUI::activate_towerUI(uint32_t active_tID)
-{
-    activetower_ID = active_tID;
-    gui_window->getChild("TowerUpgradeWindow")->setVisible(true);
+void TowerUpgradeUI::activate_towerUI(uint32_t active_tID) {
+  activetower_ID = active_tID;
+  gui_window->getChild("TowerUpgradeWindow")->setVisible(true);
 }
 
 //Q: how best to handle the inventory updating? We would need to have some sort of 'previous' inventory state, and
@@ -202,21 +199,22 @@ bool TowerUpgradeUI::handle_inventory_item_dropped(const CEGUI::EventArgs& args)
     return true;
 }
 
+bool TowerUpgradeUI::handle_inventory_item_dragging(
+    const CEGUI::EventArgs &args) {
+  const CEGUI::DragDropEventArgs &dd_args =
+      static_cast<const CEGUI::DragDropEventArgs &>(args);
+  auto dragging_slot = dd_args.window;
+  auto slot_id = dragging_slot->getName();
 
-bool TowerUpgradeUI::handle_inventory_item_dragging(const CEGUI::EventArgs& args)
-{
-    const CEGUI::DragDropEventArgs& dd_args = static_cast<const CEGUI::DragDropEventArgs&>(args);    
-    auto dragging_slot = dd_args.window;
-    auto slot_id = dragging_slot->getName();
+  std::cout << "Starting to drag slot " << slot_id << " -- "
+            << dragging_slot->getID() << std::endl;
 
-    std::cout << "Starting to drag slot " << slot_id << " -- " << dragging_slot->getID() << std::endl;
-
-    return true;
+  return true;
 }
 
-bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
-{
-    const CEGUI::DragDropEventArgs& dd_args = static_cast<const CEGUI::DragDropEventArgs&>(args);    
+bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs &args) {
+  const CEGUI::DragDropEventArgs &dd_args =
+      static_cast<const CEGUI::DragDropEventArgs &>(args);
 
     //the inventory dragger being dropped
     auto dragged_slot = dd_args.dragDropItem;
@@ -231,15 +229,16 @@ bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
     std::transform(target_letter.begin(), target_letter.end(), target_letter.begin(), ::toupper);
     std::string letter_tilename = "DTDLetters/" + target_letter;
 
-    //need to move the item from the inventory to the word slot
-    auto letter_img = letter_slot->getChild("limage");
-    letter_img->setProperty("Image", letter_tilename);
+  // need to move the item from the inventory to the word slot
+  auto letter_img = letter_slot->getChild("limage");
+  letter_img->setProperty("Image", letter_tilename);
 
-    //reset the inventory tile  -- note that we need to write this back to the backend state, as otherwise this will get
-    //overwritten upon the next inventory update
-    std::string defaultinventory_tilename = "DTDLetters/InventoryTile";
-    auto dragged_img = dragged_slot->getChild("image");
-    dragged_img->setProperty("Image", defaultinventory_tilename);
+  // reset the inventory tile  -- note that we need to write this back to the
+  // backend state, as otherwise this will get overwritten upon the next
+  // inventory update
+  std::string defaultinventory_tilename = "DTDLetters/InventoryTile";
+  auto dragged_img = dragged_slot->getChild("image");
+  dragged_img->setProperty("Image", defaultinventory_tilename);
 
     //also update the inventory state
     inventory_snapshot.remove_item(dragged_idx);
@@ -252,7 +251,7 @@ bool TowerUpgradeUI::handle_letter_item_dropped(const CEGUI::EventArgs& args)
     word_letters[letter_slot_id] = target_letter; 
     word_letter_count++;
 
-    return true;
+  return true;
 }
 
 bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
@@ -363,62 +362,62 @@ bool TowerUpgradeUI::word_combination_evthandler(const CEGUI::EventArgs &e)
     //-------------------
 #endif
 
-    gui_wordcombine_window->setVisible(true);
-    //NOTE: need to switch back to the regular UI once this one is exitted
-    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_wordcombine_window);
+  gui_wordcombine_window->setVisible(true);
+  // NOTE: need to switch back to the regular UI once this one is exitted
+  CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(
+      gui_wordcombine_window);
 
-    //NOTE: also need to spawn the word combination window here...
-    return true;
+  // NOTE: also need to spawn the word combination window here...
+  return true;
 }
 
-std::pair<bool, std::string> TowerUpgradeUI::combine_currentletters()
-{
-     //concatenate the letters to form a word
-    bool is_structurally_valid = true;
-    std::string combine_word = "";
-    for (int letter_idx = 0; letter_idx < word_letter_count; letter_idx++) {
-        if(!word_letters[letter_idx].empty()) {
-            combine_word += word_letters[letter_idx];
-        } else {
-            //TODO: do we throw up an error or something if there's a gap?
-            //...
-            std::cout << "ERROR -- this isn't a valid word because there's a space in it" << std::endl;
-            is_structurally_valid = false; 
-        }
+std::pair<bool, std::string> TowerUpgradeUI::combine_currentletters() {
+  // concatenate the letters to form a word
+  bool is_structurally_valid = true;
+  std::string combine_word = "";
+  for (int letter_idx = 0; letter_idx < word_letter_count; letter_idx++) {
+    if (!word_letters[letter_idx].empty()) {
+      combine_word += word_letters[letter_idx];
+    } else {
+      // TODO: do we throw up an error or something if there's a gap?
+      //...
+      std::cout
+          << "ERROR -- this isn't a valid word because there's a space in it"
+          << std::endl;
+      is_structurally_valid = false;
     }
+  }
 
-    return std::make_pair(is_structurally_valid, combine_word);
+  return std::make_pair(is_structurally_valid, combine_word);
 }
 
+bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e) {
+  // see what letters we have active, and do the word combination logic
 
+  // TODO: figure out how best to handle structurally invalid words (i.e. if
+  // there are spaces) auto tinfo =
+  // shared_gamestate_info->get_towerinfo(activetower_ID);
+  bool is_structurally_valid = false;
+  std::string combine_word = "";
+  std::tie(is_structurally_valid, combine_word) = combine_currentletters();
 
-bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
-{
-    //see what letters we have active, and do the word combination logic
-    
-    //TODO: figure out how best to handle structurally invalid words (i.e. if there are spaces)
-    //auto tinfo = shared_gamestate_info->get_towerinfo(activetower_ID);
-    bool is_structurally_valid = false;
-    std::string combine_word = "";
-    std::tie(is_structurally_valid, combine_word) = combine_currentletters();
+  if (is_structurally_valid) {
+    // see if the combined word is a valid one
+    std::cout << "combining word: " << combine_word << std::endl;
 
-    if(is_structurally_valid) {
-        //see if the combined word is a valid one
-        std::cout << "combining word: " << combine_word << std::endl;
+    // TODO: need to invoke the combination stuff...
+    auto tower_cmbmgmt = get_towercombiner();
+    auto valid_word = tower_cmbmgmt.check_combination(combine_word);
+    if (valid_word) {
+      std::cout << "@COMBINE -- word " << combine_word << " is valid word"
+                << std::endl;
+      tower_properties cmb_stats =
+          tower_cmbmgmt.make_wordcombination(combine_word);
 
-        //TODO: need to invoke the combination stuff...
-        auto tower_cmbmgmt = get_towercombiner();
-        auto valid_word = tower_cmbmgmt.check_combination(combine_word);
-        if(valid_word) {
-            std::cout << "@COMBINE -- word " << combine_word << " is valid word" << std::endl;
-            tower_properties cmb_stats = tower_cmbmgmt.make_wordcombination(combine_word);
-
-            //TODO: need to take this tower_properties stat and generate a tower modify event
-            active_tower_mods.emplace_back(std::make_pair(activetower_ID, std::move(cmb_stats)));
-        } else {
-            //do we warn the user? or just have the individual letter combinations?
-            std::cout << "@COMBINE -- word " << combine_word << " is a dictionary word" << std::endl;
-        }
+      // TODO: need to take this tower_properties stat and generate a tower
+      // modify event
+      active_tower_mods.emplace_back(
+          std::make_pair(activetower_ID, std::move(cmb_stats)));
     } else {
         //TODO: will we ever add the ability to do sentences? That would be pretty neat... in which case we
         //would need spaces as a character. For now though, I guess it's just an error
@@ -434,70 +433,93 @@ bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e)
 
     //CEGUI::WindowManager::getSingleton().destroyWindow(wordslot_layout);
     //wordslot_layout = nullptr;
-    /*
     //how to delete GUI widgets?
     for (auto wslot_widgetit : session_word_slots) {
     CEGUI::WindowManager::getSingleton().destroyWindow(wslot_widgetit);
     }
-    session_word_slots.clear();
-    */  
-    //TBH, no idea what the difference between disable and deactivate is here
-    gui_wordcombine_window->disable();
-    gui_wordcombine_window->deactivate();
+  } else {
+    // TODO: will we ever add the ability to do sentences? That would be pretty
+    // neat... in which case we would need spaces as a character. For now though,
+    // I guess it's just an error
+    std::cout << "@COMBINE -- word " << combine_word << " is NOT a valid word"
+              << std::endl;
+  }
 
-    gui_inventory_window->disable();
-    gui_inventory_window->deactivate();
+  // NOTE: we should also close the UI
+  gui_wordcombine_window->setVisible(false);
 
-    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(gui_window);
+  // CEGUI::WindowManager::getSingleton().destroyWindow(wordslot_layout);
+  // wordslot_layout = nullptr;
+  /*
+  //how to delete GUI widgets?
+  for (auto wslot_widgetit : session_word_slots) {
+  CEGUI::WindowManager::getSingleton().destroyWindow(wslot_widgetit);
+  }
+  session_word_slots.clear();
+  */
+  // TBH, no idea what the difference between disable and deactivate is here
+  gui_wordcombine_window->disable();
+  gui_wordcombine_window->deactivate();
 
+  gui_inventory_window->disable();
+  gui_inventory_window->deactivate();
 
-    return true;
+  CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(
+      gui_window);
+
+  return true;
 }
 
-bool TowerUpgradeUI::wordcombine_previewbtn(const CEGUI::EventArgs &e)
-{
-    std::cout << "previewing word combination...." << std::endl;
+bool TowerUpgradeUI::wordcombine_previewbtn(const CEGUI::EventArgs &e) {
+  std::cout << "previewing word combination...." << std::endl;
 
-    bool is_structurally_valid = false;
-    std::string combine_word = "";
-    std::tie(is_structurally_valid, combine_word) = combine_currentletters();
+  bool is_structurally_valid = false;
+  std::string combine_word = "";
+  std::tie(is_structurally_valid, combine_word) = combine_currentletters();
 
-    if(is_structurally_valid) {
-        //see if the combined word is a valid one
-        std::cout << "combining word: " << combine_word << std::endl;
+  if (is_structurally_valid) {
+    // see if the combined word is a valid one
+    std::cout << "combining word: " << combine_word << std::endl;
 
-        //TODO: need to invoke the combination stuff...
-        auto tower_cmbmgmt = get_towercombiner();
-        auto valid_word = tower_cmbmgmt.check_combination(combine_word);
-        if(valid_word) {
-            std::cout << "@COMBINE -- word " << combine_word << " is valid word" << std::endl;
-            tower_properties cmb_stats = tower_cmbmgmt.make_wordcombination(combine_word);
+    // TODO: need to invoke the combination stuff...
+    auto tower_cmbmgmt = get_towercombiner();
+    auto valid_word = tower_cmbmgmt.check_combination(combine_word);
+    if (valid_word) {
+      std::cout << "@COMBINE -- word " << combine_word << " is valid word"
+                << std::endl;
+      tower_properties cmb_stats =
+          tower_cmbmgmt.make_wordcombination(combine_word);
 
-            //these are placeholders... need to decide what to use for the name, how to handle the tier, etc.
-            const std::string tower_name {"PLACEHOLDER"};
-            const int tier = 1337;
+      // these are placeholders... need to decide what to use for the name, how
+      // to handle the tier, etc.
+      const std::string tower_name{"PLACEHOLDER"};
+      const int tier = 1337;
 
-            std::stringstream tinfo_oss;
-            tinfo_oss << tower_name << "\nTier: " << tier << " \nAttributes:\n" << cmb_stats << "\n";
-		    auto tower_info_str = tinfo_oss.str();
-            gui_wordcombine_layout->getChild("DTDWordCombinePanel")->getChild("CombinedStatsEdit")->setText(tower_info_str);
-        } else { 
-            std::cout << "@COMBINE -- word " << combine_word << " is NOT valid word" << std::endl;
-        }
+      std::stringstream tinfo_oss;
+      tinfo_oss << tower_name << "\nTier: " << tier << " \nAttributes:\n"
+                << cmb_stats << "\n";
+      auto tower_info_str = tinfo_oss.str();
+      gui_wordcombine_layout->getChild("DTDWordCombinePanel")
+          ->getChild("CombinedStatsEdit")
+          ->setText(tower_info_str);
     } else {
-        std::cout << "@COMBINE -- word " << combine_word << " is NOT a structurally valid word" << std::endl;
+      std::cout << "@COMBINE -- word " << combine_word << " is NOT valid word"
+                << std::endl;
     }
+  } else {
+    std::cout << "@COMBINE -- word " << combine_word
+              << " is NOT a structurally valid word" << std::endl;
+  }
 
-    return true;
+  return true;
 }
-
 
 
 bool TowerUpgradeUI::wordcombine_clearbtn(const CEGUI::EventArgs &e)
 {
 
-    //TODO: need to clear the current letter selections, move the icons back to the inventory,
-    //and reset any inventory state changes that were enacted
+  // TODO: need to clear the current letter selections, move the icons back to
+  // the inventory, and reset any inventory state changes that were enacted
 
     detail::clear_combinepanel(gui_wordcombine_layout);
 

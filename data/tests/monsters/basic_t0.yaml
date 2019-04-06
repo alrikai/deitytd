@@ -1,0 +1,16 @@
+---
+MonsterAttributes: 
+    name: T0_M
+    model: Sinbad
+    
+    attributes:
+        health: 100.0
+        speed: 0.05 
+        armor_amount: 1000.0
+        element_ID: CHAOS
+#
+#  ID: 
+#  attributes: 
+#
+#  ID: 
+#  attributes: 

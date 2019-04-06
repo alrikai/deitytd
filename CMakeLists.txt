@@ -1,16 +1,14 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 PROJECT(TowerDefense)
 
+enable_testing()
 add_definitions(-DTDPath=${CMAKE_SOURCE_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++14 -Wall -Wextra")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/OGRE/cmake/modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/local/lib/OGRE/cmake")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-if(EXISTS "/usr/local/lib/OGRE/cmake")
-  set(CMAKE_MODULE_PATH "/usr/local/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
-  set(OGRE_SAMPLES_INCLUDEPATH "/usr/local/share/OGRE/samples/Common/include/")
-else ()
-  message(SEND_ERROR "Failed to find module path.")
-endif()
+MESSAGE("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
 ADD_DEFINITIONS(-DRTSHADER_SYSTEM_BUILD_CORE_SHADERS)
 ADD_DEFINITIONS(-DRTSHADER_SYSTEM_BUILD_EXT_SHADERS)
@@ -24,7 +22,8 @@ INCLUDE_DIRECTORIES(${OIS_INCLUDE_DIRS})
 FIND_PACKAGE(CEGUI REQUIRED)
 INCLUDE_DIRECTORIES(${CEGUI_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${CEGUIOGRE_INCLUDE_DIRS})
-set(OGREVIEW_LIBS ${OGRE_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${OIS_LIBRARIES} ${CEGUI_LIBRARIES} "/usr/local/lib/libCEGUIOgreRenderer-0.so")
+set(CEGUIOGRE "/usr/local/lib/libCEGUIOgreRenderer-0.so")
+set(OGREVIEW_LIBS ${OGRE_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${OIS_LIBRARIES} ${CEGUI_LIBRARIES} ${CEGUIOGRE})
 
 MESSAGE(STATUS "OGREVIEW LIBS -- ${OGREVIEW_LIBS}")
 
@@ -44,7 +43,6 @@ message("OpenCV include: " ${OpenCV_INCLUDE_DIRS})
 message("OpenCV link: " ${OpenCV_LIBS})
 
 #Boost
-#FIND_PACKAGE(Boost 1.55.0 REQUIRED)
 FIND_PACKAGE(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 message("Boost include: " ${Boost_INCLUDE_DIRS})

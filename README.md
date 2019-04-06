@@ -1,1 +1,1 @@
-DietyTD -- coming soon (?)
+DeityTD -- coming soon (?)

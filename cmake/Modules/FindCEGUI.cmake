@@ -414,6 +414,8 @@ elseif (UNIX)
         /opt/CEGUI
         /usr
         /usr/local
+        /usr/lib
+        /usr/lib/x86_64-linux-gnu
         $ENV{HOME}/cegui
         $ENV{HOME}/CEGUI
     )

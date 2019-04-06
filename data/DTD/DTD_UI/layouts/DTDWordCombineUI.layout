@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<GUILayout version="4" >
+    <Window type="DefaultWindow" name="DTDWordCombineWindow" >
+        <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+        <Window type="HorizontalLayoutContainer" name="WordCombineBackground" >
+            <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+            <Window type="DTDLook/StaticText" name="DTDWordCombinePanel" >
+                <Property name="Area" value="{{0,0},{0,0},{0.6,0},{1,0}}" />
+                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                <Property name="HorzScrollPageSize" value="1142" />
+                <Property name="VertScrollPageSize" value="1070" />
+                <Window type="DTDLook/MultiLineEditbox" name="CombinedStatsEdit" >
+                    <Property name="Area" value="{{0.5,0},{0.35,5},{1,0},{0.7,5}}" />
+                    <Property name="Text" >
+</Property>
+                    <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
+                </Window>
+                <Window type="DTDLook/MultiLineEditbox" name="CurrentStatsEdit" >
+                    <Property name="Area" value="{{0,0},{0.35,5},{0.5,0},{0.7,5}}" />
+                    <Property name="Text" >
+</Property>
+                    <Property name="MouseCursorImage" value="DTDLook/MouseArrow" />
+                </Window>
+                <Window type="DTDLook/Button" name="PreviewButton" >
+                    <Property name="Area" value="{{0.3,5},{0.7,5},{0.5,5},{0.85,5}}" />
+                    <Property name="Text" value="Preview" />
+                </Window>
+                <Window type="DTDLook/Button" name="CombineButton" >
+                    <Property name="Area" value="{{0.5,0},{0.7,5},{0.7,0},{0.85,5}}" />
+                    <Property name="Text" value="Combine" />
+                </Window>
+                <Window type="DTDLook/StaticImage" name="CurrentTowerImage" >
+                    <Property name="Area" value="{{0,5},{0.7,5},{0.3,5},{1,-5}}" />
+                    <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                </Window>
+                <Window type="DTDLook/StaticImage" name="CombineTowerImage" >
+                    <Property name="Area" value="{{0.7,0},{0.7,5},{1,0},{1,-5}}" />
+                    <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                </Window>
+                <Window type="DTDLook/Button" name="CancelButton" >
+                    <Property name="Area" value="{{0.5,0},{0.85,0},{0.7,0},{1,0}}" />
+                    <Property name="Text" value="Cancel" />
+                </Window>
+                <Window type="DTDLook/Button" name="ClearButton" >
+                    <Property name="Area" value="{{0.3,5},{0.85,0},{0.5,5},{1,0}}" />
+                    <Property name="Text" value="Clear" />
+                </Window>
+                <Window type="DTDLook/StaticText" name="numgold_edit" >
+                    <Property name="Area" value="{{0,0},{0,0},{0.5,0},{0.1,0}}" />
+                    <Property name="Text" value=" Gold:" />
+                    <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                </Window>
+                <Window type="DTDLook/StaticText" name="numessence_edit" >
+                    <Property name="Area" value="{{0.5,0},{0,0},{1,0},{0.1,0}}" />
+                    <Property name="Text" value=" Essence:" />
+                    <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                </Window>
+                <Window type="DTDLook/Static" name="WordDropperPanel" >
+                    <Property name="Area" value="{{0,0},{0.1,0},{1,0},{0.35,0}}" />
+                    <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                    <Window type="DTDLook/StaticImage" name="letter_0" >
+                        <Property name="Area" value="{{0,0},{0,0},{0.1,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_1" >
+                        <Property name="Area" value="{{0.1,0},{0,0},{0.2,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_2" >
+                        <Property name="Area" value="{{0.2,0},{0,0},{0.3,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_3" >
+                        <Property name="Area" value="{{0.3,0},{0,0},{0.4,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_4" >
+                        <Property name="Area" value="{{0.4,0},{0,0},{0.5,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_5" >
+                        <Property name="Area" value="{{0.5,0},{0,0},{0.6,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_6" >
+                        <Property name="Area" value="{{0.6,0},{0,0},{0.7,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_7" >
+                        <Property name="Area" value="{{0.7,0},{0,0},{0.8,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_8" >
+                        <Property name="Area" value="{{0.8,0},{0,0},{0.9,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_9" >
+                        <Property name="Area" value="{{0.9,0},{0,0},{1,0},{0.5,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_10" >
+                        <Property name="Area" value="{{0,0},{0.5,0},{0.1,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_11" >
+                        <Property name="Area" value="{{0.1,0},{0.5,0},{0.2,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_12" >
+                        <Property name="Area" value="{{0.2,0},{0.5,0},{0.3,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_13" >
+                        <Property name="Area" value="{{0.3,0},{0.5,0},{0.4,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_14" >
+                        <Property name="Area" value="{{0.4,0},{0.5,0},{0.5,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_15" >
+                        <Property name="Area" value="{{0.5,0},{0.5,0},{0.6,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_16" >
+                        <Property name="Area" value="{{0.6,0},{0.5,0},{0.7,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_17" >
+                        <Property name="Area" value="{{0.7,0},{0.5,0},{0.8,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_18" >
+                        <Property name="Area" value="{{0.8,0},{0.5,0},{0.9,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                    <Window type="DTDLook/StaticImage" name="letter_19" >
+                        <Property name="Area" value="{{0.9,0},{0.5,0},{1,0},{1,0}}" />
+                        <Property name="Image" value="DTDLetters/InventoryTile" />
+                        <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                        <Property name="FrameEnabled" value="false" />
+                        <Window type="DragContainer" name="ldragger" >
+                            <Property name="Area" value="{{0.05,0},{0.05,0},{0.95,0},{0.95,0}}" />
+                            <Property name="StickyMode" value="false" />
+                            <Property name="DraggingEnabled" value="false" />
+                            <Window type="DTDLook/StaticImage" name="limage" >
+                                <Property name="Area" value="{{0,0},{0,0},{1,0},{1,0}}" />
+                                <Property name="Image" value="DTDLetters/BlankTile" />
+                                <Property name="MaxSize" value="{{1,0},{1,0}}" />
+                                <Property name="FrameEnabled" value="false" />
+                                <Property name="MousePassThroughEnabled" value="true" />
+                                <Property name="MouseInputPropagationEnabled" value="true" />
+                            </Window>
+                        </Window>
+                    </Window>
+                </Window>
+            </Window>
+        </Window>
+    </Window>
+</GUILayout>

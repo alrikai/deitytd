@@ -22,4 +22,8 @@
 # vim files
 *.swp
 *.ignore
+*.swo
 
+# misc. generated files
+data/DTD/*.png
+data/TDraw_image*.png

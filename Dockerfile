@@ -8,23 +8,55 @@ LABEL maintainer="Alrik Firl afirlortwo@gmail.com" \
 RUN apt-get update --fix-missing
 
 # Install system tools / libraries
-RUN apt-get -y install build-essential \
-    ssh \
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+    gcc \ 
+	g++ \ 
+    build-essential \
     sudo \
     vim \
     git \
     wget \
     make \
     cmake \
-    virt-viewer \
+    virt-viewer 
+
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
     ffmpeg \
+	mercurial \
     libboost-all-dev \
     libopencv-dev \ 
-    libogre-1.9-dev \
     libois-dev \ 
-    libcegui-mk2-dev \ 
     ocl-icd-opencl-dev \ 
-    libyaml-cpp-dev
+    cmake-data \
+	scons \
+	ccache
+
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+    libyaml-cpp-dev \ 
+	libfreetype6-dev \
+	libgles2-mesa-dev \
+	libxt-dev \
+	libxaw7-dev \ 
+	libsdl2-dev \
+	zlib1g-dev \ 
+	libzzip-dev \ 
+	libsdl2-dev \ 
+	libfreeimage-dev \ 
+	libxaw7-dev \ 
+    libxt-dev \ 
+	libglu1-mesa-dev
+
+# Cegui deps
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+    libfreetype6-dev \
+	libsilly-dev \
+	libxml2-dev \
+	libexpat1-dev \
+	libglfw-dev \
+	libglew-dev \
+	libglm-dev \
+	libgl1-mesa-glx \
+	libgl1-mesa-dri
 
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 RUN export uid=1000 gid=1000 devname=DTD && \
@@ -47,12 +79,16 @@ RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
 RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
 RUN sudo ln -s /usr/include/cegui-0.8.4/CEGUI /usr/include/CEGUI
 
-#COPY *.txt deitytd/
-#COPY Controller deitytd/Controller
-#COPY Testing deitytd/Testing
-#COPY Common deitytd/Common
-#COPY cmake deitytd/cmake
-#COPY Model deitytd/Model
+RUN hg clone https://bitbucket.org/cegui/cegui -u v0-8
+RUN hg clone https://bitbucket.org/sinbad/ogre/ -u v1-9
+COPY resources/ogre-find-patch.diff cegui/.
+
+RUN mkdir ogre/build && cd ogre/build && cmake .. && make -j2 && sudo make install
+RUN cd cegui && hg import ogre-find-patch.diff --no-commit
+RUN mkdir cegui/build && cd cegui/build && cmake .. && make -j2 && sudo make install
+
+RUN git clone https://github.com/alrikai/fflames.git
+RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
 
 # Enable additional output from Launcher
 #ENV QT_VERBOSE true
@@ -60,4 +96,4 @@ RUN sudo ln -s /usr/include/cegui-0.8.4/CEGUI /usr/include/CEGUI
 # Xvfb
 ENV DISPLAY :99
 
-ENTRYPOINT cd deitytd/build; /bin/bash
+ENTRYPOINT /bin/bash

@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<Animations>
+    <AnimationDefinition name="Example1A" duration="0.3" replayMode="loop">
+        <Affector property="Alpha" interpolator="float">
+            <KeyFrame position="0" value="1" />
+            <KeyFrame position="0.3" value="0.66" progression="quadratic decelerating" />
+        </Affector>
+        <Subscription event="MouseLeavesArea" action="Start" />
+    </AnimationDefinition>
+
+    <AnimationDefinition name="Example1B" duration="0.3" replayMode="loop">
+        <Affector property="Alpha" interpolator="float">
+            <KeyFrame position="0" value="0.66" />
+            <KeyFrame position="0.3" value="1" progression="quadratic accelerating" />
+        </Affector>
+        <Subscription event="MouseEntersArea" action="Start" />
+    </AnimationDefinition>
+
+	
+    <AnimationDefinition name="RotateRightLoop" duration="2.0" replayMode="loop">
+        <Affector property="Rotation" interpolator="QuaternionSlerp" applicationMethod="absolute">
+            <KeyFrame position="0.0" progression="linear" value="x:0 y:0 z:0" />
+            <KeyFrame position="0.5" progression="linear" value="x:0 y:0 z:90" />
+            <KeyFrame position="1.0" progression="linear" value="x:0 y:0 z:180" />
+            <KeyFrame position="1.5" progression="linear" value="x:0 y:0 z:270" />
+            <KeyFrame position="2.0" progression="linear" value="x:0 y:0 z:360" />
+        </Affector>
+    </AnimationDefinition>
+	
+    <AnimationDefinition name="RotateLeftLoop" duration="2.0" replayMode="loop">
+        <Affector property="Rotation" interpolator="QuaternionSlerp" applicationMethod="absolute">
+            <KeyFrame position="0.0" progression="linear" value="x:0 y:0 z:360" />
+            <KeyFrame position="0.5" progression="linear" value="x:0 y:0 z:270" />
+            <KeyFrame position="1.0" progression="linear" value="x:0 y:0 z:180" />
+            <KeyFrame position="1.5" progression="linear" value="x:0 y:0 z:90" />
+            <KeyFrame position="2.0" progression="linear" value="x:0 y:0 z:0" />
+        </Affector>
+    </AnimationDefinition>
+
+    <AnimationDefinition name="StopRotate" duration="0.6" replayMode="once">
+        <Affector property="Rotation" interpolator="QuaternionSlerp" applicationMethod="absolute">
+            <KeyFrame position="0.0" progression="linear" sourceProperty="Rotation" />
+            <KeyFrame position="0.6" progression="linear" value="x:0 y:0 z:0" />
+        </Affector>
+    </AnimationDefinition>
+
+</Animations>
+

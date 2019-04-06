@@ -1,10 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 set(make_include_current_dir on)
-add_subdirectory(util)
-include_directories(util)
-
-set(YAML-CPP yaml-cpp)
+#add_subdirectory(util)
+#include_directories(util)
 
 include_directories(Towers)
 add_subdirectory(Towers)

@@ -1,0 +1,33 @@
+diff -r 92d654557f17 CMakeLists.txt
+--- a/CMakeLists.txt	Fri Mar 08 13:59:12 2019 +0000
++++ b/CMakeLists.txt	Thu Mar 21 05:00:59 2019 +0000
+@@ -25,6 +25,7 @@
+ project(cegui)
+ 
+ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
++set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/local/lib/OGRE/cmake")
+ include(CEGUIMacros)
+ include(CMakeDependentOption)
+ 
+@@ -111,7 +112,7 @@
+     find_package(Ogre)
+ endif()
+ if(${OGRE_FOUND})
+-    if (${OGRE_VERSION} VERSION_GREATER 1.11)
++    #if (${OGRE_VERSION} VERSION_GREATER 1.11)
+         set(CMAKE_CXX_STANDARD 11)
+         set(CMAKE_CXX_STANDARD_REQUIRED ON)
+         set(CMAKE_CXX_EXTENSIONS OFF)
+@@ -119,7 +120,11 @@
+         set(CEGUI_FOUND_OGRE_VERSION_MAJOR ${OGRE_VERSION_MAJOR})
+         set(CEGUI_FOUND_OGRE_VERSION_MINOR ${OGRE_VERSION_MINOR})
+         set(CEGUI_FOUND_OGRE_VERSION_PATCH ${OGRE_VERSION_PATCH})
+-    endif()
++
++        message("${CEGUI_FOUND_OGRE_VERSION_MAJOR}")
++        message("${CEGUI_FOUND_OGRE_VERSION_MINOR}")
++        message("${CEGUI_FOUND_OGRE_VERSION_PATCH}")
++    #endif()
+ endif()
+ 
+ find_package(OIS)

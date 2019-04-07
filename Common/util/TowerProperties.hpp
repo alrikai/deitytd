@@ -36,6 +36,11 @@ struct tower_property_modifier {
   // low and high range of attack damage per damage type
   damage_type damage_value;
   float enhanced_damage_value[NUM_ELEM];
+  // for +%-enhanced damage to <X> types
+  float enhanced_damage_affinity[NUM_ELEM];
+
+  //typeless post-armor damage
+  float armor_pierce_damage;
 
   float enhanced_speed_value;
 
@@ -53,6 +58,7 @@ struct tower_property_modifier {
 
   // event lists for on-hit and on-death effects. When these events are
   // triggered, will loop through these event lists and fire them off
+  std::vector<event_attribute_modifier *> on_attack_events;
   std::vector<event_attribute_modifier *> on_hit_events;
   std::vector<event_attribute_modifier *> on_death_events;
 };
@@ -86,6 +92,9 @@ struct tower_properties {
     crit_multiplier += rhs_modifier.crit_multiplier;
 
     // also take the RHS properties' events
+    on_attack_events.insert(std::end(on_attack_events),
+                         std::begin(rhs_modifier.on_attack_events),
+                         std::end(rhs_modifier.on_attack_events));
     on_hit_events.insert(std::end(on_hit_events),
                          std::begin(rhs_modifier.on_hit_events),
                          std::end(rhs_modifier.on_hit_events));
@@ -115,6 +124,9 @@ struct tower_properties {
     crit_chance += modifier.crit_chance_value;
     crit_multiplier += modifier.crit_multiplier_value;
 
+    on_attack_events.insert(std::end(on_attack_events),
+                         std::begin(modifier.on_attack_events),
+                         std::end(modifier.on_attack_events));
     on_hit_events.insert(std::end(on_hit_events),
                          std::begin(modifier.on_hit_events),
                          std::end(modifier.on_hit_events));
@@ -140,6 +152,7 @@ struct tower_properties {
 
   // event lists for on-hit and on-death effects. When these events are
   // triggered, will loop through these event lists and fire them off
+  std::vector<event_attribute_modifier *> on_attack_events;
   std::vector<event_attribute_modifier *> on_hit_events;
   std::vector<event_attribute_modifier *> on_death_events;
 

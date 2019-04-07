@@ -6,7 +6,9 @@ MonsterAttributes:
     attributes:
         health: 100.0
         speed: 0.05 
-        armor_amount: 1000.0
+        flat_def: 1000.0
+        percent_def: 0.2
+        threshold_def: -1 #-1 means no threshold
         element_ID: CHAOS
 #
 #  ID: 

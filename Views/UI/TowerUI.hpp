@@ -53,6 +53,7 @@ struct TowerUpgradeUI {
     if (is_showing()) {
       std::cout << "TODO: all windows should be closed!" << std::endl;
     }
+  }
   
 	inline void register_shared_towerinfo(
       std::shared_ptr<
@@ -98,7 +99,6 @@ struct TowerUpgradeUI {
     std::array<std::string, MAX_NUM_LETTERS> word_letters;
     int word_letter_count;
     uint32_t activetower_ID;
-  }
 };
 
 #endif

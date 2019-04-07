@@ -200,11 +200,13 @@ inline std::tuple<std::string, CharacterModels::ModelIDs, MonsterStats> parse_mo
   YAML::Node mob_attributes = mob_node["attributes"];
   const auto health = mob_attributes["health"].as<float>();
   const auto speed = mob_attributes["speed"].as<float>();
-  const auto armor_flat = mob_attributes["armor_amount"].as<float>();
+  const auto armor_flat = mob_attributes["flat_def"].as<float>();
+  const auto armor_percent = mob_attributes["percent_def"].as<float>();
+  const auto armor_thresh = mob_attributes["threshold_def"].as<float>();
   const auto mob_estr = mob_attributes["element_ID"].as<std::string>();
   const auto element_type = ElementInfo::get_element_type(mob_estr);
 
-  MonsterStats stats (health, speed, element_type, armor_flat);
+  MonsterStats stats (health, speed, element_type, armor_flat, armor_percent, armor_thresh);
   return std::make_tuple(base_name, mob_model_id, stats);
 }
 

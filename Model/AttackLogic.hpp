@@ -15,6 +15,28 @@
 
 #include <memory>
 
+//compute total damage values for an attack on a per-element basis, pre-mitigation
+void compute_damage(std::unique_ptr<TowerAttackBase> attack) {
+
+
+
+}
+
+//compute the total damage values for an attack on a per-element basis, post-mitigation
+void compute_mitigation(std::array<float, tower_property_modifier::NUM_ELEM>& attack, const MonsterStats& mob_stats) {
+  bool has_thresh = mob_stats.thresh_armor > 0;
+  for (size_t elem_idx = 0; elem_idx < attack.size(); elem_idx++) {
+    if (has_thresh) {
+      attack[elem_idx] = attack[elem_idx] > mob_stats.thresh_armor ? mob_stats.thresh_armor : attack[elem_idx];
+    }
+    attack[elem_idx] = (1 - mob_stats.percent_armor) * (attack[elem_idx] - mob_stats.flat_armor);
+  }
+}
+
+//merge the per-element damage and get the final, scalar HP deduction amount
+float compute_damage();
+
+
 // TODO: try prototyping how the logic for applying the game mechanics will
 // be...
 void compute_attackhit(const std::list<std::weak_ptr<Monster>> &tile_mobs,

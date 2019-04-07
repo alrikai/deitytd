@@ -431,12 +431,14 @@ bool TowerUpgradeUI::wordcombine_combinebtn(const CEGUI::EventArgs &e) {
     //NOTE: we should also close the UI
     gui_wordcombine_window->setVisible(false);
 
+    /*
     //CEGUI::WindowManager::getSingleton().destroyWindow(wordslot_layout);
     //wordslot_layout = nullptr;
     //how to delete GUI widgets?
     for (auto wslot_widgetit : session_word_slots) {
     CEGUI::WindowManager::getSingleton().destroyWindow(wslot_widgetit);
     }
+    */
   } else {
     // TODO: will we ever add the ability to do sentences? That would be pretty
     // neat... in which case we would need spaces as a character. For now though,

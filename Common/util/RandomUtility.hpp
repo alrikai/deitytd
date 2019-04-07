@@ -14,11 +14,19 @@
 #include <vector>
 
 namespace Randomize {
+//kind of unfortunate, but this is how we avoid nondeterminism at testing time
+#ifdef RANDOM_SEED_TESTING
+std::default_random_engine &get_engine() {
+  static std::default_random_engine eng{RANDOM_SEED_TESTING};
+  return eng;
+}
+#else
 std::default_random_engine &get_engine() {
   static std::random_device rdev{};
   static std::default_random_engine eng{rdev()};
   return eng;
 }
+#endif
 
 class GaussianRoller {
 public:

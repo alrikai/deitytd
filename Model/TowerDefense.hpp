@@ -37,7 +37,14 @@ class TowerDefense {
 
 public:
   // it's possible that we'll move to normalized coordinates?
-  explicit TowerDefense(ViewType<ModelType> *view) : td_view(view) {
+  explicit TowerDefense(int32_t seed = -1) {
+    if (seed < 0) {
+      seed = std::time(0);
+    }
+    std::srand(seed);
+
+    td_view = std::make_unique<ViewType<ModelType>>(); 
+
     TDPlayerInformation defaultplayer_state(20, 0, 20);
 
     // td_view->draw_maptiles(ModelType::TLIST_WIDTH, ModelType::TLIST_HEIGHT);
@@ -87,6 +94,9 @@ public:
                                  tower_name);
   }
 
+  ViewType<ModelType>* get_td_frontend() const { 
+    return td_view.get();
+  }
 
   ModelType* get_td_backend () const {
     return td_backend.get();

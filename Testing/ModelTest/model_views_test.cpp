@@ -60,10 +60,10 @@ int main()
     using TDBackendType = TowerLogic;
     using TDType = TowerDefense<OgreDisplay, TDBackendType>;
 
-    auto display = new OgreDisplay<TDBackendType>();
-    Controller controller (display->get_root(), display->get_render_window());
+    std::unique_ptr<TDType> td = std::make_unique<TDType>();
 
-    std::unique_ptr<TDType> td = std::unique_ptr<TDType>(new TDType(display));
+    auto display = td->get_td_frontend();
+    Controller controller (display->get_root(), display->get_render_window());
     display->register_input_controller(&controller);  
 
     td->init_game();

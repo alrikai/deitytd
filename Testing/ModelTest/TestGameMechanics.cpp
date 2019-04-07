@@ -27,7 +27,7 @@ struct FrontStub
 {
     using ModifierType = tower_properties;
     using TowerEventQueueType = typename UserTowerEvents::EventQueueType<UserTowerEvents::tower_event<BackendType>>::QType;
-	using GameInformationType = GameInformation<CommonTowerInformation, TDPlayerInformation>;
+    using GameInformationType = GameInformation<CommonTowerInformation, TDPlayerInformation>;
 
     void draw_maptiles(const int width, const int height) {}
 

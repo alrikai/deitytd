@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #include_directories("/home/alrik/Projects/towerdefense/Model/util")
 
-set (TowerComboSrc ModifierParser.cpp  TowerCombiner.cpp)
+set (TowerComboSrc ModifierConfigParser.cpp ModifierParser.cpp TowerCombiner.cpp)
 add_library(TDTowerCombiner SHARED ${TowerComboSrc})
 
 SET(TDCOMBOSRCS main.cpp)

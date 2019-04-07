@@ -79,13 +79,12 @@ uint32_t compute_wordscore(const std::string &word) {
 TowerCombiner::TowerCombiner(const std::string &dictionary_fpath,
                              const std::string &attribute_cfgfpath)
     : dictionary_filename(dictionary_fpath),
-      attributecfg_filename(attribute_cfgfpath) {
+      attributecfg_filename(attribute_cfgfpath),
+      attribute_cfg(attributecfg_filename) {
   std::cout << "loading dictionary at " << dictionary_filename
             << " -- attribute cfg at " << attributecfg_filename << std::endl;
   // load the dictionary, prepare the data structures
   load_dictionary(dict, dictionary_filename);
-  // populaates the modifier factory
-  get_modifier_configs(attribute_fact, attributecfg_filename);
 }
 
 // returns the aggregate modifier tower_properties object that results from the
@@ -105,6 +104,7 @@ TowerCombiner::make_wordcombination(const std::string &word) const {
   auto word_score = compute_wordscore(word);
 
   tower_property_modifier stats_modifier;
+	const auto attribute_fac = attribute_cfg.get_factory();
   // next, need the list of attributes for the word
   for (auto word_unit : word) {
     auto modifier_key_it = character_attribute_map.find(word_unit);
@@ -112,7 +112,7 @@ TowerCombiner::make_wordcombination(const std::string &word) const {
       std::cout << "character " << word_unit << " --> " << std::hex
                 << modifier_key_it->second << std::dec << std::endl;
       auto attribmodifier =
-          attribute_fact.create_product(modifier_key_it->second, word_score);
+          attribute_fac->create_product(modifier_key_it->second, word_score);
       std::cout << typeid(*attribmodifier).name() << std::endl;
 
       // aggregate the modifier values so we can apply them in a well-ordered

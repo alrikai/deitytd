@@ -16,7 +16,7 @@
 
 //#include "TowerProperties.hpp"
 #include "shared/common_information.hpp"
-#include "tower_combiner/TowerCombiner.hpp"
+#include "Combinations/TowerCombiner.hpp"
 #include "util/AttributeModifiers.hpp"
 
 //#include "Essences.hpp"

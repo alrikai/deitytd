@@ -4,7 +4,6 @@ set(make_include_current_dir on)
 include_directories(include)
 
 add_subdirectory(util)
-add_subdirectory(tower_combiner)
 
 set (CommonSrc src/ModelUtils.cpp)
 add_library(TDCommon SHARED ${CommonSrc})

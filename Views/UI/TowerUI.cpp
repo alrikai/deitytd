@@ -1,5 +1,9 @@
 #include "TowerUI.hpp"
 
+//TODO: we generally don't want to include things from the Model in View, but we are short-circuiting the 
+//word combination verification with the combiner logic
+#include "Model/Towers/Combinations/TowerCombiner.hpp"
+
 //helper function for clearing out the word combination UI panel
 namespace detail {
 void clear_combinepanel(CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout)

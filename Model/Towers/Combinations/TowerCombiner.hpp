@@ -11,6 +11,7 @@
 
 #include "factory.hpp"
 #include "util/TowerModifiers.hpp"
+#include "ModifierConfigParser.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -41,10 +42,24 @@ private:
   using modifier_factory_t =
       Factory<modifier_factory_value_t, modifier_factory_key_t,
               modifier_factory_generator_t>;
-  modifier_factory_t attribute_fact;
+  AttributeMapper<modifier_factory_t> attribute_cfg;
 
   using dictionary_map_t = std::map<std::string, void *>;
   dictionary_map_t dict;
 };
+
+// this is the singleton for the towercombiner. I am still not entirely sure
+// that this is the best way to go, but I think I can have it s.t. this is really
+// ONLY used from the frontend (and we just pass the tower_properties w/ a modify
+// event to the backend from the frontend... but we'll have to see?)
+inline const TowerCombiner &get_towercombiner() {
+  // choose the word dictionary and default modifier stats
+  const static std::string config_file{
+      "resources/default_attribute_values.yaml"};
+  const static std::string dict_file{"resources/word_list.txt"};
+
+  static TowerCombiner tower_gen(dict_file, config_file);
+  return tower_gen;
+}
 
 #endif

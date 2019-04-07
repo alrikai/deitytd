@@ -26,5 +26,5 @@ TARGET_LINK_LIBRARIES(TestModel
 #${PCL_FEATURES_LIBRARIES}
 					  
 add_executable(GameMechanicsTest TestGameMechanics.cpp)
-target_link_libraries(GameMechanicsTest gtest_main ${YAML-CPP} TDTowers TDUtils TowersBackend TDCommon ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(GameMechanicsTest gtest_main ${YAML-CPP} TDTowers TDUtils TowersBackend TDTowerCombiner TDCommon ${Boost_SYSTEM_LIBRARY})
 add_test(NAME GameMechanics_test COMMAND GameMechanicsTest)

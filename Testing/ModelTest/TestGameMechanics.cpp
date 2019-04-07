@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "util/TowerModifiers.hpp"
-#include "Common/tower_combiner/ModifierParser.hpp"
+#include "Model/Towers/Combinations/ModifierParser.hpp"
 #include "Model/TowerDefense.hpp"
 #include "Model/AttackLogic.hpp"
 #include "util/Types.hpp"
@@ -62,99 +62,7 @@ void add_tower_displayinfo(TDType& td)
 
 //TODO: this should be part of the tower utils class -- this will load a yaml file, and 
 //generate a tower_property_modifier object from the stats in the yaml file.
-  tower_property_modifier parse_tower(const std::string& tower_cfg) {
-      tower_property_modifier tower_modifier;
-	  YAML::Node cfg_root = YAML::LoadFile(tower_cfg);
-	  if (cfg_root.IsNull()) {
-		  std::ostringstream ostr;
-		  ostr << "ERROR -- config yaml file " << tower_cfg << " not found";
-		  throw std::runtime_error(ostr.str());
-	  }
 
-	  YAML::Node tower_node = cfg_root["TowerAttributes"];
-	  assert(tower_node.size() == 3);
-
-	  auto tower_name = tower_node["name"].as<std::string>();
-	  auto tower_tier = tower_node["tier"].as<uint32_t>();
-	  YAML::Node tower_attributes = tower_node["attributes"];
-	  const size_t num_attributes = tower_attributes.size();
-	  for (size_t attr_idx = 0; attr_idx < num_attributes; attr_idx++) {
-		  YAML::Node value = tower_attributes[attr_idx];
-		  const uint32_t ID = value["ID"].as<uint32_t>();
-		  const std::string type = value["type"].as<std::string>();
-		  auto mod_attributes = value["value"];
-		  switch (ID) {
-		      case TowerModifiers::flat_damage::ID: {
-		      TowerModifiers::flat_damage::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_damage tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::enhanced_damage::ID: {
-			  TowerModifiers::enhanced_damage::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::enhanced_damage tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::enhanced_speed::ID: {
-			  TowerModifiers::enhanced_speed::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::enhanced_speed tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::flat_range::ID: {
-			  TowerModifiers::flat_range::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_range tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::flat_crit_chance::ID: {
-			  TowerModifiers::flat_crit_chance::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_crit_chance tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::flat_crit_multiplier::ID: {
-			  TowerModifiers::flat_crit_multiplier::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_crit_multiplier tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::flat_type_damage::ID: {
-			  TowerModifiers::flat_type_damage::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_type_damage tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::enhanced_type_damage::ID: {
-			  TowerModifiers::enhanced_type_damage::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::enhanced_type_damage tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			case TowerModifiers::flat_damage_onhit::ID: {
-			  TowerModifiers::flat_damage_onhit::parameter_cfg cfg;
-			  parse_modifier_parameters(mod_attributes, cfg);
-			  TowerModifiers::flat_damage_onhit tmod (cfg);
-			  tmod.aggregate_modifier(tower_modifier);
-			  break;
-			}
-			default: {
-			  std::cerr << "Invalid ID " << ID << std::endl;
-			  break;
-			}
-		  }
-	  }
-	  return tower_modifier;
-  }
 }
 
 //breakpoint on failure:
@@ -280,7 +188,7 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
 
   // load the tower modifiers, apply them to the base tower
   const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_flatED.yaml"};
-  tower_property_modifier tmod = TestStubs::parse_tower(tower_fpath);
+  tower_property_modifier tmod = TowerPropertyParser::parse_tower_config(tower_fpath);
   tower_properties tprop;
   tprop.apply_property_modifier(tmod);
   td_backend->modify_tower(tprop, tower_xcoord,tower_ycoord);
@@ -313,7 +221,7 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
   ASSERT_EQ(mob_stats.health, 33.894);
 }
 
-TEST_F (DTDBackendTest, PctDMG) {
+TEST_F (DTDBackendTest, Basic_PctDMG) {
   // create the basic fundamnetal tower
   const int tier = 1;
   auto td_backend = td->get_td_backend();

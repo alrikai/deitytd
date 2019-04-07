@@ -33,9 +33,11 @@
  * select which ones to take.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <sstream>
 
 //#include "RandomUtility.hpp"
@@ -47,11 +49,11 @@ enum class Elements { CHAOS = 0, WATER, AIR, FIRE, EARTH };
 namespace ElementInfo {
 inline std::string get_element_name(const Elements &type) {
   const static std::map<Elements, std::string> element_names{
-      {Elements::CHAOS, "Chaos"},
-      {Elements::WATER, "Water"},
-      {Elements::AIR, "Air"},
-      {Elements::FIRE, "Fire"},
-      {Elements::EARTH, "Earth"}};
+      {Elements::CHAOS, "chaos"},
+      {Elements::WATER, "water"},
+      {Elements::AIR, "air"},
+      {Elements::FIRE, "fire"},
+      {Elements::EARTH, "earth"}};
 
   auto elem_it = element_names.find(type);
   if (elem_it != element_names.end())
@@ -63,13 +65,15 @@ inline std::string get_element_name(const Elements &type) {
 //TODO: conilidate this into a bidirectional lookup uisng a custom
 //transparent comparator (s.t. we can lookup using string or enum ID,
 //from the same structure)
-inline Elements get_element_type(const std::string& type_name) {
+inline Elements get_element_type(std::string type_name) {
   const static std::map<std::string, Elements> element_types{
-      {"Chaos", Elements::CHAOS},
-      {"Water", Elements::WATER},
-      {"Air", Elements::AIR},
-      {"Fire", Elements::FIRE},
-      {"Earth", Elements::EARTH}};
+      {"chaos", Elements::CHAOS},
+      {"water", Elements::WATER},
+      {"air", Elements::AIR},
+      {"fire", Elements::FIRE},
+      {"earth", Elements::EARTH}};
+  //make sure the capitalization doesn't matter for lookup
+  std::transform(type_name.begin(), type_name.end(), type_name.begin(), ::tolower);
   auto elem_it = element_types.find(type_name);
   if (elem_it != element_types.end()) {
     return elem_it->second;

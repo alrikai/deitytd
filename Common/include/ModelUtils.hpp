@@ -9,6 +9,7 @@
 #ifndef TD_INCLUDE_COMMON_MODEL_UTILS_HPP
 #define TD_INCLUDE_COMMON_MODEL_UTILS_HPP
 
+#include <algorithm>
 #include <string>
 #include <vector>
 //#include <map>
@@ -25,12 +26,15 @@ struct CharacterModels {
       return id_names[(int) id];
   }
  
-  static ModelIDs to_modelid(const std::string& strid) {
+  static ModelIDs to_modelid(std::string model_name) {
+    std::transform(model_name.begin(), model_name.end(), model_name.begin(), ::tolower);
     for (size_t id_idx = 0; id_idx < id_names.size(); id_idx++) {
-        if (strid == id_names[id_idx]) {
+        if (model_name == id_names[id_idx]) {
             return (ModelIDs) id_idx;
         }
     }
+    //have some default placeholder, or just throw an exception ,since this shouldn't happen
+    return  ModelIDs::ogre_S;
   }
 
   // might not want / need this here (need the model string on the front-end

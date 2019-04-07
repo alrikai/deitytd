@@ -58,6 +58,11 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
 	libgl1-mesa-glx \
 	libgl1-mesa-dri
 
+#stuff for development & debugging
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+  gdb
+
+
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 RUN export uid=1000 gid=1000 devname=DTD && \
     mkdir -p /home/${devname} && \

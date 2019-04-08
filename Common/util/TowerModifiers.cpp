@@ -72,3 +72,13 @@ std::ostream &operator<<(std::ostream &stream,
          << " max -- " << cfg.cap << " duration -- " << cfg.duration;
   return stream;
 }
+
+std::ostream &operator<<(std::ostream &stream,
+                         const TowerModifiers::flat_added_damage::parameter_cfg &cfg) {
+  static const std::string element_names[] = {"CHAOS", "WATER", "AIR", "FIRE",
+                                              "EARTH"};
+
+  stream << "flat_added_damage::parameter_cfg: " << cfg.flat_dmg_amount
+         << " @ " << element_names[static_cast<int>(cfg.type)];
+  return stream;
+}

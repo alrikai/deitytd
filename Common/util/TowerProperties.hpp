@@ -23,15 +23,37 @@ struct tower_property_modifier {
       : damage_value{{dmg_dist(0, 0), dmg_dist(0, 0), dmg_dist(0, 0),
                       dmg_dist(0, 0), dmg_dist(0, 0)}} {
     for (int elem_idx = 0; elem_idx < NUM_ELEM; elem_idx++) {
-      enhanced_damage_value[elem_idx] = 0.f;
+      enhanced_damage_value[elem_idx] = 0;
+      enhanced_damage_affinity[elem_idx] = 0;
     }
-    enhanced_speed_value = 0.f;
-    attack_speed_value = 0.f;
-    attack_range_value = 0.f;
-
-    crit_chance_value = 0.f;
-    crit_multiplier_value = 50.f;
+    enhanced_speed_value = 0;
+    attack_speed_value = 0;
+    attack_range_value = 0;
+    crit_chance_value = 0;
+    crit_multiplier_value = 0;
+		armor_pierce_damage = 0;
   }
+
+	void merge(tower_property_modifier other) {
+    for (int elem_idx = 0; elem_idx < NUM_ELEM; elem_idx++) {
+      damage_value[elem_idx] += other.damage_value[elem_idx];
+      enhanced_damage_value[elem_idx] += other.enhanced_damage_value[elem_idx];
+      enhanced_damage_affinity[elem_idx] += other.enhanced_damage_affinity[elem_idx];
+    }
+    enhanced_speed_value += other.enhanced_speed_value;
+    attack_speed_value += other.attack_speed_value;
+    attack_range_value += other.attack_range_value;
+
+    armor_pierce_damage += other.armor_pierce_damage;
+
+    crit_chance_value += other.crit_chance_value;
+    crit_multiplier_value += other.crit_multiplier_value;
+
+		//take the effects from the other modfifier
+		on_attack_events.insert(std::end(on_attack_events), std::begin(other.on_attack_events), std::end(other.on_attack_events));
+		on_hit_events.insert(std::end(on_hit_events), std::begin(other.on_hit_events), std::end(other.on_hit_events));
+		on_death_events.insert(std::end(on_death_events), std::begin(other.on_death_events), std::end(other.on_death_events));
+	}
 
   // low and high range of attack damage per damage type
   damage_type damage_value;
@@ -89,7 +111,7 @@ struct tower_properties {
     attack_range += rhs_modifier.attack_range;
 
     crit_chance += rhs_modifier.crit_chance;
-    crit_multiplier += rhs_modifier.crit_multiplier;
+    crit_multiplier += (rhs_modifier.crit_multiplier);
 
     // also take the RHS properties' events
     on_attack_events.insert(std::end(on_attack_events),
@@ -113,8 +135,7 @@ struct tower_properties {
     // apply the +damage first, then the +%enhanced damage
     for (int dmg_idx = 0; dmg_idx < NUM_ELEM; dmg_idx++) {
       damage[dmg_idx] += modifier.damage_value[dmg_idx];
-      damage[dmg_idx] +=
-          damage[dmg_idx] * modifier.enhanced_damage_value[dmg_idx];
+      damage[dmg_idx] *= (1 + modifier.enhanced_damage_value[dmg_idx]);
     }
 
     attack_speed += modifier.attack_speed_value;

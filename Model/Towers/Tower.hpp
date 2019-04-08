@@ -97,12 +97,14 @@ public:
     return true;
   }
 
+	/*
   virtual void
   apply_modifier(const std::vector<tower_properties> &modifier_list) {
     for (auto modifier : modifier_list) {
       base_attributes += modifier;
     }
   }
+	*/
 
   // NOTE: we would also trigger any on-kill effects here (if the tower has
   // them)
@@ -139,6 +141,8 @@ public:
     return info;
   }
 
+	tower_properties compute_attack_damage() const;
+
   inline std::string get_name() const { return tower_name; }
 
   inline Coordinate<float> get_position() const { return position; }
@@ -160,6 +164,7 @@ protected:
   // the baseline, fundamental attributes. These represent the permenent
   // attributes (so only permentant changes will be written to this one)
   tower_properties base_attributes;
+  tower_property_modifier enhancements;
   // the current, subject-to-change attributes
   tower_properties attack_attributes;
   double cost;

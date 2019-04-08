@@ -69,6 +69,18 @@ std::string Tower::get_stats() const {
   return stats_info;
 }
 
+
+tower_properties Tower::compute_attack_damage() const {
+  auto attributes = base_attributes;
+  tower_property_modifier status_modifier = enhancements;
+  // generate the tower effects for the attack
+  for (auto effect_it : status_effects) {
+    effect_it->aggregate_modifier(status_modifier);
+  }
+  attributes.apply_property_modifier(std::move(status_modifier));
+	return attributes;
+}
+
 /*
  * upon attacking, the tower needs to tally all of the long-term and short-term
  * effects and modifiers that it has, and compute the attack attributes for the
@@ -84,14 +96,7 @@ Tower::generate_attack(const std::string &attack_id, const uint64_t timestamp) {
   // towers)
   const auto mob_id = get_target()->get_name();
   // reset the (per-cycle) attack atttributes
-  attack_attributes = base_attributes;
-
-  tower_property_modifier status_modifier;
-  // generate the tower effects for the attack
-  for (auto effect_it : status_effects) {
-    effect_it->aggregate_modifier(status_modifier);
-  }
-  attack_attributes.apply_property_modifier(std::move(status_modifier));
+  attack_attributes = compute_attack_damage();
   std::cout << "Tower (temporary) properties " << attack_attributes
             << std::endl;
 
@@ -121,6 +126,9 @@ Tower::generate_attack(const std::string &attack_id, const uint64_t timestamp) {
 }
 
 bool Tower::add_modifier(tower_property_modifier &&modifier) {
+
+	enhancements.merge(std::move(modifier));
+	//base_attributes.apply_property_modifier(modifier);
 
   // NOTE: what do we do here?
   std::cout << "@Tower::add_modifier with " << typeid(modifier).name()

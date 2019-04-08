@@ -17,12 +17,12 @@
 #include <string>
 
 
-struct TowerPropertyParser {
-	static tower_property_modifier parse_tower_config(const std::string& tower_cfg);
-	static uint32_t modifier_name_to_ID(std::string mod_type);
+struct ModifierMapper  {
+  ModifierMapper();
+	tower_property_modifier parse_tower_config(const std::string& tower_cfg);
+	uint32_t modifier_name_to_ID(std::string mod_type);
 
-  static constexpr size_t NUM_MODIFIERS = 17;
-  static const std::array<std::string, NUM_MODIFIERS> modifier_names;
+  std::set<std::pair<int, std::string>> modifier_mapping;
 };
 
 template <typename modifierfactory_t>

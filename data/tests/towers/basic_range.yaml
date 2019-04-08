@@ -1,0 +1,8 @@
+---
+TowerAttributes: 
+    name: PCT_TT
+    tier: 1
+    attributes: 
+        - ID: 4
+          type: flat_range
+          value: {percent_edamage: 30}

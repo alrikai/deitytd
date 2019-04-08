@@ -1,0 +1,8 @@
+---
+TowerAttributes: 
+    name: CRTPCT_TT
+    tier: 1
+    attributes: 
+        - ID: 5
+          type: flat_crit_chance
+          value: {percent_ecrit: 5}

@@ -74,7 +74,8 @@ protected:
   using TDBackendType = TowerLogic;
   using TDType = TowerDefense<TestStubs::FrontStub, TDBackendType>;
 
-  DTDBackendTest() {
+  DTDBackendTest() 
+	: attack_id("T0_atk") {
     int test_seed = 42;
     td = std::make_shared<TDType> (test_seed);
     view = td->get_td_frontend();
@@ -105,11 +106,11 @@ protected:
   void SetUp() override { 
     td->init_game();
 	  TestStubs::add_tower_displayinfo(td);
-    td->start_game();
+    //td->start_game();
   }
 
   void TearDown() override {
-	  td->stop_game();
+	  //td->stop_game();
   }
 
   std::shared_ptr<Monster> make_mob_from_cfg(const std::string& mob_cfg) {
@@ -134,6 +135,8 @@ protected:
   uint32_t tid;
   tower_properties expected_base_props;
   ModifierMapper tower_modifier_loader;
+
+  const std::string attack_id;
 };
 
 void assert_tower_properties_almost_equals(const tower_properties& attack_vals, const tower_properties& expected_vals) {
@@ -174,10 +177,10 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
   auto mob = make_mob_from_cfg(mob_fpath);
 
   td_backend->make_tower(tid, tier, tower_xcoord,tower_ycoord);
-  auto basic_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
-  basic_tower->set_target(mob);
+  auto test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
+  test_tower->set_target(mob);
   const std::string basic_attack_id {"flat_atk"};
-  auto basic_attack = basic_tower->generate_attack(basic_attack_id, 0);
+  auto basic_attack = test_tower->generate_attack(basic_attack_id, 0);
   //this is the default (fundamental) tower stats, without any boosts
   auto basic_attack_vals = basic_attack->get_attack_attributes();
   assert_tower_properties_almost_equals(basic_attack_vals, expected_base_props);
@@ -185,18 +188,13 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
   // load the tower modifiers, apply them to the base tower
   const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_flatED.yaml"};
   tower_property_modifier tmod = tower_modifier_loader.parse_tower_config(tower_fpath);
-  tower_properties tprop;
-  tprop.apply_property_modifier(tmod);
-  td_backend->modify_tower(tprop, tower_xcoord,tower_ycoord);
-  Tower* test_tower = nullptr; 
-  test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
-  // have the tower target the mob
-  test_tower->set_target(mob);
 
-  const std::string attack_id {"T0_atk"};
+	tower_properties expected_props = basic_attack_vals;
+  expected_props.apply_property_modifier(tmod);
+
+  test_tower->add_modifier(std::move(tmod));
   auto attack = test_tower->generate_attack(attack_id, 0);
   auto attack_vals = attack->get_attack_attributes();
-  auto expected_props = tprop + basic_attack_vals;
   assert_tower_properties_almost_equals(attack_vals, expected_props);
 
   tower_properties expected_handprops = expected_base_props;
@@ -206,7 +204,7 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
   }
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
-  attack->set_target(Coordinate<float>(mob_xcoord, mob_ycoord));
+  //attack->set_target(Coordinate<float>(mob_xcoord, mob_ycoord));
 
   std::list<std::weak_ptr<Monster>> moblist; 
   moblist.emplace_back(mob);
@@ -242,15 +240,13 @@ TEST_F (DTDBackendTest, Basic_PctDMG) {
   const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_pctED.yaml"};
   tower_property_modifier tmod = tower_modifier_loader.parse_tower_config(tower_fpath);
 
-	tower_properties tprop;
-  tprop.apply_property_modifier(tmod);
-  auto expected_props = tprop + basic_attack_vals;
+	tower_properties expected_props = basic_attack_vals;
+  expected_props.apply_property_modifier(tmod);
 
   test_tower->add_modifier(std::move(tmod));
   //auto tdamage = tower->compute_attack_damage();
   
 	test_tower->set_target(mob);
-  const std::string attack_id {"T0_atk"};
   auto attack = test_tower->generate_attack(attack_id, 0);
   auto attack_vals = attack->get_attack_attributes();
   assert_tower_properties_almost_equals(attack_vals, expected_props);
@@ -269,7 +265,7 @@ TEST_F (DTDBackendTest, Basic_PctDMG) {
 
   //check the mob state, make sure the correct damage was done
   MonsterStats mob_stats = mob->get_attributes();
-  EXPECT_FLOAT_EQ(mob_stats.health, 95.5535);
+  EXPECT_FLOAT_EQ(mob_stats.health, 94.2195969);
 }
 
 TEST_F (DTDBackendTest, Basic_flat_crit_multiplier) {
@@ -283,10 +279,10 @@ TEST_F (DTDBackendTest, Basic_flat_crit_multiplier) {
   auto mob = make_mob_from_cfg(mob_fpath);
 
   td_backend->make_tower(tid, tier, tower_xcoord,tower_ycoord);
-  auto basic_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
-  basic_tower->set_target(mob);
-  const std::string basic_attack_id {"pct_atk"};
-  auto basic_attack = basic_tower->generate_attack(basic_attack_id, 0);
+  auto test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
+  test_tower->set_target(mob);
+  const std::string basic_attack_id {"flatcrit_atk"};
+  auto basic_attack = test_tower->generate_attack(basic_attack_id, 0);
   //this is the default (fundamental) tower stats, without any boosts
   auto basic_attack_vals = basic_attack->get_attack_attributes();
   assert_tower_properties_almost_equals(basic_attack_vals, expected_base_props);
@@ -294,24 +290,16 @@ TEST_F (DTDBackendTest, Basic_flat_crit_multiplier) {
   // load the tower modifiers, apply them to the base tower
   const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_critamt.yaml"};
   tower_property_modifier tmod = tower_modifier_loader.parse_tower_config(tower_fpath);
-  tower_properties tprop;
-  tprop.apply_property_modifier(tmod);
-  td_backend->modify_tower(tprop, tower_xcoord,tower_ycoord);
-  Tower* test_tower = nullptr; 
-  test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
-  // have the tower target the mob
-  test_tower->set_target(mob);
 
-  const std::string attack_id {"T0_atk"};
+	tower_properties expected_props = basic_attack_vals;
+  expected_props.apply_property_modifier(tmod);
+  test_tower->add_modifier(std::move(tmod));
+
   auto attack = test_tower->generate_attack(attack_id, 0);
   auto attack_vals = attack->get_attack_attributes();
-  auto expected_props = tprop + basic_attack_vals;
   assert_tower_properties_almost_equals(attack_vals, expected_props);
   tower_properties expected_handprops = expected_base_props;
-  for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    expected_handprops.damage[dmg_idx].low *= (1.0 + 0.3);
-    expected_handprops.damage[dmg_idx].high *= (1.0 + 0.3);
-  }
+  expected_handprops.crit_multiplier += 25;
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
   attack->set_target(Coordinate<float>(mob_xcoord, mob_ycoord));
@@ -322,7 +310,7 @@ TEST_F (DTDBackendTest, Basic_flat_crit_multiplier) {
 
   //check the mob state, make sure the correct damage was done
   MonsterStats mob_stats = mob->get_attributes();
-  EXPECT_FLOAT_EQ(mob_stats.health, 28.4675);
+  EXPECT_FLOAT_EQ(mob_stats.health, 95.466637);
 }
 
 /* TODO: Other tests to have:

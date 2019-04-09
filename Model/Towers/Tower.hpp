@@ -112,7 +112,7 @@ public:
 
   inline bool in_range(const float target_dist) const {
     // return target_dist < attack_attributes.attack_range;
-    return target_dist < base_attributes.attack_range;
+    return target_dist < base_attributes.modifier.attack_range_value;
   }
 
   inline std::shared_ptr<Monster> get_target() const { return current_target; }

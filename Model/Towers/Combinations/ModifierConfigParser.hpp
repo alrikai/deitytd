@@ -45,6 +45,7 @@ private:
   void parse_attribute_modifier(YAML::Node &mod_attributes, std::string &&modifier_name);
 
 	modifierfactory_t attribute_factory;
+  ModifierMapper mapper;
 };
 
 template <typename modifierfactory_t>
@@ -68,7 +69,7 @@ void AttributeMapper<modifierfactory_t>::parse_modifiers(const std::string &conf
 		assert(value.Type() == YAML::NodeType::Map);
 
 		auto modifier_name = key.as<std::string>();
-		const uint32_t ID = value["ID"].as<uint32_t>();
+		const uint32_t ID = mapper.modifier_name_to_ID(modifier_name);
 		auto mod_attributes = value["attributes"];
 
 		// std::cout << modifier_name << " ID: " << ID << " -- attributes: " <<

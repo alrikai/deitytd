@@ -1,8 +1,7 @@
 ---
 TowerAttributes: 
-    name: PCT_TT
+    name: FLAT_WATER_ED_TT
     tier: 1
     attributes: 
-        - ID: 2
-          type: enhanced_damage
-          value: {percent_edamage: 30}
+          type: flat_type_damage
+          value: {elem: water, value_low: 20, value_high: 30}

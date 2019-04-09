@@ -88,17 +88,17 @@ protected:
     
     for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
       if (dmg_idx == 0) {
-        expected_base_props.damage[dmg_idx].low = 2;
-        expected_base_props.damage[dmg_idx].high = 5;
+        expected_base_props.modifier.damage_value[dmg_idx].low = 2;
+        expected_base_props.modifier.damage_value[dmg_idx].high = 5;
       } else {
-        expected_base_props.damage[dmg_idx].low = 0;
-        expected_base_props.damage[dmg_idx].high = 0;
+        expected_base_props.modifier.damage_value[dmg_idx].low = 0;
+        expected_base_props.modifier.damage_value[dmg_idx].high = 0;
       }
     }
-    expected_base_props.attack_speed = 1;
-    expected_base_props.attack_range = 3;
-    expected_base_props.crit_chance = 0;
-    expected_base_props.crit_multiplier = 50;
+    expected_base_props.modifier.attack_speed_value = 1;
+    expected_base_props.modifier.attack_range_value = 3;
+    expected_base_props.modifier.crit_chance_value = 0;
+    expected_base_props.modifier.crit_multiplier_value = 50;
   }
 
   virtual ~DTDBackendTest() {}
@@ -141,13 +141,13 @@ protected:
 
 void assert_tower_properties_almost_equals(const tower_properties& attack_vals, const tower_properties& expected_vals) {
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    EXPECT_FLOAT_EQ(attack_vals.damage[dmg_idx].low, expected_vals.damage[dmg_idx].low);
-    EXPECT_FLOAT_EQ(attack_vals.damage[dmg_idx].high, expected_vals.damage[dmg_idx].high);
+    EXPECT_FLOAT_EQ(attack_vals.modifier.damage_value[dmg_idx].low, expected_vals.modifier.damage_value[dmg_idx].low);
+    EXPECT_FLOAT_EQ(attack_vals.modifier.damage_value[dmg_idx].high, expected_vals.modifier.damage_value[dmg_idx].high);
   }
-  EXPECT_FLOAT_EQ(attack_vals.attack_speed, expected_vals.attack_speed);
-  EXPECT_FLOAT_EQ(attack_vals.attack_range, expected_vals.attack_range);
-  EXPECT_FLOAT_EQ(attack_vals.crit_chance, expected_vals.crit_chance);
-  EXPECT_FLOAT_EQ(attack_vals.crit_multiplier, expected_vals.crit_multiplier);
+  EXPECT_FLOAT_EQ(attack_vals.modifier.attack_speed_value, expected_vals.modifier.attack_speed_value);
+  EXPECT_FLOAT_EQ(attack_vals.modifier.attack_range_value, expected_vals.modifier.attack_range_value);
+  EXPECT_FLOAT_EQ(attack_vals.modifier.crit_chance_value, expected_vals.modifier.crit_chance_value);
+  EXPECT_FLOAT_EQ(attack_vals.modifier.crit_multiplier_value, expected_vals.modifier.crit_multiplier_value);
 }
 
 TEST_F (DTDBackendTest, BasicTower) {
@@ -199,8 +199,8 @@ TEST_F (DTDBackendTest, Basic_FlatDMG) {
 
   tower_properties expected_handprops = expected_base_props;
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    expected_handprops.damage[dmg_idx].low += 10;
-    expected_handprops.damage[dmg_idx].high += 20;
+    expected_handprops.modifier.damage_value[dmg_idx].low += 10;
+    expected_handprops.modifier.damage_value[dmg_idx].high += 20;
   }
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
@@ -252,8 +252,8 @@ TEST_F (DTDBackendTest, Basic_PctDMG) {
   assert_tower_properties_almost_equals(attack_vals, expected_props);
   tower_properties expected_handprops = expected_base_props;
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    expected_handprops.damage[dmg_idx].low *= (1.0 + 0.3);
-    expected_handprops.damage[dmg_idx].high *= (1.0 + 0.3);
+    expected_handprops.modifier.damage_value[dmg_idx].low *= (1.0 + 0.3);
+    expected_handprops.modifier.damage_value[dmg_idx].high *= (1.0 + 0.3);
   }
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
@@ -299,7 +299,7 @@ TEST_F (DTDBackendTest, Basic_flat_crit_multiplier) {
   auto attack_vals = attack->get_attack_attributes();
   assert_tower_properties_almost_equals(attack_vals, expected_props);
   tower_properties expected_handprops = expected_base_props;
-  expected_handprops.crit_multiplier += 25;
+  expected_handprops.modifier.crit_multiplier_value += 25;
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
   attack->set_target(Coordinate<float>(mob_xcoord, mob_ycoord));

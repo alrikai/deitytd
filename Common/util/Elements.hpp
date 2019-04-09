@@ -128,6 +128,7 @@ const static std::map<std::tuple<Elements, Elements>, double> damage_coeffs{
 // enhanced damage; the tower_properties should have a damage range attribute
 
 template <typename T> struct range {
+  range() : low(0), high(0) {}
   range(T low_, T high_) : low(low_), high(high_) {}
 
   range(const range<T> &other) {

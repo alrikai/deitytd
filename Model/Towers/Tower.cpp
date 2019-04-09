@@ -38,35 +38,10 @@ std::string to_string_wprecision(const T val, const uint32_t ndec = 2) {
 // using floating point #'s for everything so I need to use string streams for
 // the string conversions T_T
 std::string Tower::get_stats() const {
-  std::string stats_info{"Base Stats:\n"};
-
-  for (int elem_idx = 0; elem_idx < tower_properties::NUM_ELEM; elem_idx++) {
-    auto element_type = static_cast<Elements>(elem_idx);
-    stats_info += ElementInfo::get_element_name(element_type);
-    stats_info += " Damage: [";
-    stats_info +=
-        to_string_wprecision(base_attributes.damage[elem_idx].low) + ", " +
-        to_string_wprecision(base_attributes.damage[elem_idx].high) + "]\n";
-  }
-  stats_info +=
-      "Speed: " + to_string_wprecision(base_attributes.attack_speed) + "\n";
-  stats_info +=
-      "Range: " + to_string_wprecision(base_attributes.attack_range) + "\n";
-
-  stats_info += "\n\nCurrent Stats:\n";
-  for (int elem_idx = 0; elem_idx < tower_properties::NUM_ELEM; elem_idx++) {
-    auto element_type = static_cast<Elements>(elem_idx);
-    stats_info += ElementInfo::get_element_name(element_type);
-    stats_info += " Damage: [";
-    stats_info +=
-        to_string_wprecision(attack_attributes.damage[elem_idx].low) + ", " +
-        to_string_wprecision(attack_attributes.damage[elem_idx].high) + "]\n";
-  }
-  stats_info +=
-      "Speed: " + to_string_wprecision(attack_attributes.attack_speed) + "\n";
-  stats_info +=
-      "Range: " + to_string_wprecision(attack_attributes.attack_range) + "\n";
-  return stats_info;
+  std::ostringstream ostr;
+  ostr <<"Base Stats:\n" << base_attributes;
+  ostr << "\n\nCurrent Stats:\n" << attack_attributes;
+  return ostr.str();
 }
 
 
@@ -156,19 +131,15 @@ namespace TowerGenerator {
 std::unique_ptr<Tower> make_fundamentaltower(const uint32_t ID, const int tier,
                                              const std::string &tower_name,
                                              const float row, const float col) {
-  // make some base stats based on the tower tier
+  // make some base stats based on the tower tier -- 
+  // TODO: this should be in a yaml file
   tower_properties base_attributes;
 
-  base_attributes.damage[static_cast<int>(Elements::CHAOS)] =
+  base_attributes.modifier.damage_value[static_cast<int>(Elements::CHAOS)] =
       tower_properties::dmg_dist(2 * tier, 5 * tier);
-  /*
-      auto dmg_it = base_attributes.damage.find(Elements::CHAOS);
-      if(dmg_it != base_attributes.damage.end())
-          dmg_it->second = tower_properties::dmg_dist(2 * tier, 5 * tier);
-  */
-  base_attributes.attack_speed = 1 * tier;
-  base_attributes.attack_range = 3 * tier;
-
+  base_attributes.modifier.attack_speed_value = 1 * tier;
+  base_attributes.modifier.attack_range_value = 3 * tier;
+  base_attributes.modifier.crit_multiplier_value = 50;
   // etc...
 
   auto base_tower = std::unique_ptr<Tower>(

@@ -77,10 +77,7 @@ struct flat_damage : stat_attribute_modifier {
 
   inline void apply_modifier(tower_properties &stats) override final {
     // this would give a flat +damage to all stats
-    for (auto dmg_it = stats.damage.begin(); dmg_it != stats.damage.end();
-         dmg_it++) {
-      (*dmg_it) += value;
-    }
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -122,10 +119,7 @@ struct enhanced_damage : stat_attribute_modifier {
   // for if we're applying the modifier directly....
   inline void apply_modifier(tower_properties &stats) override final {
     // this would give a +X% enhanced damage to all stats
-    for (auto dmg_it = stats.damage.begin(); dmg_it != stats.damage.end();
-         dmg_it++) {
-      *(dmg_it) += (*(dmg_it)*value);
-    }
+    aggregate_modifier(stats.modifier); 
   }
 
   // or if we are aggregating a set of modifiers to be applied later...
@@ -166,7 +160,7 @@ struct enhanced_speed : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.attack_speed += stats.attack_speed * value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -198,7 +192,7 @@ struct flat_range : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.attack_range += value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -231,7 +225,7 @@ struct flat_crit_chance : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.crit_chance += value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -264,7 +258,7 @@ struct flat_crit_multiplier : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.crit_multiplier += value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -338,7 +332,7 @@ struct flat_type_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.damage[static_cast<int>(type)] += value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -409,8 +403,7 @@ struct enhanced_type_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.damage[static_cast<int>(type)] +=
-        stats.damage[static_cast<int>(type)] * value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -465,7 +458,7 @@ struct flat_damage_onhit : event_attribute_modifier {
 
   inline void apply_modifier(tower_properties &stats) override final {
     // err.... is this the right way to do this?
-    stats.on_hit_events.push_back(this);
+    stats.modifier.on_hit_events.push_back(this);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -573,7 +566,7 @@ struct flat_added_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    stats.damage[static_cast<int>(type)] += value;
+    aggregate_modifier(stats.modifier); 
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {

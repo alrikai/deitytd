@@ -13,14 +13,8 @@
 #include "Towers/TowerAttack.hpp"
 #include "util/RandomUtility.hpp"
 
+#include <algorithm>
 #include <memory>
-
-//compute total damage values for an attack on a per-element basis, pre-mitigation
-void compute_damage(std::unique_ptr<TowerAttackBase> attack) {
-
-
-
-}
 
 //compute the total damage values for an attack on a per-element basis, post-mitigation
 void compute_mitigation(std::array<float, tower_property_modifier::NUM_ELEM>& attack, const MonsterStats& mob_stats) {
@@ -34,7 +28,42 @@ void compute_mitigation(std::array<float, tower_property_modifier::NUM_ELEM>& at
 }
 
 //merge the per-element damage and get the final, scalar HP deduction amount
-float compute_damage();
+float compute_damage(const tower_properties &props, Elements ttype) {
+  auto attack_roller = Randomize::UniformRoller();
+  std::array<float, tower_property_modifier::NUM_ELEM> damage {};
+
+  bool atk_crit = attack_roller.get_roll(1) < props.modifier.crit_chance_value;
+  //apply base damage and %-ED
+  for (int elem_idx = 0; elem_idx < tower_properties::NUM_ELEM; elem_idx++) {
+    //roll the amount here, so we collapse the [low - high) range down to a float
+    auto elem_dmg = props.modifier.damage_value[elem_idx];
+    const auto raw_dmg = elem_dmg.low + attack_roller.get_roll(elem_dmg.high - elem_dmg.low);
+    damage[elem_idx] = raw_dmg;
+    damage[elem_idx] *= (1 + props.modifier.enhanced_damage_value[elem_idx]);
+    //apply crit damage
+    if (atk_crit) {
+      damage[elem_idx] *= (1 + props.modifier.crit_multiplier_value);
+    }
+
+    //have the built-in affinity effects
+    const auto atkcoeff_type = std::make_pair(
+        static_cast<Elements>(elem_idx), ttype);
+    const auto dmg_factor_it =
+        ElementInfo::damage_coeffs.find(atkcoeff_type);
+
+    float intrinisic_affinity_multiplier = 0;
+    if (dmg_factor_it != ElementInfo::damage_coeffs.end()) {
+      intrinisic_affinity_multiplier = dmg_factor_it->second;
+    }
+    //apply the affinity modifier
+    float affinity_modifier = 1 + intrinisic_affinity_multiplier + props.modifier.enhanced_damage_affinity[static_cast<int>(ttype)];  
+    damage[elem_idx] *= affinity_modifier;
+    //aply flat added damage
+    damage[elem_idx] += props.modifier.added_damage_value[elem_idx];
+  }
+
+  return std::accumulate(damage.begin(), damage.end(), 0);
+}
 
 
 // TODO: try prototyping how the logic for applying the game mechanics will
@@ -49,7 +78,6 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>> &tile_mobs,
   // TODO: ... ???
   // TODO: profit?
 
-  auto attack_roller = Randomize::UniformRoller();
   auto origin_tower = attack->get_origin_tower();
   auto target_mob_id = origin_tower->get_target_id();
 
@@ -66,39 +94,14 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>> &tile_mobs,
     if (auto target_mob = mob_it->lock()) {
 
       //@HERE: we have the tower attack, the origin tower, and the target mob.
-      std::cout << "got mob " << target_mob->get_name() << std::endl;
 
-      // TODO: compute the samage and status effect changes
-      // TODO: apply said status effects
-      //... but for now, we'll just start with damage
-
-      // TODO: move this part off into another file. Should have a bunch of
-      // (generic) functions for computing the state changes as a result of an
-      // attakc
       auto mob_stats = target_mob->get_attributes();
       auto atk_attributes = attack->get_attack_attributes();
-      float atk_dmg = 0.f;
-
-      for (int elem_idx = 0; elem_idx < tower_property_modifier::NUM_ELEM;
-           elem_idx++) {
-
-        const auto atkcoeff_type = std::make_pair(
-            static_cast<Elements>(elem_idx), mob_stats.armor_class);
-        const auto dmg_factor_it =
-            ElementInfo::damage_coeffs.find(atkcoeff_type);
-
-        if (dmg_factor_it != ElementInfo::damage_coeffs.end()) {
-          const auto raw_dmg =
-              atk_attributes.damage[elem_idx].low +
-              attack_roller.get_roll(atk_attributes.damage[elem_idx].high -
-                                     atk_attributes.damage[elem_idx].low);
-          atk_dmg += dmg_factor_it->second * raw_dmg;
-        }
-      }
-      std::cout << "attack " << attack->get_id() << " did " << atk_dmg
-                << " damage" << std::endl;
-
+      float atk_dmg = compute_damage(atk_attributes, mob_stats.armor_class);
       const bool mob_alive = target_mob->recieve_damage(atk_dmg);
+
+      std::cout << "attack " << attack->get_id() << " did " << atk_dmg
+                << " damage" << " to mob " << target_mob->get_name() << std::endl;
 
       // TODO: generate the status updates
 

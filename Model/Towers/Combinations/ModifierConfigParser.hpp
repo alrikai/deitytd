@@ -137,10 +137,8 @@ void AttributeMapper<modifierfactory_t>::parse_attribute_modifier(
   parse_modifier_parameters(mod_attributes, cfg);
   std::cout << "ID " << modifier_t::ID << " cfg: " << cfg << std::endl;
 
-  // TODO: need to make a unique ID for the flat_type_damage_{} and
-  // enhanced_type_damage_{} types
-  uint32_t modifier_ID = cfg.get_ID();
   // make the modifier generator function
+  uint32_t modifier_ID = cfg.get_ID();
   auto mod_fn =
       make_modifier_fn<typename modifierfactory_t::product_generator_t>(
           std::move(cfg));

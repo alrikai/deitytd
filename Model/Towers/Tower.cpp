@@ -105,9 +105,11 @@ bool Tower::add_modifier(tower_property_modifier &&modifier) {
 	enhancements.merge(std::move(modifier));
 	//base_attributes.apply_property_modifier(modifier);
 
+  /*
   // NOTE: what do we do here?
   std::cout << "@Tower::add_modifier with " << typeid(modifier).name()
             << std::endl;
+  */
   return true;
 }
 /*

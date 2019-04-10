@@ -51,7 +51,7 @@ std::ostream &operator<<(std::ostream &stream,
   static const std::string element_names[] = {"CHAOS", "WATER", "AIR", "FIRE",
                                               "EARTH"};
 
-  stream << "flat_type_damage::parameter_cfg: " << cfg.flat_dmg_amount << " @ "
+  stream << "flat_type_damage::parameter_cfg: [" << cfg.low_val << ", " << cfg.high_val << "] @ "
          << element_names[static_cast<int>(cfg.type)];
   return stream;
 }

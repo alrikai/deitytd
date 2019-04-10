@@ -112,12 +112,13 @@ template <typename mod_generator_t>
 mod_generator_t make_modifier_fn(TowerModifiers::flat_type_damage::parameter_cfg modifier_cfg) {
   mod_generator_t modifier_fn = [modifier_cfg](float level) {
     // NOTE: this approach works, at least
-    float amount = modifier_cfg.flat_dmg_amount;
+    auto low_amount = modifier_cfg.low_val;
+    auto high_amount = modifier_cfg.high_val;
     auto type = modifier_cfg.type;
     auto scale = modifier_cfg.scale_factor;
 
     auto modifier_obj =
-        new TowerModifiers::flat_type_damage(amount, type, scale); //(std::move(modifier_cfg));
+        new TowerModifiers::flat_type_damage(low_amount, high_amount, type, scale); //(std::move(modifier_cfg));
     modifier_obj->scale_modifier(level);
     return modifier_obj;
   };

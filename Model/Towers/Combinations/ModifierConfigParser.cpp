@@ -30,6 +30,8 @@ ModifierMapper::ModifierMapper() {
     TowerModifiers::flat_crit_multiplier::parameter_cfg flat_crit_multiplier;
     modifier_mapping.insert(std::make_pair(flat_crit_multiplier.get_ID(), flat_crit_multiplier.get_name()));
 
+    modifier_mapping.insert(std::make_pair(TowerModifiers::flat_type_damage::ID + 0, std::string{TowerModifiers::flat_type_damage::NAME}));
+
     TowerModifiers::flat_type_damage::parameter_cfg flat_type_damage_chaos;
     flat_type_damage_chaos.type = Elements::CHAOS;
     modifier_mapping.insert(std::make_pair(flat_type_damage_chaos.get_ID(), flat_type_damage_chaos.get_name()));
@@ -49,6 +51,8 @@ ModifierMapper::ModifierMapper() {
     TowerModifiers::flat_type_damage::parameter_cfg flat_type_damage_earth;
     flat_type_damage_earth.type = Elements::EARTH;
     modifier_mapping.insert(std::make_pair(flat_type_damage_earth.get_ID(), flat_type_damage_earth.get_name()));
+
+    modifier_mapping.insert(std::make_pair(TowerModifiers::enhanced_type_damage::ID + 0, std::string{TowerModifiers::enhanced_type_damage::NAME}));
 
     TowerModifiers::enhanced_type_damage::parameter_cfg enhanced_type_damage_chaos;
     enhanced_type_damage_chaos.type = Elements::CHAOS;

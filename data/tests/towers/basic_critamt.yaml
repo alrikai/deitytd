@@ -3,5 +3,5 @@ TowerAttributes:
     name: CRTAMT_TT
     tier: 1
     attributes: 
-          type: flat_crit_multiplier
+        - type: flat_crit_multiplier
           value: {value_critmult: 25}

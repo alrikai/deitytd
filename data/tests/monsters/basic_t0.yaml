@@ -4,9 +4,9 @@ MonsterAttributes:
     model: Sinbad
     
     attributes:
-        health: 100.0
+        health: 1000.0
         speed: 0.05 
-        flat_def: 1000.0
+        flat_def: 1.0
         percent_def: 0.2
         threshold_def: -1 #-1 means no threshold
         element_ID: CHAOS

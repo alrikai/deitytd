@@ -24,14 +24,16 @@ void compute_mitigation(std::array<float, tower_property_modifier::NUM_ELEM>& at
       attack[elem_idx] = attack[elem_idx] > mob_stats.thresh_armor ? mob_stats.thresh_armor : attack[elem_idx];
     }
     attack[elem_idx] = (1 - mob_stats.percent_armor) * (attack[elem_idx] - mob_stats.flat_armor);
+    //threshold the mitigation to be 0 (i.e. if the flat_armor > attack)
+    attack[elem_idx] = attack[elem_idx] < 0 ? 0 : attack[elem_idx];
   }
 }
 
 //merge the per-element damage and get the final, scalar HP deduction amount
-float compute_damage(const tower_properties &props, Elements ttype) {
+float compute_damage(const tower_properties &props, const MonsterStats& mob_stats) {
   auto attack_roller = Randomize::UniformRoller();
   std::array<float, tower_property_modifier::NUM_ELEM> damage {};
-
+  const Elements ttype = mob_stats.armor_class;
   bool atk_crit = attack_roller.get_roll(1) < props.modifier.crit_chance_value;
   //apply base damage and %-ED
   for (int elem_idx = 0; elem_idx < tower_properties::NUM_ELEM; elem_idx++) {
@@ -61,6 +63,11 @@ float compute_damage(const tower_properties &props, Elements ttype) {
     //aply flat added damage
     damage[elem_idx] += props.modifier.added_damage_value[elem_idx];
   }
+
+  //compute the mob defense reduction
+  compute_mitigation(damage, mob_stats);
+
+  //TODO: have any post-defense / armor piercing damage applied here
 
   return std::accumulate(damage.begin(), damage.end(), 0);
 }
@@ -92,12 +99,9 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>> &tile_mobs,
 
   if (mob_it != tile_mobs.end()) {
     if (auto target_mob = mob_it->lock()) {
-
-      //@HERE: we have the tower attack, the origin tower, and the target mob.
-
       auto mob_stats = target_mob->get_attributes();
       auto atk_attributes = attack->get_attack_attributes();
-      float atk_dmg = compute_damage(atk_attributes, mob_stats.armor_class);
+      float atk_dmg = compute_damage(atk_attributes, mob_stats);
       const bool mob_alive = target_mob->recieve_damage(atk_dmg);
 
       std::cout << "attack " << attack->get_id() << " did " << atk_dmg

@@ -74,8 +74,9 @@ void parse_modifier_parameters(
 void parse_modifier_parameters(const YAML::Node &mod_attributes,
                                TowerModifiers::flat_type_damage::parameter_cfg &modifier_cfg) {
   modifier_cfg.type =
-      static_cast<Elements>(mod_attributes["dmg_type"].as<int>());
-  modifier_cfg.flat_dmg_amount = mod_attributes["dmg_amount"].as<float>();
+      static_cast<Elements>(mod_attributes["elem"].as<int>());
+  modifier_cfg.low_val = mod_attributes["value_low"].as<float>();
+  modifier_cfg.high_val = mod_attributes["value_high"].as<float>();
   if (mod_attributes["scale_factor"]) {
     modifier_cfg.scale_factor = mod_attributes["scale_factor"].as<float>();
   } else {
@@ -87,8 +88,8 @@ void parse_modifier_parameters(
     const YAML::Node &mod_attributes,
     TowerModifiers::enhanced_type_damage::parameter_cfg &modifier_cfg) {
   modifier_cfg.type =
-      static_cast<Elements>(mod_attributes["dmg_type"].as<int>());
-  modifier_cfg.ed_percent_amount = mod_attributes["dmg_percent"].as<float>();
+      static_cast<Elements>(mod_attributes["elem"].as<int>());
+  modifier_cfg.ed_percent_amount = mod_attributes["percent_edamage"].as<float>();
   if (mod_attributes["scale_factor"]) {
     modifier_cfg.scale_factor = mod_attributes["scale_factor"].as<float>();
   } else {

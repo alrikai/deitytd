@@ -3,5 +3,5 @@ TowerAttributes:
     name: FLAT_WATER_ED_TT
     tier: 1
     attributes: 
-          type: flat_type_damage
+        - type: flat_type_damage
           value: {elem: water, value_low: 20, value_high: 30}

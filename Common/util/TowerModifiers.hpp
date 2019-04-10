@@ -281,9 +281,11 @@ struct flat_type_damage : stat_attribute_modifier {
   static constexpr uint32_t AIR_ID = FD_OFFSET + 0x2;
   static constexpr uint32_t FIRE_ID = FD_OFFSET + 0x3;
   static constexpr uint32_t EARTH_ID = FD_OFFSET + 0x4;
+  static constexpr const char* NAME = "flat_type_damage";
 
   struct parameter_cfg {
-    float flat_dmg_amount;
+    float low_val;
+    float high_val;
     Elements type;
     float scale_factor;
 
@@ -321,13 +323,13 @@ struct flat_type_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   flat_type_damage(parameter_cfg cfg)
-      : value(cfg.flat_dmg_amount), type(cfg.type), scale(cfg.scale_factor) {
-    std::cout << "setting type " << static_cast<int>(type) << " -- flat dmg "
-              << value << std::endl;
+      : value(cfg.low_val, cfg.high_val), type(cfg.type), scale(cfg.scale_factor) {
+    std::cout << "setting type " << static_cast<int>(type) << " -- flat dmg ["
+              << value.low << ", " << value.high << "]" << std::endl;
   }
 
-  flat_type_damage(float amount, Elements type, float scale_factor)
-      : value(amount), type(type), scale(scale_factor) {}
+  flat_type_damage(float low_v, float high_v, Elements type, float scale_factor)
+      : value(low_v, high_v), type(type), scale(scale_factor) {}
 
   //----------------------------------------------------------
 
@@ -339,10 +341,11 @@ struct flat_type_damage : stat_attribute_modifier {
     stats_modifier.damage_value[static_cast<int>(type)] += value;
   }
   inline void scale_modifier(float score) override final {
-    value += scale * score;
+    value.low += scale * score;
+    value.high += scale * score;
   }
 
-  float value;
+  tower_properties::dmg_dist value;
   Elements type;
   float scale;
 };
@@ -356,6 +359,7 @@ struct enhanced_type_damage : stat_attribute_modifier {
   static constexpr uint32_t AIR_ID = ED_OFFSET + 0x2;
   static constexpr uint32_t FIRE_ID = ED_OFFSET + 0x3;
   static constexpr uint32_t EARTH_ID = ED_OFFSET + 0x4;
+  static constexpr const char* NAME = "enhanced_type_damage";
 
   struct parameter_cfg {
     float ed_percent_amount;

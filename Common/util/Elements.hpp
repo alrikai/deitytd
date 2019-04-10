@@ -37,13 +37,12 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 
 //#include "RandomUtility.hpp"
 
 enum class Elements { CHAOS = 0, WATER, AIR, FIRE, EARTH };
-   
 
 // can have the element affinity lookup tables here
 namespace ElementInfo {
@@ -62,9 +61,9 @@ inline std::string get_element_name(const Elements &type) {
     return "";
 }
 
-//TODO: conilidate this into a bidirectional lookup uisng a custom
-//transparent comparator (s.t. we can lookup using string or enum ID,
-//from the same structure)
+// TODO: conilidate this into a bidirectional lookup uisng a custom
+// transparent comparator (s.t. we can lookup using string or enum ID,
+// from the same structure)
 inline Elements get_element_type(std::string type_name) {
   const static std::map<std::string, Elements> element_types{
       {"chaos", Elements::CHAOS},
@@ -72,17 +71,18 @@ inline Elements get_element_type(std::string type_name) {
       {"air", Elements::AIR},
       {"fire", Elements::FIRE},
       {"earth", Elements::EARTH}};
-  //make sure the capitalization doesn't matter for lookup
-  std::transform(type_name.begin(), type_name.end(), type_name.begin(), ::tolower);
+  // make sure the capitalization doesn't matter for lookup
+  std::transform(type_name.begin(), type_name.end(), type_name.begin(),
+                 ::tolower);
   auto elem_it = element_types.find(type_name);
   if (elem_it != element_types.end()) {
     return elem_it->second;
   } else {
-      // since this will be read from yaml files that I write, this should *really* 
-      // never happen. 
-      std::ostringstream ostr;
-      ostr << "Type name " << type_name << " is not a valid element type";
-      throw std::runtime_error(ostr.str());
+    // since this will be read from yaml files that I write, this should
+    // *really* never happen.
+    std::ostringstream ostr;
+    ostr << "Type name " << type_name << " is not a valid element type";
+    throw std::runtime_error(ostr.str());
   }
 }
 
@@ -124,8 +124,8 @@ const static std::map<std::tuple<Elements, Elements>, double> damage_coeffs{
 
 // need to have some centralized notion about what a tower's charcteristics are.
 // if each of these essences have 1 or more attributes associated with them,
-// then those attributes should map to the tower properties. e.g. ares might be %
-// enhanced damage; the tower_properties should have a damage range attribute
+// then those attributes should map to the tower properties. e.g. ares might be
+// % enhanced damage; the tower_properties should have a damage range attribute
 
 template <typename T> struct range {
   range() : low(0), high(0) {}

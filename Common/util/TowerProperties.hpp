@@ -20,20 +20,22 @@ struct tower_property_modifier {
   using damage_type = std::array<dmg_dist, NUM_ELEM>;
 
   tower_property_modifier()
-      : damage_value{}, enhanced_damage_value{}, enhanced_damage_affinity{}, added_damage_value{} {
+      : damage_value{}, enhanced_damage_value{}, enhanced_damage_affinity{},
+        added_damage_value{} {
     enhanced_speed_value = 0;
     attack_speed_value = 0;
     attack_range_value = 0;
     crit_chance_value = 0;
     crit_multiplier_value = 0;
-		armor_pierce_damage = 0;
+    armor_pierce_damage = 0;
   }
 
-	void merge(tower_property_modifier other) {
+  void merge(tower_property_modifier other) {
     for (int elem_idx = 0; elem_idx < NUM_ELEM; elem_idx++) {
       damage_value[elem_idx] += other.damage_value[elem_idx];
       enhanced_damage_value[elem_idx] += other.enhanced_damage_value[elem_idx];
-      enhanced_damage_affinity[elem_idx] += other.enhanced_damage_affinity[elem_idx];
+      enhanced_damage_affinity[elem_idx] +=
+          other.enhanced_damage_affinity[elem_idx];
       added_damage_value[elem_idx] += other.added_damage_value[elem_idx];
     }
     enhanced_speed_value += other.enhanced_speed_value;
@@ -45,11 +47,17 @@ struct tower_property_modifier {
     crit_chance_value += other.crit_chance_value;
     crit_multiplier_value += other.crit_multiplier_value;
 
-		//take the effects from the other modfifier
-		on_attack_events.insert(std::end(on_attack_events), std::begin(other.on_attack_events), std::end(other.on_attack_events));
-		on_hit_events.insert(std::end(on_hit_events), std::begin(other.on_hit_events), std::end(other.on_hit_events));
-		on_death_events.insert(std::end(on_death_events), std::begin(other.on_death_events), std::end(other.on_death_events));
-	}
+    // take the effects from the other modfifier
+    on_attack_events.insert(std::end(on_attack_events),
+                            std::begin(other.on_attack_events),
+                            std::end(other.on_attack_events));
+    on_hit_events.insert(std::end(on_hit_events),
+                         std::begin(other.on_hit_events),
+                         std::end(other.on_hit_events));
+    on_death_events.insert(std::end(on_death_events),
+                           std::begin(other.on_death_events),
+                           std::end(other.on_death_events));
+  }
 
   // low and high range of attack damage per damage type
   damage_type damage_value;
@@ -59,7 +67,7 @@ struct tower_property_modifier {
   // damage added post-modifiers per element
   std::array<float, NUM_ELEM> added_damage_value;
 
-  //typeless post-armor damage
+  // typeless post-armor damage
   float armor_pierce_damage;
 
   float enhanced_speed_value;
@@ -88,9 +96,7 @@ struct tower_properties {
   static constexpr int NUM_ELEM = tower_property_modifier::NUM_ELEM;
   using damage_type = tower_property_modifier::damage_type;
 
-  tower_properties()
-      : modifier() 
-  {}
+  tower_properties() : modifier() {}
 
   tower_properties &operator+=(const tower_properties &rhs_modifier) {
     apply_property_modifier(rhs_modifier.modifier);

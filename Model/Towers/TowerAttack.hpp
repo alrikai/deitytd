@@ -178,8 +178,9 @@ struct HomingAttackMovement {
       // if it's just out of range of the tower, then the attack should persist
       // if the mob is dead, then the attack is no longer really relevant....
       // although the situation gets complicated if we have splash damage, etc.
-      // Not sure what to do in that case actually. Maybe have it detonate at the
-      // mob's location of death? (i.e. it becomes a FixedAttackMovement object)
+      // Not sure what to do in that case actually. Maybe have it detonate at
+      // the mob's location of death? (i.e. it becomes a FixedAttackMovement
+      // object)
       std::cout << "NOTE: The attack's mob is gone/reset" << std::endl;
     }
 
@@ -187,9 +188,9 @@ struct HomingAttackMovement {
   }
 
   // NOTE: having it target a monster might be too restrictive -- would be nice
-  // to have something more generic than a Monster (i.e. if we had some type like
-  // 'Moveable' which governed anything that could be moved around the map).... I
-  // guess this will work for now though?
+  // to have something more generic than a Monster (i.e. if we had some type
+  // like 'Moveable' which governed anything that could be moved around the
+  // map).... I guess this will work for now though?
   std::weak_ptr<Monster> target;
   FixedAttackMovement mover;
 };

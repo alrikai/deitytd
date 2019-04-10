@@ -16,62 +16,71 @@
 #include <algorithm>
 #include <memory>
 
-//compute the total damage values for an attack on a per-element basis, post-mitigation
-void compute_mitigation(std::array<float, tower_property_modifier::NUM_ELEM>& attack, const MonsterStats& mob_stats) {
+// compute the total damage values for an attack on a per-element basis,
+// post-mitigation
+void compute_mitigation(
+    std::array<float, tower_property_modifier::NUM_ELEM> &attack,
+    const MonsterStats &mob_stats) {
   bool has_thresh = mob_stats.thresh_armor > 0;
   for (size_t elem_idx = 0; elem_idx < attack.size(); elem_idx++) {
     if (has_thresh) {
-      attack[elem_idx] = attack[elem_idx] > mob_stats.thresh_armor ? mob_stats.thresh_armor : attack[elem_idx];
+      attack[elem_idx] = attack[elem_idx] > mob_stats.thresh_armor
+                             ? mob_stats.thresh_armor
+                             : attack[elem_idx];
     }
-    attack[elem_idx] = (1 - mob_stats.percent_armor) * (attack[elem_idx] - mob_stats.flat_armor);
-    //threshold the mitigation to be 0 (i.e. if the flat_armor > attack)
+    attack[elem_idx] = (1 - mob_stats.percent_armor) *
+                       (attack[elem_idx] - mob_stats.flat_armor);
+    // threshold the mitigation to be 0 (i.e. if the flat_armor > attack)
     attack[elem_idx] = attack[elem_idx] < 0 ? 0 : attack[elem_idx];
   }
 }
 
-//merge the per-element damage and get the final, scalar HP deduction amount
-float compute_damage(const tower_properties &props, const MonsterStats& mob_stats) {
+// merge the per-element damage and get the final, scalar HP deduction amount
+float compute_damage(const tower_properties &props,
+                     const MonsterStats &mob_stats) {
   auto attack_roller = Randomize::UniformRoller();
-  std::array<float, tower_property_modifier::NUM_ELEM> damage {};
+  std::array<float, tower_property_modifier::NUM_ELEM> damage{};
   const Elements ttype = mob_stats.armor_class;
   bool atk_crit = attack_roller.get_roll(1) < props.modifier.crit_chance_value;
-  //apply base damage and %-ED
+  // apply base damage and %-ED
   for (int elem_idx = 0; elem_idx < tower_properties::NUM_ELEM; elem_idx++) {
-    //roll the amount here, so we collapse the [low - high) range down to a float
+    // roll the amount here, so we collapse the [low - high) range down to a
+    // float
     auto elem_dmg = props.modifier.damage_value[elem_idx];
-    const auto raw_dmg = elem_dmg.low + attack_roller.get_roll(elem_dmg.high - elem_dmg.low);
+    const auto raw_dmg =
+        elem_dmg.low + attack_roller.get_roll(elem_dmg.high - elem_dmg.low);
     damage[elem_idx] = raw_dmg;
     damage[elem_idx] *= (1 + props.modifier.enhanced_damage_value[elem_idx]);
-    //apply crit damage
+    // apply crit damage
     if (atk_crit) {
       damage[elem_idx] *= (1 + props.modifier.crit_multiplier_value);
     }
 
-    //have the built-in affinity effects
-    const auto atkcoeff_type = std::make_pair(
-        static_cast<Elements>(elem_idx), ttype);
-    const auto dmg_factor_it =
-        ElementInfo::damage_coeffs.find(atkcoeff_type);
+    // have the built-in affinity effects
+    const auto atkcoeff_type =
+        std::make_pair(static_cast<Elements>(elem_idx), ttype);
+    const auto dmg_factor_it = ElementInfo::damage_coeffs.find(atkcoeff_type);
 
     float intrinisic_affinity_multiplier = 0;
     if (dmg_factor_it != ElementInfo::damage_coeffs.end()) {
       intrinisic_affinity_multiplier = dmg_factor_it->second;
     }
-    //apply the affinity modifier
-    float affinity_modifier = 1 + intrinisic_affinity_multiplier + props.modifier.enhanced_damage_affinity[static_cast<int>(ttype)];  
+    // apply the affinity modifier
+    float affinity_modifier =
+        1 + intrinisic_affinity_multiplier +
+        props.modifier.enhanced_damage_affinity[static_cast<int>(ttype)];
     damage[elem_idx] *= affinity_modifier;
-    //aply flat added damage
+    // aply flat added damage
     damage[elem_idx] += props.modifier.added_damage_value[elem_idx];
   }
 
-  //compute the mob defense reduction
+  // compute the mob defense reduction
   compute_mitigation(damage, mob_stats);
 
-  //TODO: have any post-defense / armor piercing damage applied here
+  // TODO: have any post-defense / armor piercing damage applied here
 
   return std::accumulate(damage.begin(), damage.end(), 0);
 }
-
 
 // TODO: try prototyping how the logic for applying the game mechanics will
 // be...
@@ -105,7 +114,8 @@ void compute_attackhit(const std::list<std::weak_ptr<Monster>> &tile_mobs,
       const bool mob_alive = target_mob->recieve_damage(atk_dmg);
 
       std::cout << "attack " << attack->get_id() << " did " << atk_dmg
-                << " damage" << " to mob " << target_mob->get_name() << std::endl;
+                << " damage"
+                << " to mob " << target_mob->get_name() << std::endl;
 
       // TODO: generate the status updates
 

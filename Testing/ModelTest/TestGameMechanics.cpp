@@ -126,6 +126,7 @@ protected:
 
   TestStubs::FrontStub<TDBackendType>* view;
   std::shared_ptr<TDType> td;
+  
 
   //common game mechanics state values
   float tower_xcoord;

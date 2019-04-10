@@ -83,7 +83,7 @@ public:
                 // point
                 path_tiles[flat_neighbor_idx] = current_tile;
                 //... also keep track of the distance of the tile wrt the spawn
-                //point
+                // point
                 distance_tiles[flat_neighbor_idx] =
                     distance_tiles[flat_tile_idx] + 1;
 
@@ -103,8 +103,9 @@ public:
   }
 
   // TODO: give some accessor to get the path from any given point to the
-  // destination -- might need to re-arrange the path_tiles datastructure to make
-  // this a bit easier? -- what should we return it as? a vector, or a list?
+  // destination -- might need to re-arrange the path_tiles datastructure to
+  // make this a bit easier? -- what should we return it as? a vector, or a
+  // list?
 
   // makes the path list from the specified source tile to the dest tile
   // NOTE: this function has some (hidden) dependancy on the above function --

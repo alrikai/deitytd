@@ -43,7 +43,7 @@ public:
     }
     std::srand(seed);
 
-    td_view = std::make_unique<ViewType<ModelType>>(); 
+    td_view = std::make_unique<ViewType<ModelType>>();
 
     TDPlayerInformation defaultplayer_state(20, 0, 20);
 
@@ -94,13 +94,9 @@ public:
                                  tower_name);
   }
 
-  ViewType<ModelType>* get_td_frontend() const { 
-    return td_view.get();
-  }
+  ViewType<ModelType> *get_td_frontend() const { return td_view.get(); }
 
-  ModelType* get_td_backend () const {
-    return td_backend.get();
-  }
+  ModelType *get_td_backend() const { return td_backend.get(); }
 
 private:
   // aim for 30Hz
@@ -224,7 +220,7 @@ private:
         // to figure out exactly what sort of interface is best here
         wavemob_metadata.mob_model_id = mob_model_id;
         wavemob_metadata.mob_id = mob_id;
-        wavemob_metadata.num_mobs = 2; //TODO: increate the #mobs
+        wavemob_metadata.num_mobs = 2; // TODO: increate the #mobs
         wave_mobinfo.push_back(wavemob_metadata);
 
         bool has_valid_path = TDState::td->td_backend->enter_active_state(
@@ -271,12 +267,12 @@ private:
       // NOTE: we hope to say that each timestamp is equal to 1 iter (in ms).
       // What do we do about the rounds that are over-time however?
       //--> the backend shouldnt care, since the backend just works in terms of
-      //timestamp values (and it doesn't care about the time associated with
+      // timestamp values (and it doesn't care about the time associated with
       // them). The issue would arise in the frontend, where we would move based
       // on the conversion of the backend timestamp value to ms. However, if we
       // have all of our backend->frontend events as absolute positions (e.g.
-      // attack destination, mob destination, etc). then this shouldn't produce a
-      // noticable skew, and it would be self-correcting (i.e. if we send
+      // attack destination, mob destination, etc). then this shouldn't produce
+      // a noticable skew, and it would be self-correcting (i.e. if we send
       // position updates every 150ms)
       TDState::td->timestamp++;
 

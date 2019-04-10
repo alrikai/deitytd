@@ -29,13 +29,13 @@
  */
 class Monster {
 public:
-  Monster(const CharacterModels::ModelIDs mob_id, const std::string &mob_name, const MonsterStats& stats)
-      : Monster (mob_id, mob_name, stats, 0, 0)
-  {}
-  Monster(const CharacterModels::ModelIDs mob_id, const std::string &mob_name, const MonsterStats& stats,
-          float starting_col, float starting_row)
-      : current_position(starting_col, starting_row), id(mob_id), attributes(stats),
-        monster_name(mob_name) {
+  Monster(const CharacterModels::ModelIDs mob_id, const std::string &mob_name,
+          const MonsterStats &stats)
+      : Monster(mob_id, mob_name, stats, 0, 0) {}
+  Monster(const CharacterModels::ModelIDs mob_id, const std::string &mob_name,
+          const MonsterStats &stats, float starting_col, float starting_row)
+      : current_position(starting_col, starting_row), id(mob_id),
+        attributes(stats), monster_name(mob_name) {
     current_tile = nullptr;
     destination_tile = nullptr;
 
@@ -184,18 +184,20 @@ Monster *make_monster(MonsterArgs... args) {
   return new MonsterT(std::forward<MonsterArgs>(args)...);
 }
 
-inline std::tuple<std::string, CharacterModels::ModelIDs, MonsterStats> parse_monster_info(const std::string& mob_cfg) {
+inline std::tuple<std::string, CharacterModels::ModelIDs, MonsterStats>
+parse_monster_info(const std::string &mob_cfg) {
   YAML::Node cfg_root = YAML::LoadFile(mob_cfg);
   if (cfg_root.IsNull()) {
-      std::ostringstream ostr;
-      ostr << "ERROR -- config yaml file " << mob_cfg << " not found";
-      throw std::runtime_error(ostr.str());
+    std::ostringstream ostr;
+    ostr << "ERROR -- config yaml file " << mob_cfg << " not found";
+    throw std::runtime_error(ostr.str());
   }
 
   YAML::Node mob_node = cfg_root["MonsterAttributes"];
   const std::string base_name = mob_node["name"].as<std::string>();
   const std::string model = mob_node["model"].as<std::string>();
-  const CharacterModels::ModelIDs mob_model_id = CharacterModels::to_modelid(model);
+  const CharacterModels::ModelIDs mob_model_id =
+      CharacterModels::to_modelid(model);
 
   YAML::Node mob_attributes = mob_node["attributes"];
   const auto health = mob_attributes["health"].as<float>();
@@ -206,16 +208,21 @@ inline std::tuple<std::string, CharacterModels::ModelIDs, MonsterStats> parse_mo
   const auto mob_estr = mob_attributes["element_ID"].as<std::string>();
   const auto element_type = ElementInfo::get_element_type(mob_estr);
 
-  MonsterStats stats (health, speed, element_type, armor_flat, armor_percent, armor_thresh);
+  MonsterStats stats(health, speed, element_type, armor_flat, armor_percent,
+                     armor_thresh);
   return std::make_tuple(base_name, mob_model_id, stats);
 }
 
-inline std::vector<std::shared_ptr<Monster>> parse_monster(const std::string& mob_cfg, const std::string name_prefix, size_t num_mobs=1) {
+inline std::vector<std::shared_ptr<Monster>>
+parse_monster(const std::string &mob_cfg, const std::string name_prefix,
+              size_t num_mobs = 1) {
   auto minfo = parse_monster_info(mob_cfg);
   std::vector<std::shared_ptr<Monster>> mobs;
   for (size_t idx = 0; idx < num_mobs; idx++) {
-    std::string mobname = name_prefix + std::get<0>(minfo) + std::to_string(idx);
-    mobs.emplace_back(std::make_shared<Monster>(std::get<1>(minfo), std::move(mobname), std::move(std::get<2>(minfo))));
+    std::string mobname =
+        name_prefix + std::get<0>(minfo) + std::to_string(idx);
+    mobs.emplace_back(std::make_shared<Monster>(
+        std::get<1>(minfo), std::move(mobname), std::move(std::get<2>(minfo))));
   }
   return mobs;
 }

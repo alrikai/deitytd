@@ -17,9 +17,10 @@ struct MonsterStats {
    *
    */
 
-  MonsterStats(float health, float speed, Elements armor, float flat_def, float percent_def, float thresh_def) 
-      : health(health), speed(speed), armor_class(armor), flat_armor(flat_def), percent_armor(percent_def), thresh_armor(thresh_def)
-  {}
+  MonsterStats(float health, float speed, Elements armor, float flat_def,
+               float percent_def, float thresh_def)
+      : health(health), speed(speed), armor_class(armor), flat_armor(flat_def),
+        percent_armor(percent_def), thresh_armor(thresh_def) {}
 
   float health;
   float speed;

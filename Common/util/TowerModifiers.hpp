@@ -63,7 +63,7 @@ struct flat_damage : stat_attribute_modifier {
     float scale_factor;
 
     constexpr inline uint32_t get_ID() const { return flat_damage::ID; }
-    constexpr inline const char* get_name() const { return "flat_damage"; }
+    constexpr inline const char *get_name() const { return "flat_damage"; }
   };
 
   //----------------------------------------------------------
@@ -77,7 +77,7 @@ struct flat_damage : stat_attribute_modifier {
 
   inline void apply_modifier(tower_properties &stats) override final {
     // this would give a flat +damage to all stats
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -102,7 +102,7 @@ struct enhanced_damage : stat_attribute_modifier {
     float ed_percent;
     float scale_factor;
     constexpr inline uint32_t get_ID() const { return enhanced_damage::ID; }
-    constexpr inline const char* get_name() const { return "enhanced_damage"; }
+    constexpr inline const char *get_name() const { return "enhanced_damage"; }
   };
 
   //----------------------------------------------------------
@@ -119,7 +119,7 @@ struct enhanced_damage : stat_attribute_modifier {
   // for if we're applying the modifier directly....
   inline void apply_modifier(tower_properties &stats) override final {
     // this would give a +X% enhanced damage to all stats
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
 
   // or if we are aggregating a set of modifiers to be applied later...
@@ -145,7 +145,7 @@ struct enhanced_speed : stat_attribute_modifier {
     float es_percent;
     float scale_factor;
     constexpr inline uint32_t get_ID() const { return enhanced_speed::ID; }
-    constexpr inline const char* get_name() const { return "enhanced_speed"; }
+    constexpr inline const char *get_name() const { return "enhanced_speed"; }
   };
 
   //----------------------------------------------------------
@@ -160,7 +160,7 @@ struct enhanced_speed : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -180,7 +180,7 @@ struct flat_range : stat_attribute_modifier {
     float range;
     float scale_factor;
     constexpr inline uint32_t get_ID() const { return flat_range::ID; }
-    constexpr inline const char* get_name() const { return "flat_range"; }
+    constexpr inline const char *get_name() const { return "flat_range"; }
   };
 
   //----------------------------------------------------------
@@ -192,7 +192,7 @@ struct flat_range : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -212,7 +212,7 @@ struct flat_crit_chance : stat_attribute_modifier {
     float crit_percent;
     float scale_factor;
     constexpr inline uint32_t get_ID() const { return flat_crit_chance::ID; }
-    constexpr inline const char* get_name() const { return "flat_crit_chance"; }
+    constexpr inline const char *get_name() const { return "flat_crit_chance"; }
   };
 
   //----------------------------------------------------------
@@ -225,7 +225,7 @@ struct flat_crit_chance : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -244,8 +244,12 @@ struct flat_crit_multiplier : stat_attribute_modifier {
   struct parameter_cfg {
     float crit_multiplier_percent;
     float scale_factor;
-    constexpr inline uint32_t get_ID() const { return flat_crit_multiplier::ID; }
-    constexpr inline const char* get_name() const { return "flat_crit_multiplier"; }
+    constexpr inline uint32_t get_ID() const {
+      return flat_crit_multiplier::ID;
+    }
+    constexpr inline const char *get_name() const {
+      return "flat_crit_multiplier";
+    }
   };
 
   //----------------------------------------------------------
@@ -258,7 +262,7 @@ struct flat_crit_multiplier : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -275,13 +279,13 @@ struct flat_crit_multiplier : stat_attribute_modifier {
 // can give a flat +damage for one type of damage
 struct flat_type_damage : stat_attribute_modifier {
   static constexpr uint32_t ID = 0x7;
-	static constexpr uint32_t FD_OFFSET = 0x00FF0000;
+  static constexpr uint32_t FD_OFFSET = 0x00FF0000;
   static constexpr uint32_t CHAOS_ID = FD_OFFSET + 0x0;
   static constexpr uint32_t WATER_ID = FD_OFFSET + 0x1;
   static constexpr uint32_t AIR_ID = FD_OFFSET + 0x2;
   static constexpr uint32_t FIRE_ID = FD_OFFSET + 0x3;
   static constexpr uint32_t EARTH_ID = FD_OFFSET + 0x4;
-  static constexpr const char* NAME = "flat_type_damage";
+  static constexpr const char *NAME = "flat_type_damage";
 
   struct parameter_cfg {
     float low_val;
@@ -293,37 +297,39 @@ struct flat_type_damage : stat_attribute_modifier {
       return flat_type_damage::ID + static_cast<int>(type) +
              flat_type_damage::CHAOS_ID;
     }
-    inline const char* get_name() const { 
-			std::string type {"flat_type_damage_"}; 
-		  auto typecode = get_ID() - ID;
-			switch(typecode) {
-        case CHAOS_ID:
-					type += "chaos";
-					break;
-				case WATER_ID:
-					type += "water";
-					break;
-				case AIR_ID:
-					type += "air";
-					break;
-				case FIRE_ID:
-					type += "fire";
-					break;
-				case EARTH_ID:
-					type += "earth";
-					break;
-				default:
-					std::string err_msg {"Invalid flat_type_damage typecode " + std::to_string(typecode)};
-					throw std::runtime_error(err_msg);
-			}
-		  return type.c_str();
-		}
+    inline const char *get_name() const {
+      std::string type{"flat_type_damage_"};
+      auto typecode = get_ID() - ID;
+      switch (typecode) {
+      case CHAOS_ID:
+        type += "chaos";
+        break;
+      case WATER_ID:
+        type += "water";
+        break;
+      case AIR_ID:
+        type += "air";
+        break;
+      case FIRE_ID:
+        type += "fire";
+        break;
+      case EARTH_ID:
+        type += "earth";
+        break;
+      default:
+        std::string err_msg{"Invalid flat_type_damage typecode " +
+                            std::to_string(typecode)};
+        throw std::runtime_error(err_msg);
+      }
+      return type.c_str();
+    }
   };
 
   //----------------------------------------------------------
 
   flat_type_damage(parameter_cfg cfg)
-      : value(cfg.low_val, cfg.high_val), type(cfg.type), scale(cfg.scale_factor) {
+      : value(cfg.low_val, cfg.high_val), type(cfg.type),
+        scale(cfg.scale_factor) {
     std::cout << "setting type " << static_cast<int>(type) << " -- flat dmg ["
               << value.low << ", " << value.high << "]" << std::endl;
   }
@@ -334,7 +340,7 @@ struct flat_type_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -353,13 +359,13 @@ struct flat_type_damage : stat_attribute_modifier {
 // can give a flat +damage for one type of damage
 struct enhanced_type_damage : stat_attribute_modifier {
   static constexpr uint32_t ID = 0x8;
-	static constexpr uint32_t ED_OFFSET = 0x00FE0000;
+  static constexpr uint32_t ED_OFFSET = 0x00FE0000;
   static constexpr uint32_t CHAOS_ID = ED_OFFSET + 0x0;
   static constexpr uint32_t WATER_ID = ED_OFFSET + 0x1;
   static constexpr uint32_t AIR_ID = ED_OFFSET + 0x2;
   static constexpr uint32_t FIRE_ID = ED_OFFSET + 0x3;
   static constexpr uint32_t EARTH_ID = ED_OFFSET + 0x4;
-  static constexpr const char* NAME = "enhanced_type_damage";
+  static constexpr const char *NAME = "enhanced_type_damage";
 
   struct parameter_cfg {
     float ed_percent_amount;
@@ -370,31 +376,32 @@ struct enhanced_type_damage : stat_attribute_modifier {
       return enhanced_type_damage::ID + static_cast<int>(type) +
              enhanced_type_damage::CHAOS_ID;
     }
-    inline const char* get_name() const { 
-			std::string type {"enhanced_type_damage_"}; 
-		  auto typecode = get_ID() - ID;
-			switch(typecode) {
-        case CHAOS_ID:
-					type += "chaos";
-					break;
-				case WATER_ID:
-					type += "water";
-					break;
-				case AIR_ID:
-					type += "air";
-					break;
-				case FIRE_ID:
-					type += "fire";
-					break;
-				case EARTH_ID:
-					type += "earth";
-					break;
-				default:
-					std::string err_msg {"Invalid enhanced_type_damage_ typecode " + std::to_string(typecode)};
-					throw std::runtime_error(err_msg);
-			}
-		  return type.c_str();
-		}
+    inline const char *get_name() const {
+      std::string type{"enhanced_type_damage_"};
+      auto typecode = get_ID() - ID;
+      switch (typecode) {
+      case CHAOS_ID:
+        type += "chaos";
+        break;
+      case WATER_ID:
+        type += "water";
+        break;
+      case AIR_ID:
+        type += "air";
+        break;
+      case FIRE_ID:
+        type += "fire";
+        break;
+      case EARTH_ID:
+        type += "earth";
+        break;
+      default:
+        std::string err_msg{"Invalid enhanced_type_damage_ typecode " +
+                            std::to_string(typecode)};
+        throw std::runtime_error(err_msg);
+      }
+      return type.c_str();
+    }
   };
 
   //----------------------------------------------------------
@@ -407,7 +414,7 @@ struct enhanced_type_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -434,7 +441,9 @@ struct flat_damage_onhit : event_attribute_modifier {
     float scale_factor;
 
     constexpr inline uint32_t get_ID() const { return flat_damage_onhit::ID; }
-    constexpr inline const char* get_name() const { return "flat_damage_onhit"; }
+    constexpr inline const char *get_name() const {
+      return "flat_damage_onhit";
+    }
   };
 
   //----------------------------------------------------------
@@ -474,7 +483,8 @@ struct flat_damage_onhit : event_attribute_modifier {
   }
 
   //@HERE -- need to cycle through the active application of it, and overwrite
-  //the oldest with the new application. Also need to decrease the existing ones
+  // the oldest with the new application. Also need to decrease the existing
+  // ones
   // by the time delta and de-activate any that are <= 0
   void apply_on_event(Monster *mob, Tower *tower,
                       float time_delta) override final {
@@ -508,12 +518,12 @@ struct flat_damage_onhit : event_attribute_modifier {
   int oldest_application;
 };
 
-//this is flat typed damage that is added *after* enhancements are taken into account,
-//whereas flat_damage is done *pre* enhancements. 
-//So, we can get bigger #'s for this one, but it will not scale as well. 
+// this is flat typed damage that is added *after* enhancements are taken into
+// account, whereas flat_damage is done *pre* enhancements. So, we can get bigger
+// #'s for this one, but it will not scale as well.
 struct flat_added_damage : stat_attribute_modifier {
   static constexpr uint32_t ID = 0xa;
-	static constexpr uint32_t FAD_OFFSET = 0x00FD0000;
+  static constexpr uint32_t FAD_OFFSET = 0x00FD0000;
   static constexpr uint32_t CHAOS_ID = FAD_OFFSET + 0x0;
   static constexpr uint32_t WATER_ID = FAD_OFFSET + 0x1;
   static constexpr uint32_t AIR_ID = FAD_OFFSET + 0x2;
@@ -528,33 +538,33 @@ struct flat_added_damage : stat_attribute_modifier {
       return flat_added_damage::ID + static_cast<int>(type) +
              flat_added_damage::CHAOS_ID;
     }
-    inline const char* get_name() const { 
-			std::string type {"enhanced_type_damage_"}; 
-		  auto typecode = get_ID() - ID;
-			switch(typecode) {
-        case CHAOS_ID:
-					type += "chaos";
-					break;
-				case WATER_ID:
-					type += "water";
-					break;
-				case AIR_ID:
-					type += "air";
-					break;
-				case FIRE_ID:
-					type += "fire";
-					break;
-				case EARTH_ID:
-					type += "earth";
-					break;
-				default:
-					std::string err_msg {"Invalid enhanced_type_damage_ typecode " + std::to_string(typecode)};
-					throw std::runtime_error(err_msg);
-			}
-		  return type.c_str();
-		}  
-	};
-
+    inline const char *get_name() const {
+      std::string type{"enhanced_type_damage_"};
+      auto typecode = get_ID() - ID;
+      switch (typecode) {
+      case CHAOS_ID:
+        type += "chaos";
+        break;
+      case WATER_ID:
+        type += "water";
+        break;
+      case AIR_ID:
+        type += "air";
+        break;
+      case FIRE_ID:
+        type += "fire";
+        break;
+      case EARTH_ID:
+        type += "earth";
+        break;
+      default:
+        std::string err_msg{"Invalid enhanced_type_damage_ typecode " +
+                            std::to_string(typecode)};
+        throw std::runtime_error(err_msg);
+      }
+      return type.c_str();
+    }
+  };
 
   //----------------------------------------------------------
 
@@ -570,7 +580,7 @@ struct flat_added_damage : stat_attribute_modifier {
   //----------------------------------------------------------
 
   inline void apply_modifier(tower_properties &stats) override final {
-    aggregate_modifier(stats.modifier); 
+    aggregate_modifier(stats.modifier);
   }
   inline void
   aggregate_modifier(tower_property_modifier &stats_modifier) override final {
@@ -584,7 +594,6 @@ struct flat_added_damage : stat_attribute_modifier {
   Elements type;
   float scale;
 };
-
 
 /*
 
@@ -615,26 +624,34 @@ struct  : tower_attribute_modifier
 };
 */
 
-} 
+} // namespace TowerModifiers
 
 std::ostream &operator<<(std::ostream &stream,
                          const TowerModifiers::flat_damage::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::enhanced_damage::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::enhanced_speed::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::enhanced_damage::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::enhanced_speed::parameter_cfg &cfg);
 std::ostream &operator<<(std::ostream &stream,
                          const TowerModifiers::flat_range::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::flat_crit_chance::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::flat_crit_multiplier::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::flat_type_damage::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::enhanced_type_damage::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::flat_damage_onhit::parameter_cfg &cfg);
-std::ostream &operator<<(std::ostream &stream,
-                         const TowerModifiers::flat_added_damage::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::flat_crit_chance::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::flat_crit_multiplier::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::flat_type_damage::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::enhanced_type_damage::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::flat_damage_onhit::parameter_cfg &cfg);
+std::ostream &
+operator<<(std::ostream &stream,
+           const TowerModifiers::flat_added_damage::parameter_cfg &cfg);
 #endif

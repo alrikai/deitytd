@@ -15,8 +15,8 @@
 #include "util/Types.hpp"
 
 //#include "TowerProperties.hpp"
-#include "shared/common_information.hpp"
 #include "Combinations/TowerCombiner.hpp"
+#include "shared/common_information.hpp"
 #include "util/AttributeModifiers.hpp"
 
 //#include "Essences.hpp"
@@ -97,14 +97,14 @@ public:
     return true;
   }
 
-	/*
-  virtual void
-  apply_modifier(const std::vector<tower_properties> &modifier_list) {
-    for (auto modifier : modifier_list) {
-      base_attributes += modifier;
-    }
-  }
-	*/
+  /*
+virtual void
+apply_modifier(const std::vector<tower_properties> &modifier_list) {
+for (auto modifier : modifier_list) {
+base_attributes += modifier;
+}
+}
+  */
 
   // NOTE: we would also trigger any on-kill effects here (if the tower has
   // them)
@@ -141,7 +141,7 @@ public:
     return info;
   }
 
-	tower_properties compute_attack_damage() const;
+  tower_properties compute_attack_damage() const;
 
   inline std::string get_name() const { return tower_name; }
 

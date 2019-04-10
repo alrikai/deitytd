@@ -109,6 +109,4 @@ private:
   player_information_t player_info;
 };
 
-
-
 #endif

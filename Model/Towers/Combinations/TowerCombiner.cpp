@@ -33,16 +33,26 @@ const std::unordered_map<char, uint32_t>
         {'Z', TowerModifiers::flat_crit_chance::ID + 0},
         {'B', TowerModifiers::flat_crit_multiplier::ID + 0},
         {'M', TowerModifiers::flat_crit_multiplier::ID + 0},
-        {'H', TowerModifiers::flat_type_damage::ID + TowerModifiers::flat_type_damage::CHAOS_ID},
-        {'W', TowerModifiers::flat_type_damage::ID + TowerModifiers::flat_type_damage::WATER_ID},
-        {'A', TowerModifiers::flat_type_damage::ID + TowerModifiers::flat_type_damage::AIR_ID},
-        {'F', TowerModifiers::flat_type_damage::ID + TowerModifiers::flat_type_damage::FIRE_ID},
-        {'G', TowerModifiers::flat_type_damage::ID + TowerModifiers::flat_type_damage::EARTH_ID},
-        {'X', TowerModifiers::enhanced_type_damage::ID + TowerModifiers::enhanced_type_damage::CHAOS_ID},
-        {'V', TowerModifiers::enhanced_type_damage::ID + TowerModifiers::enhanced_type_damage::WATER_ID},
-        {'Y', TowerModifiers::enhanced_type_damage::ID + TowerModifiers::enhanced_type_damage::AIR_ID},
-        {'J', TowerModifiers::enhanced_type_damage::ID + TowerModifiers::enhanced_type_damage::FIRE_ID},
-        {'P', TowerModifiers::enhanced_type_damage::ID + TowerModifiers::enhanced_type_damage::EARTH_ID}};
+        {'H', TowerModifiers::flat_type_damage::ID +
+                  TowerModifiers::flat_type_damage::CHAOS_ID},
+        {'W', TowerModifiers::flat_type_damage::ID +
+                  TowerModifiers::flat_type_damage::WATER_ID},
+        {'A', TowerModifiers::flat_type_damage::ID +
+                  TowerModifiers::flat_type_damage::AIR_ID},
+        {'F', TowerModifiers::flat_type_damage::ID +
+                  TowerModifiers::flat_type_damage::FIRE_ID},
+        {'G', TowerModifiers::flat_type_damage::ID +
+                  TowerModifiers::flat_type_damage::EARTH_ID},
+        {'X', TowerModifiers::enhanced_type_damage::ID +
+                  TowerModifiers::enhanced_type_damage::CHAOS_ID},
+        {'V', TowerModifiers::enhanced_type_damage::ID +
+                  TowerModifiers::enhanced_type_damage::WATER_ID},
+        {'Y', TowerModifiers::enhanced_type_damage::ID +
+                  TowerModifiers::enhanced_type_damage::AIR_ID},
+        {'J', TowerModifiers::enhanced_type_damage::ID +
+                  TowerModifiers::enhanced_type_damage::FIRE_ID},
+        {'P', TowerModifiers::enhanced_type_damage::ID +
+                  TowerModifiers::enhanced_type_damage::EARTH_ID}};
 
 //---------------------------------------------------------------------------------------------------------
 
@@ -104,7 +114,7 @@ TowerCombiner::make_wordcombination(const std::string &word) const {
   auto word_score = compute_wordscore(word);
 
   tower_property_modifier stats_modifier;
-	const auto attribute_fac = attribute_cfg.get_factory();
+  const auto attribute_fac = attribute_cfg.get_factory();
   // next, need the list of attributes for the word
   for (auto word_unit : word) {
     auto modifier_key_it = character_attribute_map.find(word_unit);

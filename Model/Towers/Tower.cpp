@@ -39,11 +39,10 @@ std::string to_string_wprecision(const T val, const uint32_t ndec = 2) {
 // the string conversions T_T
 std::string Tower::get_stats() const {
   std::ostringstream ostr;
-  ostr <<"Base Stats:\n" << base_attributes;
+  ostr << "Base Stats:\n" << base_attributes;
   ostr << "\n\nCurrent Stats:\n" << attack_attributes;
   return ostr.str();
 }
-
 
 tower_properties Tower::compute_attack_damage() const {
   auto attributes = base_attributes;
@@ -53,7 +52,7 @@ tower_properties Tower::compute_attack_damage() const {
     effect_it->aggregate_modifier(status_modifier);
   }
   attributes.apply_property_modifier(std::move(status_modifier));
-	return attributes;
+  return attributes;
 }
 
 /*
@@ -102,8 +101,8 @@ Tower::generate_attack(const std::string &attack_id, const uint64_t timestamp) {
 
 bool Tower::add_modifier(tower_property_modifier &&modifier) {
 
-	enhancements.merge(std::move(modifier));
-	//base_attributes.apply_property_modifier(modifier);
+  enhancements.merge(std::move(modifier));
+  // base_attributes.apply_property_modifier(modifier);
 
   /*
   // NOTE: what do we do here?
@@ -133,7 +132,7 @@ namespace TowerGenerator {
 std::unique_ptr<Tower> make_fundamentaltower(const uint32_t ID, const int tier,
                                              const std::string &tower_name,
                                              const float row, const float col) {
-  // make some base stats based on the tower tier -- 
+  // make some base stats based on the tower tier --
   // TODO: this should be in a yaml file
   tower_properties base_attributes;
 
@@ -148,8 +147,8 @@ std::unique_ptr<Tower> make_fundamentaltower(const uint32_t ID, const int tier,
       new Tower(std::move(base_attributes), ID, tower_name, tier, row, col));
 
   // load a fractal mesh -- the base tower will always look the same, but the
-  // tower models will diverge as they're upgraded. would it be worth sharing the
-  // base tower model and using a copy-on-write scheme for it?
+  // tower models will diverge as they're upgraded. would it be worth sharing
+  // the base tower model and using a copy-on-write scheme for it?
   std::vector<std::vector<uint32_t>> polygon_mesh;
   std::vector<std::vector<float>> polygon_points;
   const std::string mesh_filename{TDHelpers::get_basepath() +

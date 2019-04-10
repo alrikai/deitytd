@@ -9,9 +9,9 @@
 #ifndef TD_TOWER_COMBINER_HPP
 #define TD_TOWER_COMBINER_HPP
 
+#include "ModifierConfigParser.hpp"
 #include "factory.hpp"
 #include "util/TowerModifiers.hpp"
-#include "ModifierConfigParser.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -49,9 +49,9 @@ private:
 };
 
 // this is the singleton for the towercombiner. I am still not entirely sure
-// that this is the best way to go, but I think I can have it s.t. this is really
-// ONLY used from the frontend (and we just pass the tower_properties w/ a modify
-// event to the backend from the frontend... but we'll have to see?)
+// that this is the best way to go, but I think I can have it s.t. this is
+// really ONLY used from the frontend (and we just pass the tower_properties w/
+// a modify event to the backend from the frontend... but we'll have to see?)
 inline const TowerCombiner &get_towercombiner() {
   // choose the word dictionary and default modifier stats
   const static std::string config_file{

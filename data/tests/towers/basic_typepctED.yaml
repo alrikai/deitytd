@@ -4,4 +4,4 @@ TowerAttributes:
     tier: 1
     attributes: 
         - type: enhanced_type_damage
-          value: {elem: water, percent_edamage: 0.30}
+          value: {elem: chaos, percent_edamage: 0.50}

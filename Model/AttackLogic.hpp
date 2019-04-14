@@ -10,6 +10,7 @@
 #define TD_ATTACK_LOGIC_HPP
 
 #include "Monster.hpp"
+#include "Towers/Tower.hpp"
 #include "Towers/TowerAttack.hpp"
 #include "util/RandomUtility.hpp"
 

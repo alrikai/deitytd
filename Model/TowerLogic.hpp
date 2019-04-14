@@ -103,30 +103,23 @@ public:
                                 "/data/tests/monsters/basic_t0.yaml"};
     std::vector<std::shared_ptr<Monster>> mobs =
         parse_monster(mob_fpath, mob_name, 1);
-    // TODO: we are using this to just make 1 mob -- maybe we need to refactor,
-    // hmmmmm?
-    auto mob_ = mobs[0];
-    mob_->set_position(Coordinate<float>(mob_col, mob_row));
+    for (auto& mob : mobs) {
+        mob->set_position(Coordinate<float>(mob_col, mob_row));
 
-    /*
-    auto mob_ = std::shared_ptr<Monster>(
-        make_monster<Monster>(mob_id, mob_name, mob_col, mob_row));
-    */
-    // TODO: anything else we need to do here?
-    //
-    mtile->resident_mobs.push_back(mob_);
-    live_mobs.push_back(mob_);
+        // NOTE: should we have the mobs duplicated like this? --> probably not,
+        // makes no sense to maintain 2 lists of mobs for TowerLogic and the tiles.
+        // If anything, we should have 1 list, and have the other reference said
+        // list
+        mtile->resident_mobs.push_back(mob);
+        live_mobs.push_back(mob);
+        // TODO: anything else we need to do here?
 
-    // NOTE: should we have the mobs duplicated like this? --> probably not,
-    // makes no sense to maintain 2 lists of mobs for TowerLogic and the tiles.
-    // If anything, we should have 1 list, and have the other reference said
-    // list
-
-    // notify the frontend that a mob has been made
-    std::unique_ptr<RenderEvents::create_mob> m_evt =
-        std::unique_ptr<RenderEvents::create_mob>(new RenderEvents::create_mob(
-            mob_id, mob_name, std::move(map_offsets)));
-    td_frontend_events->add_makemob_event(std::move(m_evt));
+        // notify the frontend that a mob has been made
+        std::unique_ptr<RenderEvents::create_mob> m_evt =
+            std::unique_ptr<RenderEvents::create_mob>(new RenderEvents::create_mob(
+                mob_id, mob->get_name(), std::move(map_offsets)));
+        td_frontend_events->add_makemob_event(std::move(m_evt));
+    }
   }
 
   // methods called in response to frontend events, dispatched from the gameloop

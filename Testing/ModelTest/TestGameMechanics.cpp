@@ -568,6 +568,10 @@ TEST_F (DTDBackendTest, Compound_F_ED) {
   td_backend->make_tower(tid, tier, tower_xcoord,tower_ycoord);
   auto test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
   test_tower->set_target(mob);
+  const std::string basic_attack_id{"atk"};
+  auto basic_attack = test_tower->generate_attack(basic_attack_id, 0);
+  // this is the default (fundamental) tower stats, without any boosts
+  auto basic_attack_vals = basic_attack->get_attack_attributes();
 
   std::vector<std::string> tmods {"basic_flatED.yaml", "basic_pctED.yaml"};
   // load the tower modifiers, apply them to the base tower
@@ -577,7 +581,7 @@ TEST_F (DTDBackendTest, Compound_F_ED) {
     tower_property_modifier mod = tower_modifier_loader.parse_tower_config(tower_fpath);
     tmod.merge(mod);
   }
-	tower_properties expected_props = basic_attack_vals;
+  tower_properties expected_props = basic_attack_vals;
   expected_props.apply_property_modifier(tmod);
 
   test_tower->add_modifier(std::move(tmod));
@@ -589,11 +593,9 @@ TEST_F (DTDBackendTest, Compound_F_ED) {
   assert_tower_properties_almost_equals(attack_vals, expected_props);
   tower_properties expected_handprops = expected_base_props;
   for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    expected_handprops.damage[dmg_idx].low += 10;
-    expected_handprops.damage[dmg_idx].high += 20;
-
-    expected_handprops.damage[dmg_idx].low *= (1.0 + 0.3);
-    expected_handprops.damage[dmg_idx].high *= (1.0 + 0.3);
+    expected_handprops.modifier.damage_value[dmg_idx].low += 10;
+    expected_handprops.modifier.damage_value[dmg_idx].high += 20;
+    expected_handprops.modifier.enhanced_damage_value[dmg_idx] = 0.3;
   }
   assert_tower_properties_almost_equals(attack_vals, expected_handprops);
 
@@ -605,74 +607,7 @@ TEST_F (DTDBackendTest, Compound_F_ED) {
 
   //check the mob state, make sure the correct damage was done
   MonsterStats mob_stats = mob->get_attributes();
-  EXPECT_FLOAT_EQ(mob_stats.health, 94.2195969);
+  EXPECT_FLOAT_EQ(mob_stats.health, 853);
 }
-
-#if 0
-TEST_F (DTDBackendTest, Basic_) {
-  // create the basic fundamnetal tower
-  const int tier = 1;
-  auto td_backend = td->get_td_backend();
-  
-	//make the monster
-  const std::string mob_fpath { TDHelpers::get_basepath() + "/data/tests/monsters/basic_t0.yaml"};
-  auto mob = make_mob_from_cfg(mob_fpath);
-
-	//make the basic tower
-  td_backend->make_tower(tid, tier, tower_xcoord,tower_ycoord);
-  auto test_tower = td_backend->get_tower(tower_xcoord, tower_ycoord);
-  test_tower->set_target(mob);
-
-  // load the tower modifiers, apply them to the base tower
-  const std::string tower_fpath { TDHelpers::get_basepath() + "/data/tests/towers/basic_pctED.yaml"};
-  tower_property_modifier tmod = tower_modifier_loader.parse_tower_config(tower_fpath);
-
-	tower_properties expected_props = basic_attack_vals;
-  expected_props.apply_property_modifier(tmod);
-
-  test_tower->add_modifier(std::move(tmod));
-  //auto tdamage = tower->compute_attack_damage();
-  
-	test_tower->set_target(mob);
-  auto attack = test_tower->generate_attack(attack_id, 0);
-  auto attack_vals = attack->get_attack_attributes();
-  assert_tower_properties_almost_equals(attack_vals, expected_props);
-  tower_properties expected_handprops = expected_base_props;
-  for (size_t dmg_idx = 0; dmg_idx < tower_property_modifier::NUM_ELEM; dmg_idx++) {
-    expected_handprops.damage[dmg_idx].low *= (1.0 + 0.3);
-    expected_handprops.damage[dmg_idx].high *= (1.0 + 0.3);
-  }
-  assert_tower_properties_almost_equals(attack_vals, expected_handprops);
-
-  attack->set_target(Coordinate<float>(mob_xcoord, mob_ycoord));
-
-  std::list<std::weak_ptr<Monster>> moblist; 
-  moblist.emplace_back(mob);
-  compute_attackhit(moblist, std::move(attack));
-
-  //check the mob state, make sure the correct damage was done
-  MonsterStats mob_stats = mob->get_attributes();
-  EXPECT_FLOAT_EQ(mob_stats.health, 94.2195969);
-}/*
-        basic_flat_pierce.yaml
-        basic_flatED.yaml
-        basic_pctED.yaml
-        basic_range.yaml
-        basic_spd.yaml
-        basic_t0.yaml
-        basic_typeflatED.yaml
-        basic_typepctED.yaml
-        compound_full.yaml
-        flat_d.yaml
-*/
-
-#endif
-
-/* TODO: Other tests to have:
- *
- * 1. the full set of attack types / attributes
- * 2. the full set of mob armor / effects
- * 3.
- */
 
 } // namespace

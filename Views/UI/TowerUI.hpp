@@ -54,8 +54,8 @@ struct TowerUpgradeUI {
       std::cout << "TODO: all windows should be closed!" << std::endl;
     }
   }
-
-  inline void register_shared_towerinfo(
+  
+	inline void register_shared_towerinfo(
       std::shared_ptr<
           GameInformation<CommonTowerInformation, TDPlayerInformation>>
           shared_info) {
@@ -64,39 +64,41 @@ struct TowerUpgradeUI {
 
   inline bool is_showing() const { return gui_wordcombine_window->isVisible(); }
 
-  // need to have the various button handlers here
-  bool wordcombine_combinebtn(const CEGUI::EventArgs &e);
-  bool wordcombine_previewbtn(const CEGUI::EventArgs &e);
-  bool wordcombine_clearbtn(const CEGUI::EventArgs &e);
-  bool wordcombine_cancelbtn(const CEGUI::EventArgs &e);
+	//need to have the various button handlers here
+	bool wordcombine_combinebtn(const CEGUI::EventArgs &e);
+	bool wordcombine_previewbtn(const CEGUI::EventArgs &e);
+	bool wordcombine_clearbtn(const CEGUI::EventArgs &e);
+    bool wordcombine_cancelbtn(const CEGUI::EventArgs &e);
+    
+	bool word_combination_evthandler(const CEGUI::EventArgs &e);
+    
+    bool handle_inventory_item_dropped(const CEGUI::EventArgs& args);
+    bool handle_inventory_item_dragging(const CEGUI::EventArgs& args);
+    bool handle_letter_item_dropped(const CEGUI::EventArgs& args);
 
-  bool word_combination_evthandler(const CEGUI::EventArgs &e);
+    std::pair<bool, std::string> combine_currentletters();
 
-  bool handle_inventory_item_dropped(const CEGUI::EventArgs &args);
-  bool handle_inventory_item_dragging(const CEGUI::EventArgs &args);
-  bool handle_letter_item_dropped(const CEGUI::EventArgs &args);
+	CEGUI::Window* gui_window;
+	CEGUI::HorizontalLayoutContainer* gui_wordcombine_layout;
+	CEGUI::Window* gui_wordcombine_window;
+	CEGUI::Window* gui_inventory_window;
 
-  std::pair<bool, std::string> combine_currentletters();
+    PlayerInventory inventory_snapshot;
+    PlayerInventory pristine_inventory_snapshot;
+	//CEGUI::Imageset* letter_imgset;
+    //std::vector<CEGUI::Window*> session_word_slots;
+    std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>> shared_gamestate_info;
+    //std::shared_ptr<PlayerInventory> inventory;
 
-  CEGUI::Window *gui_window;
-  CEGUI::HorizontalLayoutContainer *gui_wordcombine_layout;
-  CEGUI::Window *gui_wordcombine_window;
-  CEGUI::Window *gui_inventory_window;
+    using tower_modifyinfo = std::pair<uint32_t, tower_properties>;
+    std::vector<tower_modifyinfo> active_tower_mods;
 
-  PlayerInventory inventory_snapshot;
-  // CEGUI::Imageset* letter_imgset;
-  // std::vector<CEGUI::Window*> session_word_slots;
-  std::shared_ptr<GameInformation<CommonTowerInformation, TDPlayerInformation>>
-      shared_gamestate_info;
-  // std::shared_ptr<PlayerInventory> inventory;
-
-  using tower_modifyinfo = std::pair<uint32_t, tower_properties>;
-  std::vector<tower_modifyinfo> active_tower_mods;
-
-  static constexpr int MAX_NUM_LETTERS = 20;
-  std::array<std::string, MAX_NUM_LETTERS> word_letters;
-  int word_letter_count;
-  uint32_t activetower_ID;
+    //TODO: this is a completely arbitrary # (is just the size of the inventory). Should make this the longest word
+    //in the dictionary, and make the inventory larger
+    static constexpr int MAX_NUM_LETTERS = 20;
+    std::array<std::string, MAX_NUM_LETTERS> word_letters;
+    int word_letter_count;
+    uint32_t activetower_ID;
 };
 
 #endif

@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: SPD_TT
+    tier: 1
+    attributes: 
+        - type: enhanced_speed
+          value: {percent_espeed: 0.15}

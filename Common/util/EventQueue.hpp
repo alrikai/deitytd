@@ -55,7 +55,10 @@ public:
     swap(first.buffer_, second.buffer_);
     swap(first.buffer_size, second.buffer_size);
     swap(first.timeout_len, second.timeout_len);
-    swap(first.queue_started, second.queue_started);
+    //special handling for atomics
+    auto rhs_queue_flag = second.queue_started.load();
+    auto lhs_queue_flag = first.queue_started.exchange(rhs_queue_flag);
+    second.queue_started.store(lhs_queue_flag);
   }
 
 private:

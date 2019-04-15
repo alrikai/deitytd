@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: FLATDMG_POST_TT
+    tier: 1
+    attributes: 
+        - type: flat_damage_onhit
+          value: {dmg_inc: 10, max_dmg: 50, dmg_duration: 100}

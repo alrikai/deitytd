@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: PCT_TT
+    tier: 1
+    attributes: 
+        - type: enhanced_damage
+          value: {percent_edamage: 0.3}

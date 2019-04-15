@@ -5,13 +5,12 @@ material FractalTower
         pass
         {
             depth_write on
-	    
-            texture_unit 
-	    {
 	        lighting on
-	        texture /deitytd/data/default_bg.png 2d
+            texture_unit 
+	        {
+	            texture /deitytd/data/default_bg.png 2d
             }
-	}
+	    }
     }
 }
 
@@ -20,15 +19,14 @@ material DefaultTower
     technique
     {
         pass
-	{
-            depth_write on
-		    
-            texture_unit 
 	    {
-                lighting on
-		texture /usr/local/share/OGRE/Media/materials/textures/waveNM.png 2d
+            depth_write on
+            lighting on
+            texture_unit 
+	        {
+		        texture /usr/local/share/OGRE/Media/materials/textures/waveNM.png 2d
+	        }
 	    }
-	}
     }
 }
 
@@ -36,9 +34,9 @@ material pointmaterial
 {                             
     technique                  
     {
-        scene_blend alpha_blend
         pass                   
         {                      
+            scene_blend alpha_blend
             point_sprites on   
             point_size 1.5     
             lighting off       

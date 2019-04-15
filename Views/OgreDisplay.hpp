@@ -29,29 +29,35 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 
 // might want to consider breaking this class up into smaller ones reeeal soon
 
 struct MoveableObject {
-  MoveableObject(const Ogre::Vector3 &dest, Ogre::SceneNode *snode)
-      : obj_destination(dest), obj_snode(snode) {
+  MoveableObject() = default;
+  MoveableObject(const Ogre::Vector3 &dest, Ogre::SceneNode *snode,
+                 Ogre::Entity *entity)
+      : obj_destination(dest), obj_snode(snode),
+        obj_entity(entity), direction{}, orient_direction(std::nullopt) {
     move_destination = obj_destination;
     x_delta = 0.0f;
     y_delta = 0.0f;
     is_active = false;
-	//TODO: what does this do?
-	move_duration = 0;
+    move_duration = 0;
   }
 
   virtual void update_movedest(const Ogre::Vector3 &dest_pos,
                                const double time_duration) {
     move_destination = dest_pos;
     move_duration = time_duration;
+    orient_direction = std::optional<Ogre::Vector3>(direction.normalisedCopy());
 
-    auto pos_delta = dest_pos - obj_snode->getPosition();
-    x_delta = pos_delta.x / time_duration;
-    y_delta = pos_delta.y / time_duration;
+    // save the old position to rotate from in animation
+    direction = dest_pos - obj_snode->getPosition();
+
+    x_delta = direction.x / time_duration;
+    y_delta = direction.y / time_duration;
 
     is_active = true;
 
@@ -92,20 +98,39 @@ struct MoveableObject {
     }
   }
 
+  virtual void add_animation(const std::string &animation_name,
+                             Ogre::AnimationState *animation_state) {
+    animations.emplace(std::make_pair(animation_name, animation_state));
+  }
+
   Ogre::Vector3 obj_destination;
   Ogre::Vector3 move_destination;
+  Ogre::Vector3 direction;
+
+  std::optional<Ogre::Vector3> orient_direction;
+
   float x_delta;
   float y_delta;
   float move_duration;
   bool is_active;
 
+  /*
+  //NOTE: if we have things specific to the animation, where should we do those?
+  //TODO: figure out how generic we need this to be. Every character will have
+  some state machine
+  //that determines how it acts / how it appears (i.e. idle, active, stunned,
+  dead, etc)
+  */
+  std::map<std::string, Ogre::AnimationState *> animations;
+
   Ogre::SceneNode *obj_snode;
+  Ogre::Entity *obj_entity;
 };
 
 struct TowerAttackAnimation : MoveableObject {
   TowerAttackAnimation(const std::string id, const Ogre::Vector3 &dest,
-                       Ogre::SceneNode *snode)
-      : MoveableObject(dest, snode), origin_id(id) {}
+                       Ogre::SceneNode *snode, Ogre::Entity *entity)
+      : MoveableObject(dest, snode, entity), origin_id(id) {}
 
   // the tower id from whence the attack was spawned
   const std::string origin_id;
@@ -307,6 +332,8 @@ public:
   // void windowClosed(Ogre::RenderWindow* rw) override;
   bool frameRenderingQueued(const Ogre::FrameEvent &evt) override;
 
+  void animation_mob(MoveableObject &mob, const Ogre::Real evt_time);
+
   void update_gameinfo();
   void dispatch_towerui_events();
 
@@ -371,7 +398,6 @@ private:
 
   // note: ogre manages the animation lifetimes
   std::map<std::string, Ogre::AnimationState *> tower_animations;
-  std::map<std::string, Ogre::AnimationState *> mob_animations;
 
   std::map<std::string, TowerAttackAnimation> tower_attacks;
   std::map<std::string, MoveableObject> live_mobs;
@@ -423,7 +449,8 @@ template <class BackendType> void OgreDisplay<BackendType>::start_display() {
         child_node->setPosition(origin.x, origin.y, origin.z);
         child_node->attachObject(tower_atk);
 
-        TowerAttackAnimation attack_anim(origin_tname, origin, child_node);
+        TowerAttackAnimation attack_anim(origin_tname, origin, child_node,
+                                         tower_atk);
         tower_attacks.insert(std::make_pair(render_evt->name, attack_anim));
       };
 
@@ -667,9 +694,9 @@ template <class BackendType> void OgreDisplay<BackendType>::gui_setup() {
 // Q: who would call this?
 template <class BackendType> void OgreDisplay<BackendType>::update_gameinfo() {
   // TODO: populate this somehow?? Should this spawn a request to something (?)
-  // that has the info, or should it just periodically update the info, or should
-  // it be registered as some sort of event listener that updates when the
-  // backend sends new info?
+  // that has the info, or should it just periodically update the info, or
+  // should it be registered as some sort of event listener that updates when
+  // the backend sends new info?
   auto player_state = shared_gamestate_info->get_player_state_snapshot();
   gui->update_gamestate_info(player_state);
 
@@ -961,26 +988,20 @@ void OgreDisplay<BackendType>::place_mob(const CharacterModels::ModelIDs id,
   mob_snode->scale(mob_scale, mob_scale, mob_scale);
   mob_snode->showBoundingBox(true);
 
-  MoveableObject mob_anim(target_location, mob_snode);
-  live_mobs.insert(std::make_pair(mob_name, mob_anim));
-
-  /*
-  //NOTE: if we have things specific to the animation, where should we do those?
-  //TODO: figure out how generic we need this to be. Every character will have
-  some state machine
-  //that determines how it acts / how it appears (i.e. idle, active, stunned,
-  dead, etc) auto base_animation = model_ent->getAnimationState("IdleBase");
-  auto top_animation = model_ent->getAnimationState("IdleTop");
+  auto base_animation = model_ent->getAnimationState("RunBase");
+  auto top_animation = model_ent->getAnimationState("RunTop");
   base_animation->setLoop(true);
   top_animation->setLoop(true);
   base_animation->setEnabled(true);
   top_animation->setEnabled(true);
 
-  const std::string bot_animation_id {mob_name + "_animation_B"};
-  mob_animations.emplace(std::make_pair(bot_animation_id, base_animation));
-  const std::string top_animation_id {mob_name + "_animation_T"};
-  mob_animations.emplace(std::make_pair(top_animation_id, top_animation));
-  */
+  MoveableObject mob_anim(target_location, mob_snode, model_ent);
+  live_mobs.emplace(std::make_pair(mob_name, mob_anim));
+
+  const std::string bot_animation_id{mob_name + "_animation_B"};
+  live_mobs[mob_name].add_animation(bot_animation_id, base_animation);
+  const std::string top_animation_id{mob_name + "_animation_T"};
+  live_mobs[mob_name].add_animation(top_animation_id, top_animation);
 }
 
 template <class BackendType>
@@ -1062,9 +1083,9 @@ void OgreDisplay<BackendType>::handle_user_input() {
         // plus we need some other data (e.g. #word slots, etc). which will
         // likely necessitate another information request to the backend, which
         // will be something new (but important) -- doing on-demand information
-        //requests between frontend and backend (or at least, handling the
-        // communication latency in a sensible manner). Simplest would just be to
-        // wait on getting the response from the backend, but then we'll be
+        // requests between frontend and backend (or at least, handling the
+        // communication latency in a sensible manner). Simplest would just be
+        // to wait on getting the response from the backend, but then we'll be
         // blocking the frontend
 
         std::cout << "Combining " << current_selection->getName() << " @ "
@@ -1203,15 +1224,43 @@ void OgreDisplay<BackendType>::handle_user_input() {
 // void windowClosed(Ogre::RenderWindow* rw) override;
 
 template <class BackendType>
+void OgreDisplay<BackendType>::animation_mob(MoveableObject &mob,
+                                             const Ogre::Real evt_time) {
+  mob.update_position(1000.0f * evt_time);
+
+  // TODO: update orientation if the mob is changing direction
+  if (mob.orient_direction.has_value()) {
+    auto current_direction = mob.orient_direction.value();
+    auto new_direction = mob.direction.normalisedCopy();
+    auto rotate_amt = current_direction.getRotationTo(new_direction);
+    mob.obj_snode->rotate(rotate_amt);
+    // no need to re-rotate until destination changes again
+    mob.orient_direction.reset();
+    auto local_y = mob.obj_snode->getOrientation() * Ogre::Vector3::UNIT_Y;
+    auto reorient_quat = local_y.getRotationTo(Ogre::Vector3::UNIT_Y);
+    mob.obj_snode->rotate(reorient_quat, Ogre::Node::TS_PARENT);
+  }
+
+  /*
+  if ((1.0 + current_direction.dotProduct(new_direction)) < 0.0001) {
+    mob.obj_snode->yaw(Ogre::Degree(180));
+  } else {
+    Ogre::Quaternion quat = current_direction.getRotationTo(new_direction);
+    mob.obj_snode->rotate(quat);
+  }
+  */
+
+  for (auto &mob_anim : mob.animations) {
+    mob_anim.second->addTime(evt_time);
+  }
+}
+
+template <class BackendType>
 bool OgreDisplay<BackendType>::frameRenderingQueued(
     const Ogre::FrameEvent &evt) {
   // spin the towers
   for (auto tower_it : tower_animations) {
     tower_it.second->addTime(evt.timeSinceLastFrame);
-  }
-
-  for (auto mob_it : mob_animations) {
-    mob_it.second->addTime(evt.timeSinceLastFrame);
   }
 
   // NOTE: evt is in seconds, so need to convert to ms
@@ -1220,7 +1269,7 @@ bool OgreDisplay<BackendType>::frameRenderingQueued(
   }
 
   for (auto mob_it : live_mobs) {
-    mob_it.second.update_position(1000.0f * evt.timeSinceLastFrame);
+    animation_mob(mob_it.second, evt.timeSinceLastFrame);
   }
 
   // TODO: determine if this is a good place for this, or if I should put it in

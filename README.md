@@ -1,2 +1,5 @@
 DeityTD -- coming soon (?)
-Formally hosted at https://bitbucket.org/alrikai/deitytd/wiki/Home
+
+![](data/gifs/v002cut.gif)
+
+Formerly at [bitbucket](https://bitbucket.org/alrikai/deitytd/wiki/Home)

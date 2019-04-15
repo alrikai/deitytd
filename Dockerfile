@@ -1,9 +1,10 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
 LABEL maintainer="Alrik Firl afirlortwo@gmail.com" \
       version="0.1" \
       description="DeityTD Dockerfile"
 
+ENV DEBIAN_FRONTEND=noninteractive
 # Update packages
 RUN apt-get update --fix-missing
 
@@ -52,11 +53,16 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
 	libsilly-dev \
 	libxml2-dev \
 	libexpat1-dev \
-	libglfw-dev \
+	libglfw3-dev \
 	libglew-dev \
 	libglm-dev \
 	libgl1-mesa-glx \
 	libgl1-mesa-dri
+
+#stuff for development & debugging
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+  gdb
+
 
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 RUN export uid=1000 gid=1000 devname=DTD && \

@@ -15,8 +15,8 @@
 #include "util/Types.hpp"
 
 //#include "TowerProperties.hpp"
+#include "Combinations/TowerCombiner.hpp"
 #include "shared/common_information.hpp"
-#include "tower_combiner/TowerCombiner.hpp"
 #include "util/AttributeModifiers.hpp"
 
 //#include "Essences.hpp"
@@ -97,12 +97,14 @@ public:
     return true;
   }
 
-  virtual void
-  apply_modifier(const std::vector<tower_properties> &modifier_list) {
-    for (auto modifier : modifier_list) {
-      base_attributes += modifier;
-    }
-  }
+  /*
+virtual void
+apply_modifier(const std::vector<tower_properties> &modifier_list) {
+for (auto modifier : modifier_list) {
+base_attributes += modifier;
+}
+}
+  */
 
   // NOTE: we would also trigger any on-kill effects here (if the tower has
   // them)
@@ -110,7 +112,7 @@ public:
 
   inline bool in_range(const float target_dist) const {
     // return target_dist < attack_attributes.attack_range;
-    return target_dist < base_attributes.attack_range;
+    return target_dist < base_attributes.modifier.attack_range_value;
   }
 
   inline std::shared_ptr<Monster> get_target() const { return current_target; }
@@ -139,6 +141,8 @@ public:
     return info;
   }
 
+  tower_properties compute_attack_damage() const;
+
   inline std::string get_name() const { return tower_name; }
 
   inline Coordinate<float> get_position() const { return position; }
@@ -160,6 +164,7 @@ protected:
   // the baseline, fundamental attributes. These represent the permenent
   // attributes (so only permentant changes will be written to this one)
   tower_properties base_attributes;
+  tower_property_modifier enhancements;
   // the current, subject-to-change attributes
   tower_properties attack_attributes;
   double cost;

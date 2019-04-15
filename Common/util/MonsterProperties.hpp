@@ -17,16 +17,19 @@ struct MonsterStats {
    *
    */
 
-  MonsterStats(float health, float speed, Elements armor, float armor_amt) 
-      : health(health), speed(speed), armor_class(armor), armor_amount(armor_amt)
-  {}
+  MonsterStats(float health, float speed, Elements armor, float flat_def,
+               float percent_def, float thresh_def)
+      : health(health), speed(speed), armor_class(armor), flat_armor(flat_def),
+        percent_armor(percent_def), thresh_armor(thresh_def) {}
 
   float health;
   float speed;
   // currently using the same elements as the attacks; consider if we want a
   // seperate armor type system
   Elements armor_class;
-  float armor_amount;
+  float flat_armor;
+  float percent_armor;
+  float thresh_armor;
 };
 
 #endif

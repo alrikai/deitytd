@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: RANGE_TT
+    tier: 1
+    attributes: 
+        - type: flat_range
+          value: {value_range: 5}

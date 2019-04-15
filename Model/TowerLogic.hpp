@@ -88,7 +88,7 @@ public:
   void make_mob(const CharacterModels::ModelIDs mob_id,
                 const std::string &mob_name,
                 const GameMap::IndexCoordinate &map_tile,
-				const GameMap::PointCoordinate &spawn_offset) {
+                const GameMap::PointCoordinate &spawn_offset) {
     auto mtile = map.get_tile(map_tile);
     auto mobtile_center = mtile->tile_center;
     const float mob_row = mobtile_center.row + spawn_offset.row;
@@ -99,30 +99,27 @@ public:
 
     // TODO: use the mob_id to dispatch the appropriate monster creation (will
     // need some factory for this)
-    const std::string mob_fpath {TDHelpers::get_basepath() + "/data/tests/monsters/basic_t0.yaml"};
-    std::vector<std::shared_ptr<Monster>> mobs = parse_monster(mob_fpath, mob_name, 1);
-    //TODO: we are using this to just make 1 mob -- maybe we need to refactor, hmmmmm?
-    auto mob_ = mobs[0];
-    mob_->set_position(Coordinate<float>(mob_col, mob_row));
+    const std::string mob_fpath{TDHelpers::get_basepath() +
+                                "/data/tests/monsters/basic_t0.yaml"};
+    std::vector<std::shared_ptr<Monster>> mobs =
+        parse_monster(mob_fpath, mob_name, 1);
+    for (auto& mob : mobs) {
+        mob->set_position(Coordinate<float>(mob_col, mob_row));
 
-    /*
-    auto mob_ = std::shared_ptr<Monster>(
-        make_monster<Monster>(mob_id, mob_name, mob_col, mob_row));
-    */
-    // TODO: anything else we need to do here?
-    //
-    mtile->resident_mobs.push_back(mob_);
-    live_mobs.push_back(mob_);
+        // NOTE: should we have the mobs duplicated like this? --> probably not,
+        // makes no sense to maintain 2 lists of mobs for TowerLogic and the tiles.
+        // If anything, we should have 1 list, and have the other reference said
+        // list
+        mtile->resident_mobs.push_back(mob);
+        live_mobs.push_back(mob);
+        // TODO: anything else we need to do here?
 
-    // NOTE: should we have the mobs duplicated like this? --> probably not,
-    // makes no sense to maintain 2 lists of mobs for TowerLogic and the tiles.
-    // If anything, we should have 1 list, and have the other reference said list
-
-    // notify the frontend that a mob has been made
-    std::unique_ptr<RenderEvents::create_mob> m_evt =
-        std::unique_ptr<RenderEvents::create_mob>(new RenderEvents::create_mob(
-            mob_id, mob_name, std::move(map_offsets)));
-    td_frontend_events->add_makemob_event(std::move(m_evt));
+        // notify the frontend that a mob has been made
+        std::unique_ptr<RenderEvents::create_mob> m_evt =
+            std::unique_ptr<RenderEvents::create_mob>(new RenderEvents::create_mob(
+                mob_id, mob->get_name(), std::move(map_offsets)));
+        td_frontend_events->add_makemob_event(std::move(m_evt));
+    }
   }
 
   // methods called in response to frontend events, dispatched from the gameloop
@@ -134,7 +131,7 @@ public:
   bool modify_tower(tower_property_modifier modifier, const float x_coord,
                     const float y_coord);
   // returns a non-owning pointer to the tower at the tile index
-  Tower* get_tower(const float x_coord, const float y_coord);
+  Tower *get_tower(const float x_coord, const float y_coord);
 
   bool print_tower(const float x_coord, const float y_coord);
   bool tower_taget(const float tower_xcoord, const float tower_ycoord,
@@ -174,21 +171,50 @@ public:
   bool enter_active_state(std::vector<mobwave_info> &&mob_info,
                           GameMap::IndexCoordinate spawn_point,
                           GameMap::IndexCoordinate dest_point) {
-	// loop over the different types of mobs
+    // loop over the different types of mobs
     for (auto mob_metadata : mob_info) {
-        // loop over the #mobs of each type in the wave
-		for (size_t mob_idx = 0; mob_idx < mob_metadata.num_mobs; mob_idx++) {
-            auto mob_id_i = mob_metadata.mob_id + "_mob_" + std::to_string(mob_idx);
+		//NOTE: the offset is applied to the spawn tile *center*, so we need to fiddle
+		//around with the signs and make sure our offsets don't go out of bounds
+	  const float height_increments = GameMap::TowerTileHeight / static_cast<float>(mob_metadata.num_mobs);
+	  const float width_increments = GameMap::TowerTileWidth / static_cast<float>(mob_metadata.num_mobs);
+      // loop over the #mobs of each type in the wave
+	  int row_soffset = -mob_metadata.num_mobs / 2;
+	  int col_soffset = -mob_metadata.num_mobs / 2;
+      for (size_t mob_idx = 0; mob_idx < mob_metadata.num_mobs; mob_idx++) {
+        auto mob_id_i = mob_metadata.mob_id + "_mob_" + std::to_string(mob_idx);
 
-            // adjust spawn point slightly, so that all the mobs dont spawn on the same location
-			float sign = (mob_idx <= mob_metadata.num_mobs / 2) ? -1 : 1;
-            auto height_space = sign * mob_idx * (0.5 * GameMap::TowerTileHeight / mob_metadata.num_mobs);
-            auto width_space = sign * mob_idx * (0.5 * GameMap::TowerTileWidth / mob_metadata.num_mobs);
-			// NOTE: need to normalize offsets for them to be used as offsets
-			GameMap::PointCoordinate spawn_offset (width_space / GameMap::TowerTileWidth, height_space / GameMap::TowerTileHeight);
+		/*
+        // adjust spawn point slightly, so that all the mobs dont spawn on the
+        // same location
+		size_t mob_bin = mob_idx % 4;
+		float x_sign, y_sign;
+		std::tie(x_sign, y_sign) = GameMap::get_tile_offset(mob_bin);
+		*/
 
-            make_mob(mob_metadata.mob_model_id, mob_id_i, spawn_point, spawn_offset);
-        }
+		//TODO: this assumes we will not have more than 64 mobs being spawned
+		row_soffset++;
+		if (row_soffset >= GameMap::TowerTileHeight/2) {
+          col_soffset++;
+		  row_soffset = -mob_metadata.num_mobs / 2;
+		}
+		auto h_offs = height_increments * row_soffset / GameMap::MAP_HEIGHT;
+		auto w_offs = width_increments * col_soffset / GameMap::MAP_WIDTH;
+        GameMap::PointCoordinate spawn_offset(w_offs, h_offs);
+/*
+        auto height_space =
+            y_sign * mob_idx *
+            (0.5 * GameMap::TowerTileHeight / mob_metadata.num_mobs);
+        auto width_space =
+            x_sign * mob_idx *
+            (0.5 * GameMap::TowerTileWidth / mob_metadata.num_mobs);
+        // NOTE: need to normalize offsets for them to be used as offsets
+        GameMap::PointCoordinate spawn_offset(
+            width_space / GameMap::TowerTileWidth,
+            height_space / GameMap::TowerTileHeight);
+*/
+        make_mob(mob_metadata.mob_model_id, mob_id_i, spawn_point,
+                 spawn_offset);
+      }
     }
 
     // checks if there's a valid maze from the spawn to the destination point --

@@ -166,8 +166,7 @@ bool TowerLogic::print_tower(const float x_coord, const float y_coord) {
   return true;
 }
 
-
-Tower* TowerLogic::get_tower(const float x_coord, const float y_coord) {
+Tower *TowerLogic::get_tower(const float x_coord, const float y_coord) {
   auto t_tile = map.get_bounding_tile(x_coord, y_coord);
   const int tile_row = t_tile.row / GameMap::TowerTileHeight;
   const int tile_col = t_tile.col / GameMap::TowerTileWidth;
@@ -297,7 +296,7 @@ bool TowerLogic::get_targets(Tower *tower, const int t_col, const int t_row) {
 
       // TODO: for now we just take an arbitrary mob within the tile -- we loop
       // over the mobs in the tile until we find a valid one (i.e. it's possible
-      //for the mob pointer to have been invalidated prior to this.. I think?)
+      // for the mob pointer to have been invalidated prior to this.. I think?)
       auto target_mob_it = target_tile->resident_mobs.begin();
       while (target_mob_it != target_tile->resident_mobs.end()) {
         if (auto target_mob = target_mob_it->lock()) {
@@ -325,11 +324,12 @@ bool TowerLogic::get_targets(Tower *tower, const int t_col, const int t_row) {
 
         // boundary checks -- see if the targets are within range.
         // TODO: decide on a better/more precise distance measure. We are just
-        // comparing the middle of the tiles, which isn't as accurate as it could
-        // be. i.e. we could compare from the edge of the tower, or compare to
-        // the actual mobs IN the tile (i.e. we'll have mobs resident on the
-        //tile, but they might be further than the tile mid-point and hence out
-        //of range)
+        // comparing the middle of the tiles, which isn't as accurate as it
+        // could be. i.e. we could compare from the edge of the tower, or
+        // compare to the actual mobs IN the tile (i.e. we'll have mobs resident
+        // on the
+        // tile, but they might be further than the tile mid-point and hence out
+        // of range)
         auto t_dist = L2dist(
             map.get_tile(n_col, n_row)->tile_center.row - tile_center.row,
             map.get_tile(n_col, n_row)->tile_center.col - tile_center.col);
@@ -388,6 +388,8 @@ void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp) {
       continue;
     }
 
+	//TODO: is there a way to detect here if the target is dead / gone?
+
     // what other things to check? --> collisions, timers (e.g. if the attack
     // explodes after N seconds), etc.
     if ((*attack_it)->hit_target()) {
@@ -395,10 +397,10 @@ void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp) {
       // std::endl;
 
       // call the logic for the tower attack hitting the mob -- if there's
-      // multiple mobs in a tile, how do we choose which one it hits? if it has a
-      // pre-defined target, then the attack should hit that target. if it hits a
-      // tile with mob(s), but where it's target is not among them... then we
-      // have a stranger case (not sure what to do then)
+      // multiple mobs in a tile, how do we choose which one it hits? if it has
+      // a pre-defined target, then the attack should hit that target. if it
+      // hits a tile with mob(s), but where it's target is not among them...
+      // then we have a stranger case (not sure what to do then)
       auto hit_tile =
           map.get_tile(map.get_bounding_tile((*attack_it)->get_position()));
       auto resident_mobs = hit_tile->resident_mobs;

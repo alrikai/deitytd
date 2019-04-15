@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: CRTPCT_TT
+    tier: 1
+    attributes: 
+        - type: flat_crit_chance
+          value: {percent_ecrit: 1.0} #100% crit chance, just for testing

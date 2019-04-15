@@ -1,0 +1,7 @@
+---
+TowerAttributes: 
+    name: FED_TT
+    tier: 1
+    attributes: 
+        - type: flat_damage
+          value: {value_low: 10, value_high: 20}

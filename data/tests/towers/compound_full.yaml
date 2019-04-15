@@ -1,0 +1,63 @@
+---
+TowerAttributes: 
+    name: T2_TT
+    tier: 6
+    attributes: 
+        - ID: 1
+          type: flat_damage
+          value: {value_low: 10, value_high: 20}
+        - ID: 2
+          type: enhanced_damage
+          value: {percent_edamage: 0.30} 
+        - ID: 3
+          type: enhanced_speed
+          value: {percent_espeed: 0.15}
+        - ID: 4
+          type: flat_range
+          value: {value_range: 5}
+        - ID: 5
+          type: flat_crit_chance
+          value: {percent_ecrit: 0.05}
+        - ID: 6
+          type: flat_crit_multiplier
+          value: {value_critmult: 50}
+        - ID: 7
+          type: flat_type_damage_chaos
+          value: {dmg_type: 0, dmg_amount: 30}
+        - ID: 7
+          type: flat_type_damage_water
+          value: {dmg_type: 1, dmg_amount: 30}
+        - ID: 7
+          type: flat_type_damage_air
+          value: {dmg_type: 2, dmg_amount: 30}
+        - ID: 7
+          type: flat_type_damage_fire
+          value: {dmg_type: 3, dmg_amount: 30} 
+        - ID: 7
+          type: flat_type_damage_earth
+          value: {dmg_type: 4, dmg_amount: 30}
+        - ID: 8
+          type: enhanced_type_damage_chaos
+          value: {dmg_type: 0, dmg_percent: 50}
+        - ID: 8
+          type: enhanced_type_damage_water
+          value: {dmg_type: 1, dmg_percent: 50}
+        - ID: 8
+          type: enhanced_type_damage_air
+          value: {dmg_type: 2, dmg_percent: 50}
+        - ID: 8
+          type: enhanced_type_damage_fire
+          value: {dmg_type: 3, dmg_percent: 50}
+        - ID: 8
+          type: enhanced_type_damage_earth
+          value: {dmg_type: 4, dmg_percent: 50}
+        - ID: 9
+          type: flat_damage_onhit
+          value: {dmg_inc: 10, max_dmg: 50, dmg_duration: 100}
+
+
+#  ID: 
+#  attributes: 
+#
+#  ID: 
+#  attributes: 

@@ -4,7 +4,7 @@ PROJECT(TowerDefense)
 enable_testing()
 add_definitions(-DTDPath=${CMAKE_SOURCE_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++14 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++17 -Wall -Wextra")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/OGRE/cmake/modules")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/local/lib/OGRE/cmake")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
@@ -37,7 +37,7 @@ else(OPENCL_HAS_CPP_BINDINGS )
 endif(OPENCL_HAS_CPP_BINDINGS)
 
 #OpenCV
-FIND_PACKAGE(OpenCV COMPONENTS core highgui imgproc REQUIRED)
+FIND_PACKAGE(OpenCV COMPONENTS core highgui imgproc imgcodecs REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 message("OpenCV include: " ${OpenCV_INCLUDE_DIRS})
 message("OpenCV link: " ${OpenCV_LIBS})

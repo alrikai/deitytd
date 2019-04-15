@@ -16,7 +16,6 @@ class Monster;
 class Tower;
 
 // TODO: need to implement these
-#warning "Tower Attribute Modifiers don't do anything"
 
 struct tower_attribute_modifier {
   static constexpr uint32_t ID = 0xFFFFFF00;

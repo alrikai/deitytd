@@ -49,9 +49,9 @@ struct MoveableObject {
                                const double time_duration) {
     move_destination = dest_pos; 
     move_duration = time_duration;
+    orient_direction = std::optional<Ogre::Vector3> (direction.normalisedCopy());
 
     //save the old position to rotate from in animation
-    orient_direction = std::optional<Ogre::Vector3> (direction);
     direction = dest_pos - obj_snode->getPosition();
 
     x_delta = direction.x / time_duration;
@@ -1227,7 +1227,7 @@ void OgreDisplay<BackendType>::animation_mob(MoveableObject& mob, const Ogre::Re
     //TODO: update orientation if the mob is changing direction
     if (mob.orient_direction.has_value()) {
         auto current_direction = mob.orient_direction.value();
-        auto new_direction = mob.direction;
+        auto new_direction = mob.direction.normalisedCopy();
         auto rotate_amt = current_direction.getRotationTo(new_direction);
         mob.obj_snode->rotate(rotate_amt);
         //no need to re-rotate until destination changes again

@@ -258,7 +258,7 @@ void fflame_generator<data_t, pixel_t>::render_fflame() {
 
       //TODO: see if this would normalize better/
       //cv_wrap.convertTo(logged_image, CV_8UC3);
-      cv::normalize(cv_wrap, cv_wrap, 0, 255, cv::NORM_MINMAX, -1);
+      //cv::normalize(cv_wrap, cv_wrap, 0, 255, cv::NORM_MINMAX, -1);
 
       /*
 //I think we need to normalize the pixels for Ogre3d to show them

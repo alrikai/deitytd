@@ -610,4 +610,7 @@ TEST_F (DTDBackendTest, Compound_F_ED) {
   EXPECT_FLOAT_EQ(mob_stats.health, 853);
 }
 
+//TODO: have different compound tower tests
+//TODO: have different monster stats
+
 } // namespace

@@ -388,6 +388,8 @@ void TowerLogic::cycle_update_attacks(const uint64_t onset_timestamp) {
       continue;
     }
 
+	//TODO: is there a way to detect here if the target is dead / gone?
+
     // what other things to check? --> collisions, timers (e.g. if the attack
     // explodes after N seconds), etc.
     if ((*attack_it)->hit_target()) {

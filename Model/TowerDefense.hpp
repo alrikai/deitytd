@@ -220,7 +220,7 @@ private:
         // to figure out exactly what sort of interface is best here
         wavemob_metadata.mob_model_id = mob_model_id;
         wavemob_metadata.mob_id = mob_id;
-        wavemob_metadata.num_mobs = 2; // TODO: increate the #mobs
+        wavemob_metadata.num_mobs = 10; // TODO: increase the #mobs
         wave_mobinfo.push_back(wavemob_metadata);
 
         bool has_valid_path = TDState::td->td_backend->enter_active_state(

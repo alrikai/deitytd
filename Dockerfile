@@ -1,9 +1,10 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
 LABEL maintainer="Alrik Firl afirlortwo@gmail.com" \
       version="0.1" \
       description="DeityTD Dockerfile"
 
+ENV DEBIAN_FRONTEND=noninteractive
 # Update packages
 RUN apt-get update --fix-missing
 
@@ -52,7 +53,7 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
 	libsilly-dev \
 	libxml2-dev \
 	libexpat1-dev \
-	libglfw-dev \
+	libglfw3-dev \
 	libglew-dev \
 	libglm-dev \
 	libgl1-mesa-glx \

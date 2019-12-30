@@ -51,7 +51,7 @@ struct build_tower_event : public tower_event<BackendType> {
 
 template <typename T, typename BackendType>
 struct modify_tower_event : public tower_event<BackendType> {
-  modify_tower_event() : modifier(nullptr) {}
+  modify_tower_event() : modifier() {}
 
   modify_tower_event(T mod_type, float row, float col)
       : tower_event<BackendType>(row, col), modifier(std::move(mod_type)) {}

@@ -174,7 +174,7 @@ Tower *TowerLogic::get_tower(const float x_coord, const float y_coord) {
 }
 
 // TODO: need to finish this to allow for manual targetting
-bool TowerLogic::tower_taget(const float tower_xcoord, const float tower_ycoord,
+bool TowerLogic::tower_target(const float tower_xcoord, const float tower_ycoord,
                              const float target_xcoord,
                              const float target_ycoord) {
   if (!map.is_obstructed(tower_xcoord, tower_ycoord))

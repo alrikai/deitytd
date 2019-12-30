@@ -83,15 +83,15 @@ WORKDIR /home/DTD
 
 RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
 RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
-RUN sudo ln -s /usr/include/cegui-0.8.4/CEGUI /usr/include/CEGUI
+#RUN sudo ln -s /usr/include/cegui-0.8.4/CEGUI /usr/include/CEGUI
 
-RUN hg clone https://bitbucket.org/cegui/cegui -u v0-8
-RUN hg clone https://bitbucket.org/sinbad/ogre/ -u v1-9
-COPY resources/ogre-find-patch.diff cegui/.
+#RUN hg clone https://bitbucket.org/cegui/cegui -u v0-8
+#RUN hg clone https://bitbucket.org/sinbad/ogre/ -u v1-9
+#COPY resources/ogre-find-patch.diff cegui/.
 
-RUN mkdir ogre/build && cd ogre/build && cmake .. && make -j2 && sudo make install
-RUN cd cegui && hg import ogre-find-patch.diff --no-commit
-RUN mkdir cegui/build && cd cegui/build && cmake .. && make -j2 && sudo make install
+#RUN mkdir ogre/build && cd ogre/build && cmake .. && make -j2 && sudo make install
+#RUN cd cegui && hg import ogre-find-patch.diff --no-commit
+#RUN mkdir cegui/build && cd cegui/build && cmake .. && make -j2 && sudo make install
 
 RUN git clone https://github.com/alrikai/fflames.git
 RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames

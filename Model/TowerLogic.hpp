@@ -134,7 +134,7 @@ public:
   Tower *get_tower(const float x_coord, const float y_coord);
 
   bool print_tower(const float x_coord, const float y_coord);
-  bool tower_taget(const float tower_xcoord, const float tower_ycoord,
+  bool tower_target(const float tower_xcoord, const float tower_ycoord,
                    const float target_xcoord, const float target_ycoord);
   // is run at the start of the round (i.e. in the transition from IDLE -->
   // INROUND), assuming the obstructions don't change during the round

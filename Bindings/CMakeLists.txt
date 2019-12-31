@@ -8,4 +8,4 @@ add_subdirectory(pybind11)
 
 set (wrapper_src dtdwrap.cpp)
 pybind11_add_module(pyDTD ${wrapper_src})
-#target_link_libraries(pyDTD PUBLIC ${OpenCV_LIBS})
+target_link_libraries(pyDTD PUBLIC TowersBackend)

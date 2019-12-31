@@ -34,7 +34,7 @@ endif()
 
 add_definitions(-DRANDOM_SEED_TESTING=42)
 set(CMAKE_INCLUDE_CURRENT_DIR on)
-add_subdirectory(ControllerTest)
+#add_subdirectory(ControllerTest)
 
 #find_package(PCL REQUIRED COMPONENTS common surface features)
 #include_directories(${PCL_INCLUDE_DIRS})

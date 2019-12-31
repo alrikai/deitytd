@@ -16,11 +16,11 @@
 #include <fstream>
 
 #include <opencv2/opencv.hpp>
-#include <OGRE/Ogre.h>
+//#include <OGRE/Ogre.h>
 
 #include "TowerModel.hpp"
 //#include "pcl_mesh.hpp"
-#include "Views/OgreDisplay.hpp"
+//#include "Views/OgreDisplay.hpp"
 
 
 namespace views_utils

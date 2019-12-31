@@ -15,9 +15,9 @@ namespace UserTowerEvents {
 
 template <typename BackendType> struct tower_event {
   tower_event() : row_(-1.0f), col_(-1.0f) {}
-
   tower_event(float row, float col) : row_(row), col_(col) {}
 
+  virtual ~tower_event() {}
   virtual void apply(BackendType *td_backend) = 0;
 
   // need the indices to find the targetted tower

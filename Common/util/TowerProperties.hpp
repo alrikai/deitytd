@@ -103,7 +103,7 @@ struct tower_properties {
     return *this;
   }
 
-  // NOTE: there's an optimization oppotunity here to move from the modifier's
+  // NOTE: there's an optimization opportunity here to move from the modifier's
   // on-event vectors?
   void apply_property_modifier(tower_property_modifier other) {
     modifier.merge(other);

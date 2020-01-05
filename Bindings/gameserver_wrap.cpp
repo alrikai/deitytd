@@ -15,8 +15,9 @@ void wrap_gameserver(py::module &pymod) {
 		.def ("init_game", &TowerDefense<FrontStub, TowerLogic>::init_game)
 		.def ("start_game", &TowerDefense<FrontStub, TowerLogic>::start_game)
 		.def ("stop_game", &TowerDefense<FrontStub, TowerLogic>::stop_game)
-		.def ("get_td_frontend", &TowerDefense<FrontStub, TowerLogic>::get_td_frontend)
-		.def ("get_td_backend", &TowerDefense<FrontStub, TowerLogic>::get_td_backend);
+		//NOTE: need to have this return policy to prevent python from taking ownership of the returned object pointer 
+		.def ("get_td_frontend", &TowerDefense<FrontStub, TowerLogic>::get_td_frontend, py::return_value_policy::reference_internal)
+		.def ("get_td_backend", &TowerDefense<FrontStub, TowerLogic>::get_td_backend, py::return_value_policy::reference_internal);
 
 	py::class_<FrontStub<TowerLogic>>(pymod, "FrontStub")
 		.def ("spawn_build_tower_event", &FrontStub<TowerLogic>::spawn_build_tower_event)

@@ -316,6 +316,15 @@ void TowerDefense<ViewType, ModelType>::init_game() {
   // frontend
   td_view->register_backend_eventqueue(td_backend->get_frontend_eventqueue());
 
+  //TODO: need to work out how we will handle the resources for the TD -- tower models 
+  //should be procedurally generated, and/or loaded from resource files. We should 
+  //generate the procedural towers in-code on the server side, which means the whole
+  //tower adding thing has to change. We need to have canonical UUID's for all the
+  //resources as well so we can communicate between server & client 
+  std::vector<std::vector<uint32_t>> polygon_mesh {};
+  std::vector<std::vector<float>> &&polygon_points {};
+  add_tower(std::move(polygon_mesh), std::move(polygon_points), "", "does-not-exist");
+
   td_backend->enter_idle_state();
 
   //...

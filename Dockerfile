@@ -67,16 +67,6 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
 RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
   python3-pip
   
-   
-# download conda
-RUN ["/bin/bash", "-c", "wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O $HOME/miniconda.sh"]
-RUN chmod 0755 $HOME/miniconda.sh
-RUN ["/bin/bash", "-c", "$HOME/miniconda.sh -b -p $HOME/conda"]
-ENV PATH="$HOME/conda/bin:$PATH"
-RUN rm $HOME/miniconda.sh
-RUN conda update conda
-
-
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 RUN export uid=1000 gid=1000 devname=DTD && \
     mkdir -p /home/${devname} && \
@@ -94,6 +84,14 @@ USER DTD
 ENV HOME /home/DTD
 WORKDIR /home/DTD
 
+# download conda
+RUN ["/bin/bash", "-c", "wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O $HOME/miniconda.sh"]
+RUN chmod 0755 $HOME/miniconda.sh
+RUN ["/bin/bash", "-c", "$HOME/miniconda.sh -b -p $HOME/conda"]
+ENV PATH="$HOME/conda/bin:$PATH"
+RUN rm $HOME/miniconda.sh
+RUN conda update conda
+
 RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
 RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
 #RUN sudo ln -s /usr/include/cegui-0.8.4/CEGUI /usr/include/CEGUI
@@ -108,6 +106,8 @@ RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
 
 RUN git clone https://github.com/alrikai/fflames.git
 RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
+
+RUN conda create -n deitytd-env python=3.7 ipython 
 
 # Enable additional output from Launcher
 #ENV QT_VERBOSE true

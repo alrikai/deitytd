@@ -64,6 +64,19 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
   gdb
 
 
+RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
+  python3-pip
+  
+   
+# download conda
+RUN ["/bin/bash", "-c", "wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O $HOME/miniconda.sh"]
+RUN chmod 0755 $HOME/miniconda.sh
+RUN ["/bin/bash", "-c", "$HOME/miniconda.sh -b -p $HOME/conda"]
+ENV PATH="$HOME/conda/bin:$PATH"
+RUN rm $HOME/miniconda.sh
+RUN conda update conda
+
+
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 RUN export uid=1000 gid=1000 devname=DTD && \
     mkdir -p /home/${devname} && \

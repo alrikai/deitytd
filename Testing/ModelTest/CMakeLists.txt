@@ -26,5 +26,5 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 #${PCL_FEATURES_LIBRARIES}
 					  
 add_executable(GameMechanicsTest TestGameMechanics.cpp)
-target_link_libraries(GameMechanicsTest gtest_main ${YAML-CPP} TDTowers TDUtils TowersBackend TDTowerCombiner TDCommon ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
+target_link_libraries(GameMechanicsTest gtest_main ${YAML-CPP} TDTowers TDUtils TDShared TowersBackend TDTowerCombiner TDCommon ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
 add_test(NAME GameMechanics_test COMMAND GameMechanicsTest)

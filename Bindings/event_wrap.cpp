@@ -30,21 +30,47 @@ void wrap_events(py::module &pymod) {
 	//https://pybind11.readthedocs.io/en/master/advanced/classes.html
 	py::class_<UserTowerEvents::tower_event<backend_t>, UserTowerEvents::PyTowerEvent<backend_t>>(pymod, "tower_event")
 		.def (py::init<>())
-		.def (py::init<float, float>());
+		.def (py::init<float, float>())
+		.def ("__repr__", [](const UserTowerEvents::tower_event<backend_t>& evt){
+			std::ostringstream ostr;
+            ostr << evt << "\n";
+            return ostr.str();
+		});
 
 	py::class_<UserTowerEvents::build_tower_event<backend_t>, UserTowerEvents::tower_event<backend_t>>(pymod, "build_tower_event")
 		.def (py::init<>())
-        .def (py::init<uint32_t, int, float, float>());
+        .def (py::init<uint32_t, int, float, float>())
+		.def ("__repr__", [](const UserTowerEvents::build_tower_event<backend_t>& evt){
+			std::ostringstream ostr;
+            ostr << evt << "\n";
+            return ostr.str();
+		});
 
 	py::class_<UserTowerEvents::print_tower_event<backend_t>, UserTowerEvents::tower_event<backend_t>>(pymod, "print_tower_event")
 		.def (py::init<>())
-        .def (py::init<float, float>());
+        .def (py::init<float, float>())
+		.def ("__repr__", [](const UserTowerEvents::print_tower_event<backend_t>& evt){
+			std::ostringstream ostr;
+            ostr << evt << "\n";
+            return ostr.str();
+		});
 
 	py::class_<UserTowerEvents::tower_target_event<backend_t>, UserTowerEvents::tower_event<backend_t>>(pymod, "tower_target_event")
 		.def (py::init<>())
-        .def (py::init<float, float, float, float>());
+        .def (py::init<float, float, float, float>())
+
+		.def ("__repr__", [](const UserTowerEvents::tower_target_event<backend_t>& evt){
+			std::ostringstream ostr;
+            ostr << evt << "\n";
+            return ostr.str();
+		});
 
 	py::class_<UserTowerEvents::modify_tower_event<tower_properties, backend_t>, UserTowerEvents::tower_event<backend_t>>(pymod, "modify_tower_event")
 		.def (py::init<>())
-        .def (py::init<tower_properties, float, float>());
+        .def (py::init<tower_properties, float, float>())
+		.def ("__repr__", [](const UserTowerEvents::modify_tower_event<tower_properties, backend_t>& evt){
+			std::ostringstream ostr;
+            ostr << evt << "\n";
+            return ostr.str();
+		});
 }

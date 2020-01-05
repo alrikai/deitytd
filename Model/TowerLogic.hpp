@@ -24,7 +24,6 @@
 #include <atomic>
 #include <list>
 #include <memory>
-#include <thread>
 
 struct mobwave_info {
   CharacterModels::ModelIDs mob_model_id;
@@ -42,7 +41,7 @@ public:
       GameMap::MAP_WIDTH / GameMap::TowerTileHeight;
 
   // TODO: need to move the player initial state setting to elsewhere
-  TowerLogic(TDPlayerInformation default_pstate)
+  explicit TowerLogic(TDPlayerInformation default_pstate)
       : player_state(default_pstate) {
     // anything else to initialize goes here...
     td_frontend_events = std::unique_ptr<ViewEvents>(new ViewEvents());
@@ -84,7 +83,7 @@ public:
         .second;
   }
 
-  // adds a tower model to the internal list
+  // adds a monster model to the internal list
   void make_mob(const CharacterModels::ModelIDs mob_id,
                 const std::string &mob_name,
                 const GameMap::IndexCoordinate &map_tile,

@@ -15,7 +15,7 @@
 
 namespace TDHelpers {
 // converts the pre-processor symbol to a std::string
-std::string get_TD_path() {
+inline std::string get_TD_path() {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 

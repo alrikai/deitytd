@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <thread>
 
+#include <type_traits>
+#include <typeinfo>
+
 template <typename EventType> class EventQueue {
 public:
   explicit EventQueue(const size_t max_sz = 500, const int max_wait = 0)
@@ -81,7 +84,7 @@ void EventQueue<EventType>::push(std::unique_ptr<EventType> data) {
   std::lock_guard<std::mutex> lock(dlock_);
   // delete the oldest element to be replaced
   if (buffer_.size() >= buffer_size) {
-    std::cout << "Queue Full, Deleting Oldest Frame -- Thread "
+    std::cout << "Queue " << typeid(EventType).name() << " Full, Deleting Oldest Frame -- Thread "
               << std::this_thread::get_id() << std::endl;
     buffer_.pop();
   }

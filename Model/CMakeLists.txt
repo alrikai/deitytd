@@ -9,4 +9,4 @@ add_subdirectory(Towers)
 
 set (LogicSrc TowerLogic.cpp)
 add_library(TowersBackend SHARED ${LogicSrc})
-target_link_libraries(TowersBackend TDTowers TDUtils TDTowerCombiner ${YAML-CPP})
+target_link_libraries(TowersBackend TDTowers TDUtils TDShared TDTowerCombiner ${YAML-CPP})

@@ -7,4 +7,4 @@ add_library(TDTowerCombiner SHARED ${TowerComboSrc})
 
 SET(TDCOMBOSRCS main.cpp)
 ADD_EXECUTABLE(TowerCombinationTest ${TDCOMBOSRCS})
-target_link_libraries(TowerCombinationTest TDTowerCombiner TDUtils ${YAML-CPP})
+target_link_libraries(TowerCombinationTest TDTowerCombiner TDUtils TDShared ${YAML-CPP})

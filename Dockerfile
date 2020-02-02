@@ -115,4 +115,7 @@ RUN conda create -n deitytd-env python=3.7 ipython
 # Xvfb
 ENV DISPLAY :99
 
-ENTRYPOINT /bin/bash
+COPY ./resources/docker-entrypoint.sh /
+ENTRYPOINT ["/docker-entrypoint.sh"] 
+
+CMD ["/bin/bash"]

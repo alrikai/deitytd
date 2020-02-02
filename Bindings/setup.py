@@ -1,4 +1,4 @@
-from setuptools import setup, Distribution
+from setuptools import setup, Distribution, find_packages
 
 #https://stackoverflow.com/questions/24071491/how-can-i-make-a-python-wheel-from-an-existing-native-library
 class BinaryDistribution(Distribution):
@@ -11,12 +11,14 @@ kwargs = dict(
     author='Alrik Firl',
     author_email='afirlortwo@gmail.com',
     description='Best (?) TD',
+    packages=find_packages('src'),
+    package_dir={'':'src'},
+
     zip_safe=False,
     include_package_data=True,
-    py_modules=['deitytd'],
-    packages=['pyDeityTD'],
+    py_modules=['pyDeityTD/deitytd'],
     package_data={
-        'pyDeityTD': ['_pyDTD.cpython-36m-x86_64-linux-gnu.so'],
+        'pyDeityTD': ['lib/_pyDTD.cpython-36m-x86_64-linux-gnu.so'],
     },
     distclass=BinaryDistribution
 )

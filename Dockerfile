@@ -107,7 +107,9 @@ RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
 RUN git clone https://github.com/alrikai/fflames.git
 RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
 
-RUN conda create -n deitytd-env python=3.7 ipython 
+#TODO: make an environment file where the dependencies are specififed.
+#TODO: differentiate between dev and deploy dependencies
+RUN conda create -n deitytd-env python=3.7 ipython pytest 
 
 # Enable additional output from Launcher
 #ENV QT_VERBOSE true

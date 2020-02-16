@@ -15,6 +15,8 @@ void wrap_playerstate(py::module &pymod) {
         .def ("get_num_essence", &TDPlayerInformation::get_num_essence)
         .def ("lose_life", &TDPlayerInformation::lose_life)
         .def ("gain_life", &TDPlayerInformation::gain_life)
+        .def ("update_gold", &TDPlayerInformation::update_gold)
+        .def ("update_essence", &TDPlayerInformation::update_essence)
 		.def ("add_item", &TDPlayerInformation::add_item)
 		.def ("get_inventory_state", &TDPlayerInformation::get_inventory_state)
         .def ("__repr__", [](const TDPlayerInformation& player) {

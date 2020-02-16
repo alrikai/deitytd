@@ -7,7 +7,7 @@ cd "$DTDDIR" && mkdir -p build
 cd build && cmake ..
 make -j4
 cd "$DTDDIR/Bindings"
-python setup.py develop
+python3.7 setup.py develop
 cd "$DTDDIR"
 
 export PYTHONPATH=$PYTHONPATH:"$DTDDIR/build/lib"

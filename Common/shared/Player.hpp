@@ -56,16 +56,37 @@ struct TDPlayerInformation {
 
   inline int get_num_lives() const { return num_lives; }
 
-  inline int get_num_gold() const { return num_gold; }
-
-  inline int get_num_essence() const { return num_essence; }
-
   inline void lose_life() {
     std::cout << "YOU'RE DYING!!!" << std::endl;
-    num_lives--;
+    //NOTE: have the #lives decrease until we hit 0
+    if (num_lives > 0) {
+        num_lives--;
+    }
+
+    // TODO: send a signal that it is game over
+    if (num_lives == 0) {
+        std::cout << "Game Over, we are at 0 lives" << std::endl;
+    }
   }
 
   inline void gain_life() { num_lives++; }
+
+  inline int get_num_gold() const { return num_gold; }
+  inline int get_num_essence() const { return num_essence; }
+  //NOTE: delta can be > 0 or < 0
+  //TODO: rely on the caller to validate if the change is possible?
+  inline void update_gold(const int delta) { 
+      num_gold += delta; 
+      if (num_gold < 0) {
+          throw std::runtime_error("ERROR: gold is < 0 (" + std::to_string(num_gold) + ")");
+      }
+  }
+  inline void update_essence(const int delta) { 
+      num_essence += delta; 
+        if (num_essence < 0) {
+          throw std::runtime_error("ERROR: essence is < 0 (" + std::to_string(num_essence) + ")");
+      }
+  }
 
   inline bool add_item(InventoryMetadata data) {
     return inventory.add_item(data);

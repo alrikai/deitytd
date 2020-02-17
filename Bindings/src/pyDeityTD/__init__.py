@@ -1,1 +1,2 @@
-from . import deitytd 
+from _pyDTD import *
+from . import deitytd

@@ -1,4 +1,4 @@
-import pyDeityTD.deitytd as deitytd
+import pyDeityTD as deitytd
 
 def test_create():
     player_info = deitytd.TDPlayerInformation(10, 20, 30)

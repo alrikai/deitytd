@@ -73,7 +73,7 @@ RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"
 #RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
 
-COPY ./resources/docker-entrypoint.sh /.
+COPY ./script/docker-entrypoint.sh /.
 ENTRYPOINT ["/docker-entrypoint.sh"] 
 
 CMD ["/bin/bash"]

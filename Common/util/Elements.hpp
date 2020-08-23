@@ -142,6 +142,12 @@ template <typename T> struct range {
     return *this;
   }
 
+  range<T> &operator*=(const range<T> &other) {
+    low *= other.low;
+    high *= other.high;
+    return *this;
+  }
+
   range<T> &operator+=(T other) {
     low += other;
     high += other;
@@ -167,6 +173,12 @@ template <typename T> struct range {
 template <typename T>
 inline range<T> operator+(range<T> lhs, const range<T> &rhs) {
   lhs += rhs;
+  return lhs;
+}
+
+template <typename T>
+inline range<T> operator*(range<T> lhs, const range<T> &rhs) {
+  lhs *= rhs;
   return lhs;
 }
 

@@ -15,6 +15,7 @@ void wrap_modifiers(py::module &pymod) {
         .def ("apply_property_modifier", &tower_properties::apply_property_modifier)
         .def(py::self + py::self)
         .def(py::self += py::self)
+        .def_readonly("modifier", &tower_properties::modifier)
         .def ("__repr__", [](const tower_properties& tprops) {
             std::ostringstream ostr;
             ostr << tprops;
@@ -27,10 +28,14 @@ void wrap_modifiers(py::module &pymod) {
         .def(py::init<range<float>>())
         .def(py::self + py::self)
         .def(py::self += py::self)
+        .def(py::self * py::self)
+        .def(py::self *= py::self)
         .def(py::self + float())
         .def(py::self += float())
         .def(py::self * float())
         .def(py::self *= float())
+        .def_readonly("low", &range<float>::low)
+        .def_readonly("high", &range<float>::high)
         .def("__repr__", [](const range<float>& val) {
             std::ostringstream ostr;
             ostr << "(" << val.low << ", " << val.high << ")";

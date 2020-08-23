@@ -15,6 +15,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <string>
+#include <cassert>
 
 struct ModifierMapper {
   ModifierMapper();

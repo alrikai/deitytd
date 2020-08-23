@@ -23,6 +23,7 @@
 #include <list>
 #include <memory>
 #include <tuple>
+#include <cmath>
 
 /*
  * The monster class -- just a placeholder for now

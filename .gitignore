@@ -15,6 +15,7 @@
 *.exe
 *.out
 *.app
+*.pyc
 
 # OS X stuff
 .DS_Store

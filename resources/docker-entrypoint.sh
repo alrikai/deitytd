@@ -2,13 +2,20 @@
 set -e
 
 DTDDIR="/deitytd"
-source activate deitytd-env
-cd "$DTDDIR" && mkdir -p build
-cd build && cmake ..
+
+pushd ${DTDDIR}
+
+rm -rf build >> /dev/null
+mkdir -p build
+pushd build
+cmake ..
 make -j4
-cd "$DTDDIR/Bindings"
-python3.7 setup.py develop
-cd "$DTDDIR"
+popd
+
+#poetry build
+#cd "$DTDDIR/Bindings"
+#python3.8 setup.py develop
+#cd "$DTDDIR"
 
 export PYTHONPATH=$PYTHONPATH:"$DTDDIR/build/lib"
 exec "$@"

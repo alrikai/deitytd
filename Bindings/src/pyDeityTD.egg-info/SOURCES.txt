@@ -1,9 +1,0 @@
-MANIFEST.in
-setup.py
-src/pyDeityTD/__init__.py
-src/pyDeityTD/deitytd.py
-src/pyDeityTD.egg-info/PKG-INFO
-src/pyDeityTD.egg-info/SOURCES.txt
-src/pyDeityTD.egg-info/dependency_links.txt
-src/pyDeityTD.egg-info/not-zip-safe
-src/pyDeityTD.egg-info/top_level.txt

@@ -1,2 +1,0 @@
-pyDeityTD
-pyDeityTD/deitytd

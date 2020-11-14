@@ -1,0 +1,3 @@
+[submodule "lib/bindings/pybind11"]
+	path = lib/bindings/pybind11
+	url = https://github.com/pybind/pybind11.git

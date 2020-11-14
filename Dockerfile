@@ -25,7 +25,10 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
     cmake-data \
 	scons \
 	ccache \
-    libyaml-cpp-dev
+    libyaml-cpp-dev \
+    autoconf \
+    libtool \
+    pkg-config
 
 #stuff for development & debugging
 RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
@@ -45,11 +48,20 @@ RUN pip3 install --upgrade pip
 RUN pip --no-cache-dir install poetry
 COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi 
+#--no-dev 
 
 #install opencl
 RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
 RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
+
+RUN git clone --recurse-submodules -b v1.31.0 https://github.com/grpc/grpc
+RUN cd grpc && mkdir -p cmake/build && pushd cmake/build
+RUN cmake -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
+      -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
+      ../..
+RUN make -j && make install && popd
 
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 

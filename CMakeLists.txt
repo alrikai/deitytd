@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 PROJECT(TowerDefense)
 
 enable_testing()
@@ -36,6 +36,16 @@ message("Boost link: " ${Boost_LIBS})
 
 set(YAML-CPP yaml-cpp)
 find_package(yaml-cpp REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(
+  gRPC
+  GIT_REPOSITORY https://github.com/grpc/grpc
+  GIT_TAG        v1.31.1
+)
+set(FETCHCONTENT_QUIET OFF)
+FetchContent_MakeAvailable(gRPC)
+
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/Controller)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/Views)

@@ -9,7 +9,7 @@
 #include "../fractal_util.hpp"
 #include "Model/TowerDefense.hpp"
 #include "Model/util/Types.hpp"
-#include "Views/ViewEventTypes.hpp"
+#include "Events/ViewEventTypes.hpp"
 
 #include <boost/algorithm/string.hpp>
 

@@ -73,7 +73,22 @@ RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"
 #RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
 
+COPY ./lib /deitytd
+COPY ./data /data
+COPY ./resources /resources
 COPY ./script/docker-entrypoint.sh /.
-ENTRYPOINT ["/docker-entrypoint.sh"] 
 
+
+RUN mkdir -p /deitytdbuild
+WORKDIR /deitytd/build
+RUN cmake .. && make -j4
+WORKDIR /
+
+#poetry build
+#cd "$DTDDIR/Bindings"
+#python3.8 setup.py develop
+#cd "$DTDDIR"
+
+#export PYTHONPATH=$PYTHONPATH:"$DTDDIR/build/lib"
+ENTRYPOINT ["/docker-entrypoint.sh"] 
 CMD ["/bin/bash"]

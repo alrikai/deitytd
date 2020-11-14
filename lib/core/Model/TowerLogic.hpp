@@ -15,7 +15,7 @@
 #include "TowerModel.hpp"
 #include "Towers/Tower.hpp"
 #include "Towers/TowerAttack.hpp"
-#include "Views/ViewEventTypes.hpp"
+#include "Events/ViewEventTypes.hpp"
 #include "shared/Player.hpp"
 #include "shared/common_information.hpp"
 #include "util/TDEventTypes.hpp"

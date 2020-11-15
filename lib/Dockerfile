@@ -82,7 +82,8 @@ COPY ./script/test_lib.sh /test.sh
 
 RUN mkdir -p /deitytdbuild
 WORKDIR /deitytd/build
-RUN cmake .. && make -j4
+#TODO: make debug/release more easily configurable 
+RUN cmake .. -DCMAKE_BUILD_TYPE=DEBUG && make -j4
 WORKDIR /
 
 #poetry build

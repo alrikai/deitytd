@@ -7,4 +7,4 @@ add_subdirectory(util)
 add_subdirectory(shared)
 
 set (CommonSrc src/ModelUtils.cpp)
-add_library(TDCommon SHARED ${CommonSrc})
+add_library(TDCommon STATIC ${CommonSrc})

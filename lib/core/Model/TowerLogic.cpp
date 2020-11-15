@@ -10,6 +10,7 @@
 #include "AttackLogic.hpp"
 
 #include <queue>
+#include <random>
 
 template <typename T> inline T L2dist(T r_diff, T c_diff) {
   return std::sqrt(r_diff * r_diff + c_diff * c_diff);

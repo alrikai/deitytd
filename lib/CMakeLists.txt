@@ -3,12 +3,7 @@ PROJECT(DTD)
 
 enable_testing()
 add_definitions(-DTDPath=${CMAKE_SOURCE_DIR})
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++17 -Wall -Wextra")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/OGRE/cmake/modules")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/local/lib/OGRE/cmake")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-MESSAGE("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -ggdb -std=c++17 -Wall -Wextra")
 
 #OpenCL 
 find_package(OpenCL REQUIRED)
@@ -20,7 +15,7 @@ else(OPENCL_HAS_CPP_BINDINGS )
 endif(OPENCL_HAS_CPP_BINDINGS)
 
 #OpenCV
-FIND_PACKAGE(OpenCV COMPONENTS core highgui imgproc imgcodecs REQUIRED)
+FIND_PACKAGE(OpenCV COMPONENTS core imgproc imgcodecs REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 message("OpenCV include: " ${OpenCV_INCLUDE_DIRS})
 message("OpenCV link: " ${OpenCV_LIBS})
@@ -42,6 +37,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/core/Common/util)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+add_definitions(-DRANDOM_SEED_TESTING=42)
+ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(bindings)

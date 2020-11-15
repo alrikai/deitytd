@@ -7,6 +7,6 @@ set(make_include_current_dir on)
 include_directories(Towers)
 add_subdirectory(Towers)
 
-set (LogicSrc TowerLogic.cpp)
-add_library(TowersBackend SHARED ${LogicSrc})
+set (LogicSrc TowerLogic.cpp AttackLogic.cpp)
+add_library(TowersBackend STATIC ${LogicSrc})
 target_link_libraries(TowersBackend TDTowers TDUtils TDShared TDTowerCombiner ${YAML-CPP})

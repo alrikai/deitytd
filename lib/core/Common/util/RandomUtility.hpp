@@ -14,19 +14,28 @@
 #include <vector>
 
 namespace Randomize {
-// kind of unfortunate, but this is how we avoid nondeterminism at testing time
+class TDRandomEngine {
+public:
+    static std::default_random_engine& get()
+    {
+        static TDRandomEngine instance;
+        return instance.eng;
+    }
+
+    TDRandomEngine(TDRandomEngine const&) = delete;
+    void operator=(TDRandomEngine const&) = delete;
+private:
+    TDRandomEngine() {
 #ifdef RANDOM_SEED_TESTING
-std::default_random_engine &get_engine() {
-  static std::default_random_engine eng{RANDOM_SEED_TESTING};
-  return eng;
-}
+      // kind of unfortunate, but this is how we avoid nondeterminism at testing time
+      eng = std::default_random_engine {RANDOM_SEED_TESTING};
 #else
-std::default_random_engine &get_engine() {
-  static std::random_device rdev{};
-  static std::default_random_engine eng{rdev()};
-  return eng;
-}
+      std::random_device rdev{};
+      eng = std::default_random_engine {rdev()};
 #endif
+    }
+    std::default_random_engine eng;
+};
 
 class GaussianRoller {
 public:
@@ -38,7 +47,7 @@ public:
     dist.param(new_params);
   }
 
-  inline int roll_tower_tier() { return dist(get_engine()); }
+  inline int roll_tower_tier() { return dist(TDRandomEngine::get()); }
 
 private:
   std::normal_distribution<> dist;
@@ -51,7 +60,7 @@ public:
   // returns values between [0, weight)
   inline double get_roll(const double weight) {
     return std::generate_canonical<double, std::numeric_limits<double>::digits>(
-               get_engine()) *
+               TDRandomEngine::get()) *
            weight;
   }
 };

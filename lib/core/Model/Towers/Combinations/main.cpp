@@ -20,8 +20,8 @@
 #include "TowerCombiner.hpp"
 
 int main(int argc, char *argv[]) {
-  const std::string config_file{"resources/default_attribute_values.yaml"};
-  const std::string dict_file{"resources/word_list.txt"};
+  const std::string config_file{"/resources/default_attribute_values.yaml"};
+  const std::string dict_file{"/resources/word_list.txt"};
 
   TowerCombiner tower_combiner(dict_file, config_file);
 

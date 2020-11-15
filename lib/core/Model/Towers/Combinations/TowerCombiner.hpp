@@ -55,8 +55,8 @@ private:
 inline const TowerCombiner &get_towercombiner() {
   // choose the word dictionary and default modifier stats
   const static std::string config_file{
-      "resources/default_attribute_values.yaml"};
-  const static std::string dict_file{"resources/word_list.txt"};
+      "/resources/default_attribute_values.yaml"};
+  const static std::string dict_file{"/resources/word_list.txt"};
 
   static TowerCombiner tower_gen(dict_file, config_file);
   return tower_gen;

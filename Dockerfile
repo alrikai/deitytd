@@ -7,6 +7,7 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-
     poetry config virtualenvs.create false
 
 COPY --from=deity-image:latest /deitytd/build/lib /libdtd
+#TODO: copy the fflames in too? Need to see where that should live
 
 COPY ./data /data
 COPY ./resources /resources

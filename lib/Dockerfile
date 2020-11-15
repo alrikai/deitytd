@@ -45,7 +45,8 @@ RUN pip3 install --upgrade pip
 RUN pip --no-cache-dir install poetry
 COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev --no-interaction --no-ansi
+#TODO: if we don't want to be able to run tests, --no-dev 
+RUN poetry install --no-interaction --no-ansi 
 
 #install opencl
 RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
@@ -71,13 +72,12 @@ WORKDIR /
 
 RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"
-#RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
 
 COPY ./lib /deitytd
-COPY ./data /data
+COPY ./data /deitytd/data
 COPY ./resources /resources
-COPY ./script/docker-entrypoint.sh /.
-COPY ./script/test_lib.sh /.
+COPY ./script/libdocker-entrypoint.sh /docker-entrypoint.sh
+COPY ./script/test_lib.sh /test.sh
 
 
 RUN mkdir -p /deitytdbuild
@@ -92,4 +92,4 @@ WORKDIR /
 
 #export PYTHONPATH=$PYTHONPATH:"$DTDDIR/build/lib"
 ENTRYPOINT ["/docker-entrypoint.sh"] 
-CMD ["bash", "./test_lib.sh"]
+CMD ["bash", "./test.sh"]

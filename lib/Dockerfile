@@ -24,8 +24,8 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
     ocl-icd-opencl-dev \ 
     cmake-data \
 	scons \
-	ccache \
-    libyaml-cpp-dev
+	ccache 
+    #libyaml-cpp-dev
 
 #stuff for development & debugging
 RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
@@ -40,6 +40,8 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
   python3.8-distutils \
   python3.8-venv
   
+WORKDIR /
+
 #RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 RUN pip3 install --upgrade pip
 RUN pip --no-cache-dir install poetry
@@ -51,6 +53,14 @@ RUN poetry install --no-interaction --no-ansi
 #install opencl
 RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
 RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
+
+# build a static lib of yaml-cpp
+RUN git clone https://github.com/jbeder/yaml-cpp.git
+WORKDIR /yaml-cpp
+RUN mkdir -p build
+WORKDIR /yaml-cpp/build
+RUN CFLAGS="-fPIC" CXXFLAGS="-fPIC" cmake .. -DCMAKE_BUILD_TYPE=Release && make -j4 && make install
+WORKDIR /
 
 #(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
 
@@ -68,7 +78,6 @@ RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
 #USER DTD 
 #ENV HOME /home/DTD
 #WORKDIR /home/DTD
-WORKDIR /
 
 RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"

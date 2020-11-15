@@ -77,6 +77,7 @@ COPY ./lib /deitytd
 COPY ./data /data
 COPY ./resources /resources
 COPY ./script/docker-entrypoint.sh /.
+COPY ./script/test_lib.sh /.
 
 
 RUN mkdir -p /deitytdbuild
@@ -91,4 +92,4 @@ WORKDIR /
 
 #export PYTHONPATH=$PYTHONPATH:"$DTDDIR/build/lib"
 ENTRYPOINT ["/docker-entrypoint.sh"] 
-CMD ["/bin/bash"]
+CMD ["bash", "./test_lib.sh"]

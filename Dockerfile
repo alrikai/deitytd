@@ -1,79 +1,20 @@
-FROM ubuntu:20.04
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
-LABEL maintainer="Alrik Firl afirlortwo@gmail.com" \
-      version="0.1" \
-      description="DeityTD Dockerfile"
+# Install Poetry
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_HOME=/opt/poetry python && \
+    cd /usr/local/bin && \
+    ln -s /opt/poetry/bin/poetry && \
+    poetry config virtualenvs.create false
 
-ENV DEBIAN_FRONTEND=noninteractive
-# Update packages
-RUN apt-get update --fix-missing
+COPY --from=deity-image:latest /deitytd/build/lib /libdtd
 
-# Install system tools / libraries
-RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
-    gcc \ 
-	g++ \ 
-    build-essential \
-    sudo \
-    git \
-    wget \
-    make \
-    cmake \
-    ffmpeg \
-    libboost-all-dev \
-    libopencv-dev \ 
-    ocl-icd-opencl-dev \ 
-    cmake-data \
-	scons \
-	ccache \
-    libyaml-cpp-dev
-
-#stuff for development & debugging
-RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
-    vim \
-    gdb
-
-#python things
-RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
-  python3-pip \
-  python3.8 \
-  python3.8-dev \
-  python3.8-distutils \
-  python3.8-venv
-  
-#RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-RUN pip3 install --upgrade pip
-RUN pip --no-cache-dir install poetry
-COPY poetry.lock pyproject.toml ./
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev --no-interaction --no-ansi
-
-#install opencl
-RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
-RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
-
-#(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
-
-#RUN export uid=1000 gid=1000 devname=DTD && \
-#    mkdir -p /home/${devname} && \
-#    echo "${devname}:x:${uid}:${gid}:Developer,,,:/home/${devname}:/bin/bash" >> /etc/passwd && \
-#    echo "${devname}:x:${uid}:" >> /etc/group && \
-#    touch /etc/sudoers.d/${devname} && \
-#    echo "${devname} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${devname} && \
-#    chmod 0440 /etc/sudoers.d/${devname} && \
-#    chown ${uid}:${gid} -R /home/${devname} && \
-#    mkdir -p /home/DTD/deitytd/build && \
-#    chmod 7777 -R /home/DTD/deitytd
-
-#USER DTD 
-#ENV HOME /home/DTD
-#WORKDIR /home/DTD
-WORKDIR /
-
-RUN git clone https://github.com/alrikai/fflames.git
-ENV PATH="/fflames:${PATH}"
-#RUN sudo cp -r fflames/fflames /usr/local/include/FractalFlames
-
+COPY ./data /data
+COPY ./resources /resources
 COPY ./script/docker-entrypoint.sh /.
-ENTRYPOINT ["/docker-entrypoint.sh"] 
 
-CMD ["/bin/bash"]
+# Copy using poetry.lock* in case it doesn't exist yet
+COPY ./pyproject.toml ./poetry.lock* /
+RUN poetry install --no-root --no-dev
+
+COPY ./serve/app /app
+ENTRYPOINT ["/docker-entrypoint.sh"] 

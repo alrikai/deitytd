@@ -1,7 +1,7 @@
 #ifndef DTD_TESTING_MODELTEST_UTILS_FRONTEND_HPP
 #define DTD_TESTING_MODELTEST_UTILS_FRONTEND_HPP
 
-#include "Testing/fractal_util.hpp"
+#include "fractal_util.hpp"
 #include "Common/shared/common_information.hpp"
 #include "Common/shared/Player.hpp"
 #include "Common/shared/Player.hpp"

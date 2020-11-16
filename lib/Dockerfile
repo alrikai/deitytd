@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 LABEL maintainer="Alrik Firl afirlortwo@gmail.com" \
       version="0.1" \
-      description="DeityTD Dockerfile"
+      description="DeityTD Builder Dockerfile"
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Update packages

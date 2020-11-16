@@ -15,7 +15,7 @@
 
 #include <fstream>
 
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
 //#include <OGRE/Ogre.h>
 
 #include "TowerModel.hpp"

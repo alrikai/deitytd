@@ -13,23 +13,19 @@ RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
     gcc \ 
 	g++ \ 
     build-essential \
-    sudo \
     git \
-    wget \
     make \
     cmake \
     ffmpeg \
     libboost-all-dev \
-    libopencv-dev \ 
-    ocl-icd-opencl-dev \ 
     cmake-data \
 	scons \
 	ccache 
-    #libyaml-cpp-dev
 
 #stuff for development & debugging
 RUN apt-get update --fix-missing && apt-get --fix-missing -y install \
     vim \
+    sudo \
     gdb
 
 #python things
@@ -50,34 +46,16 @@ RUN poetry config virtualenvs.create false
 #TODO: if we don't want to be able to run tests, --no-dev 
 RUN poetry install --no-interaction --no-ansi 
 
-#install opencl
-RUN wget https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp
-RUN sudo cp cl.hpp /usr/include/CL/cl.hpp
-
 # build a static lib of yaml-cpp
 RUN git clone https://github.com/jbeder/yaml-cpp.git
-WORKDIR /yaml-cpp
-RUN mkdir -p build
+RUN mkdir -p /yaml-cpp/build
 WORKDIR /yaml-cpp/build
 RUN CFLAGS="-fPIC" CXXFLAGS="-fPIC" cmake .. -DCMAKE_BUILD_TYPE=Release && make -j4 && make install
+
 WORKDIR /
 
-#(userid): id -u alrik --> 1000, (groupid): id -g  alrik--> 1000 (this presumably has to be changed if not the 1st user on the system?)
-
-#RUN export uid=1000 gid=1000 devname=DTD && \
-#    mkdir -p /home/${devname} && \
-#    echo "${devname}:x:${uid}:${gid}:Developer,,,:/home/${devname}:/bin/bash" >> /etc/passwd && \
-#    echo "${devname}:x:${uid}:" >> /etc/group && \
-#    touch /etc/sudoers.d/${devname} && \
-#    echo "${devname} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${devname} && \
-#    chmod 0440 /etc/sudoers.d/${devname} && \
-#    chown ${uid}:${gid} -R /home/${devname} && \
-#    mkdir -p /home/DTD/deitytd/build && \
-#    chmod 7777 -R /home/DTD/deitytd
-
-#USER DTD 
-#ENV HOME /home/DTD
-#WORKDIR /home/DTD
+RUN mkdir -p /dtddeps
+RUN cp /yaml-cpp/build/libyaml-cpp.a /dtddeps/libyaml-cpp.a
 
 RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"
@@ -88,11 +66,11 @@ COPY ./resources /resources
 COPY ./script/libdocker-entrypoint.sh /docker-entrypoint.sh
 COPY ./script/test_lib.sh /test.sh
 
-
 RUN mkdir -p /deitytdbuild
 WORKDIR /deitytd/build
 #TODO: make debug/release more easily configurable 
 RUN cmake .. -DCMAKE_BUILD_TYPE=DEBUG && make -j4
+
 WORKDIR /
 
 #poetry build

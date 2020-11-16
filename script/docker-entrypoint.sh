@@ -17,5 +17,6 @@ DTDDIR="/libdtd"
 #python3.8 setup.py develop
 #cd "$DTDDIR"
 
-export PYTHONPATH=$PYTHONPATH:"$DTDDIR"
+export PYTHONPATH=$PYTHONPATH:${DTDDIR}
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${DTDDIR}
 exec "$@"

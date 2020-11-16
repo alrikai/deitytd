@@ -3,22 +3,10 @@ PROJECT(DTD)
 
 enable_testing()
 add_definitions(-DTDPath=${CMAKE_SOURCE_DIR})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -ggdb -std=c++17 -Wall -Wextra")
-
-#OpenCL 
-find_package(OpenCL REQUIRED)
-include_directories(${OPENCL_INCLUDE_DIRS})
-if(OPENCL_HAS_CPP_BINDINGS)
-    message("OpenCL has CPP bindings. Full include is: " ${OPENCL_INCLUDE_DIRS})
-else(OPENCL_HAS_CPP_BINDINGS )
-    message("No OpenCL CPP bindings found")
-endif(OPENCL_HAS_CPP_BINDINGS)
-
-#OpenCV
-FIND_PACKAGE(OpenCV COMPONENTS core imgproc imgcodecs REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-message("OpenCV include: " ${OpenCV_INCLUDE_DIRS})
-message("OpenCV link: " ${OpenCV_LIBS})
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
 #Boost
 FIND_PACKAGE(Boost REQUIRED)
@@ -26,8 +14,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 message("Boost include: " ${Boost_INCLUDE_DIRS})
 message("Boost link: " ${Boost_LIBS})
 
-set(YAML-CPP yaml-cpp)
-find_package(yaml-cpp REQUIRED)
+set(YAML-CPP /dtddeps/libyaml-cpp.a)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/core)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/core/Model)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/core/Common)

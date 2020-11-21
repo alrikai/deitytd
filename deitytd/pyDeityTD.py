@@ -1,11 +1,7 @@
-import _pyDTD as dtd
+import _pyDTD as dtdcore
 
 from typing import List, NamedTuple
 from dataclasses import dataclass
-
-#TODO: have any required python overrides here
-def DTDversion():
-    return "we don't really do versions..."
 
 def modifier_factory():
     pass
@@ -13,11 +9,11 @@ def modifier_factory():
 class ElementRanges(NamedTuple):
     #TODO: this is an implicit dependency on the tower_properties definition
     #order is: {"CHAOS", "WATER", "AIR", "FIRE", "EARTH"}:
-    chaos: dtd.range
-    water: dtd.range
-    air: dtd.range
-    fire: dtd.range
-    earth: dtd.range
+    chaos: dtdcore.range
+    water: dtdcore.range
+    air: dtdcore.range
+    fire: dtdcore.range
+    earth: dtdcore.range
 
 class ElementTypes(NamedTuple):
     chaos: float
@@ -49,16 +45,16 @@ class TowerPropertyFactory():
         self.modifier_factory = {}
 
     def construct (self, properties: List[TowerModifiersProperties]):
-        tmod = dtd.tower_property_modifier()
+        tmod = dtdcore.tower_property_modifier()
         for modifier in properties:
             tmod.merge(modifier)
-        tprop = dtd.tower_properties()
+        tprop = dtdcore.tower_properties()
         tprop.apply_property_modifier(tmod)
         return tprop
 
     def generate_modifier(mod_key, value):
         modifier_values = self.modifier_factory[mod_key](value)
-        return dtd.tower_property_modifier)(modifier_values)
+        return dtdcore.tower_property_modifier)(modifier_values)
 
     def _make_modifier():
         mod = TowerModifierProperties()

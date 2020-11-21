@@ -41,7 +41,7 @@ WORKDIR /
 #RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 RUN pip3 install --upgrade pip
 RUN pip --no-cache-dir install poetry
-COPY poetry.lock pyproject.toml ./
+COPY poetry.lock pyproject.toml build.py ./
 RUN poetry config virtualenvs.create false
 #TODO: if we don't want to be able to run tests, --no-dev 
 RUN poetry install --no-interaction --no-ansi 
@@ -60,18 +60,20 @@ RUN cp /yaml-cpp/build/libyaml-cpp.a /dtddeps/libyaml-cpp.a
 RUN git clone https://github.com/alrikai/fflames.git
 ENV PATH="/fflames:${PATH}"
 
-COPY ./lib /deitytd
-COPY ./data /deitytd/data
+COPY ./deitytd /deitytd
+COPY ./lib /deitytdcore
+COPY ./data /deitytdcore/data
 COPY ./resources /resources
 COPY ./script/libdocker-entrypoint.sh /docker-entrypoint.sh
 COPY ./script/test_lib.sh /test.sh
 
-RUN mkdir -p /deitytdbuild
-WORKDIR /deitytd/build
+RUN mkdir -p /deitytdcore/build
+WORKDIR /deitytdcore/build
 #TODO: make debug/release more easily configurable 
 RUN cmake .. -DCMAKE_BUILD_TYPE=DEBUG && make -j4
 
 WORKDIR /
+RUN poetry build
 
 #poetry build
 #cd "$DTDDIR/Bindings"

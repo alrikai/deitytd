@@ -1,5 +1,0 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
-
-SET (SRCS Controller.cpp InputListener.cpp)
-ADD_LIBRARY(Controller SHARED ${SRCS})
-TARGET_LINK_LIBRARIES(Controller ${OGREVIEW_LIBS})

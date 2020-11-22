@@ -29,11 +29,13 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-
     ln -s /opt/poetry/bin/poetry && \
     poetry config virtualenvs.create false
 
+RUN mkdir -p deitytdcore
+
 COPY --from=deity-image:latest /deitytdcore/build/lib /libdtd
 COPY --from=deity-image:latest /dist/DeityTD-1.0.0-cp38-cp38-manylinux2014_x86_64.whl /DeityTD-1.0.0-cp38-cp38-manylinux2014_x86_64.whl
 
 COPY ./deitytd /deitytd
-COPY ./data /data
+COPY ./data deitytdcore/data
 COPY ./resources /resources
 COPY ./script/docker-entrypoint.sh /docker-entrypoint.sh
 COPY ./script/serve.sh /serve.sh
